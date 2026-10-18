@@ -1,47 +1,110 @@
 @model VaricoseSocks.Web.Models.ProductListViewModel
 @{
-    ViewData["Title"] = "Danh sách sản phẩm";
+    ViewData["Title"] = "Danh mục sản phẩm vớ y khoa";
 }
 
 <div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Sản phẩm</li>
+        </ol>
+    </nav>
+
     <div class="row">
-        <!-- Sidebar Danh mục -->
-        <div class="col-md-3 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-primary text-white fw-bold">
-                    <i class="bi bi-funnel me-1"></i> Danh mục sản phẩm
+        <!-- Sidebar Bộ lọc -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-funnel me-1"></i> Danh mục sản phẩm</span>
+                    <a asp-controller="Product" asp-action="Index" class="text-white text-decoration-none small">Xóa lọc</a>
                 </div>
                 <div class="list-group list-group-flush">
                     <a asp-controller="Product" asp-action="Index" class="list-group-item list-group-item-action @(!Model.SelectedCategoryId.HasValue ? "active" : "")">
-                        Tất cả
+                        Tất cả sản phẩm
                     </a>
                     @foreach (var c in Model.Categories)
                     {
-                        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@c.Id" asp-route-searchTerm="@Model.SearchTerm"
+                        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@c.Id" asp-route-searchTerm="@Model.SearchTerm" asp-route-compression="@Model.CompressionFilter"
                            class="list-group-item list-group-item-action @(Model.SelectedCategoryId == c.Id ? "active" : "")">
                             @c.Name
                         </a>
                     }
                 </div>
             </div>
+
+            <!-- Lọc theo cấp độ nén CCL -->
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-white fw-bold text-dark border-bottom">
+                    <i class="bi bi-speedometer2 text-primary me-1"></i> Cấp độ áp lực (CCL)
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-column gap-2 small">
+                        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@Model.SelectedCategoryId" asp-route-compression="1"
+                           class="btn btn-sm text-start @(Model.CompressionFilter == 1 ? "btn-primary" : "btn-outline-secondary")">
+                            <strong>CCL1</strong> (15 - 21 mmHg) - Phòng ngừa
+                        </a>
+                        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@Model.SelectedCategoryId" asp-route-compression="2"
+                           class="btn btn-sm text-start @(Model.CompressionFilter == 2 ? "btn-primary" : "btn-outline-secondary")">
+                            <strong>CCL2</strong> (23 - 32 mmHg) - Điều trị y khoa
+                        </a>
+                        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@Model.SelectedCategoryId" asp-route-compression="3"
+                           class="btn btn-sm text-start @(Model.CompressionFilter == 3 ? "btn-primary" : "btn-outline-secondary")">
+                            <strong>CCL3</strong> (34 - 46 mmHg) - Áp lực cao
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đo Size Hỗ Trợ Banner -->
+            <div class="card border-0 bg-info-subtle p-3 text-center">
+                <i class="bi bi-rulers fs-2 text-info mb-1"></i>
+                <h6 class="fw-bold">Bạn chưa biết đo size?</h6>
+                <p class="small text-muted mb-2">Đo chu vi cổ chân để chọn đúng size chuẩn y khoa.</p>
+                <button type="button" class="btn btn-sm btn-info text-dark fw-bold" onclick="openSizeModal()">Bảng Đo Size</button>
+            </div>
         </div>
 
         <!-- Danh sách Sản phẩm -->
-        <div class="col-md-9">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0 text-primary">Sản phẩm (@Model.Products.Count)</h4>
-                @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
-                {
-                    <span class="text-muted">Kết quả cho: "<strong>@Model.SearchTerm</strong>"</span>
-                }
+        <div class="col-lg-9">
+            <!-- Header Bar -->
+            <div class="card shadow-sm border-0 p-3 mb-4 bg-white">
+                <div class="row align-items-center">
+                    <div class="col-md-6 mb-2 mb-md-0">
+                        <h4 class="mb-0 text-primary fw-bold">
+                            Tất cả sản phẩm <span class="badge bg-secondary fs-6">@Model.Products.Count</span>
+                        </h4>
+                        @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                        {
+                            <span class="text-muted small">Từ khóa tìm kiếm: "<strong>@Model.SearchTerm</strong>"</span>
+                        }
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <form method="get" class="d-inline-flex align-items-center gap-2">
+                            <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
+                            <input type="hidden" name="compression" value="@Model.CompressionFilter" />
+                            <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+                            <label class="small text-muted text-nowrap">Sắp xếp:</label>
+                            <select name="sortBy" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="" selected="@(string.IsNullOrEmpty(Model.SortBy))">Mặc định</option>
+                                <option value="price_asc" selected="@(Model.SortBy == "price_asc")">Giá tăng dần</option>
+                                <option value="price_desc" selected="@(Model.SortBy == "price_desc")">Giá giảm dần</option>
+                                <option value="name" selected="@(Model.SortBy == "name")">Theo tên A-Z</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
             </div>
 
+            <!-- Product Grid -->
             <div class="row row-cols-1 row-cols-md-3 g-4">
                 @if (!Model.Products.Any())
                 {
                     <div class="col-12 py-5 text-center text-muted">
                         <i class="bi bi-box-seam fs-1"></i>
-                        <p class="mt-2">Không tìm thấy sản phẩm phù hợp điều kiện.</p>
+                        <p class="mt-2">Không tìm thấy sản phẩm phù hợp với bộ lọc đã chọn.</p>
+                        <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary btn-sm">Xem tất cả sản phẩm</a>
                     </div>
                 }
                 else
@@ -49,17 +112,51 @@
                     @foreach (var p in Model.Products)
                     {
                         <div class="col">
-                            <div class="card h-100 shadow-sm border-0">
-                                <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://placehold.co/300x300?text=No+Image" : p.ImageUrl)" class="card-img-top p-3" alt="@p.Name" style="height: 220px; object-fit: contain;">
-                                <div class="card-body d-flex flex-column">
-                                    <span class="badge bg-light text-dark border mb-2 align-self-start">@(p.CategoryName ?? "Y khoa")</span>
-                                    <h6 class="card-title fw-bold">@p.Name</h6>
-                                    <div class="mt-auto pt-2">
-                                        <div class="text-danger fw-bold fs-5">@p.Price.ToString("N0") ₫</div>
-                                    </div>
+                            <div class="card h-100 shadow-sm border-0 product-card position-relative">
+                                <div class="position-absolute top-0 start-0 m-2" style="z-index: 2;">
+                                    <span class="badge bg-primary">@p.CompressionLevelText</span>
                                 </div>
-                                <div class="card-footer bg-transparent border-0 pb-3">
-                                    <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="btn btn-outline-primary w-100">Xem chi tiết</a>
+
+                                <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="text-center p-3 bg-white d-block">
+                                    <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://placehold.co/300x300?text=No+Image" : p.ImageUrl)" 
+                                         class="card-img-top" alt="@p.Name" style="height: 200px; object-fit: contain;">
+                                </a>
+
+                                <div class="card-body d-flex flex-column pt-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-light text-secondary border" style="font-size: 0.7rem;">@(p.CategoryName ?? "Y khoa")</span>
+                                        <small class="text-muted fw-bold">@(p.Origin ?? "Mỹ/Đức")</small>
+                                    </div>
+                                    <h6 class="card-title fw-bold">
+                                        <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="text-decoration-none text-dark">
+                                            @p.Name
+                                        </a>
+                                    </h6>
+                                    <p class="small text-muted mb-3 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        @p.ShortDescription
+                                    </p>
+
+                                    <div class="mt-auto">
+                                        <div class="d-flex align-items-baseline gap-2 mb-2">
+                                            <span class="text-danger fw-bold fs-5">
+                                                @((p.DiscountPrice ?? p.Price).ToString("N0")) ₫
+                                            </span>
+                                            @if (p.DiscountPrice.HasValue && p.DiscountPrice < p.Price)
+                                            {
+                                                <span class="text-muted text-decoration-line-through small">
+                                                    @p.Price.ToString("N0") ₫
+                                                </span>
+                                            }
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm flex-grow-1">
+                                                Xem chi tiết
+                                            </a>
+                                            <button type="button" class="btn btn-warning btn-sm text-dark fw-bold px-3" onclick="addToCartLive(@p.Id, 'M', 'Màu Da (Beige)', 1)">
+                                                <i class="bi bi-cart-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

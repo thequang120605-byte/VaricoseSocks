@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad8" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#dcfce7"/>
+    </linearGradient>
+    <linearGradient id="tubeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="400" rx="20" fill="url(#bgGrad8)"/>
+  
+  <!-- Herbal Leaf Badge -->
+  <circle cx="50" cy="50" r="22" fill="#10b981" opacity="0.15"/>
+  <path d="M42 55 C42 42, 55 38, 58 38 C58 51, 47 55, 42 55 Z" fill="#10b981"/>
+  <text x="80" y="55" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#047857">VENOFRESH HERBAL</text>
+
+  <!-- Pill -->
+  <rect x="250" y="32" width="120" height="30" rx="15" fill="#10b981"/>
+  <text x="310" y="52" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">Thảo Dược Đức</text>
+
+  <!-- Gel Tube Artwork -->
+  <g transform="translate(135, 75)">
+    <!-- Tube Body (angled) -->
+    <path d="M40 20 L90 20 L105 180 C105 210, 25 210, 25 180 Z" fill="url(#tubeGrad)"/>
+    
+    <!-- Top crimp seal -->
+    <rect x="35" y="10" width="60" height="12" fill="#065f46" rx="2"/>
+    <line x1="35" y1="14" x2="95" y2="14" stroke="#ffffff" stroke-width="1" stroke-dasharray="2,2"/>
+    <line x1="35" y1="18" x2="95" y2="18" stroke="#ffffff" stroke-width="1" stroke-dasharray="2,2"/>
+
+    <!-- Tube Cap at bottom -->
+    <rect x="42" y="210" width="46" height="35" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <line x1="42" y1="220" x2="88" y2="220" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="42" y1="230" x2="88" y2="230" stroke="#94a3b8" stroke-width="1.5"/>
+
+    <!-- Tube Label -->
+    <rect x="35" y="70" width="60" height="90" rx="4" fill="#ffffff" opacity="0.95"/>
+    <text x="65" y="90" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#065f46" text-anchor="middle">VENO</text>
+    <text x="65" y="104" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#10b981" text-anchor="middle">FRESH</text>
+    <line x1="45" y1="112" x2="85" y2="112" stroke="#10b981" stroke-width="1.5"/>
+    <text x="65" y="125" font-family="Arial, sans-serif" font-size="7" fill="#666" text-anchor="middle">COOLING GEL</text>
+    <text x="65" y="138" font-family="Arial, sans-serif" font-size="7" fill="#dc2626" text-anchor="middle">GIẢM ĐAU MỎI</text>
+    <text x="65" y="150" font-family="Arial, sans-serif" font-size="6" fill="#888" text-anchor="middle">100ml / Made in EU</text>
+  </g>
+
+  <!-- Feature callout -->
+  <g transform="translate(30, 160)">
+    <rect x="0" y="0" width="85" height="40" rx="8" fill="#ffffff" stroke="#bbf7d0"/>
+    <text x="42" y="16" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#047857" text-anchor="middle">MÁT LẠNH TỨC THÌ</text>
+    <text x="42" y="30" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">Làm dịu gân xanh</text>
+
+    <rect x="0" y="50" width="85" height="40" rx="8" fill="#ffffff" stroke="#bbf7d0"/>
+    <text x="42" y="66" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0d6efd" text-anchor="middle">KẾT HỢP VỚ</text>
+    <text x="42" y="80" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">Tăng hiệu quả 2X</text>
+  </g>
+
+  <!-- Bottom Tag -->
+  <rect x="20" y="340" width="360" height="42" rx="10" fill="#ffffff" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.06))"/>
+  <text x="200" y="365" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#212529" text-anchor="middle">
+    Gel Thoa Giảm Suy Giãn Tĩnh Mạch VenoFresh (100ml)
+  </text>
+</svg>

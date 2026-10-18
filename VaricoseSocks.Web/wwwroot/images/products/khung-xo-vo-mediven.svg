@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="30%" stop-color="#e2e8f0"/>
+      <stop offset="70%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+    <linearGradient id="blueCoating" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="400" rx="20" fill="url(#bgGrad6)"/>
+  
+  <!-- Accessory Badge -->
+  <circle cx="50" cy="50" r="22" fill="#0284c7" opacity="0.15"/>
+  <path d="M42 45 L58 45 L55 58 L45 58 Z M45 42 L55 42" stroke="#0284c7" stroke-width="2.5" fill="none"/>
+  <text x="80" y="55" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#0284c7">MEDIVEN BUTLER</text>
+
+  <!-- Pill -->
+  <rect x="250" y="32" width="120" height="30" rx="15" fill="#0284c7"/>
+  <text x="310" y="52" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">Dụng Cụ Y Tế</text>
+
+  <!-- Sock Aid Metal Butler Wire Frame -->
+  <g transform="translate(100, 75)">
+    <!-- Base Plate -->
+    <ellipse cx="100" cy="240" rx="90" ry="22" fill="#cbd5e1" stroke="#94a3b8" stroke-width="3"/>
+    <ellipse cx="100" cy="235" rx="80" ry="18" fill="url(#metalGrad)"/>
+
+    <!-- Left Handle Post -->
+    <path d="M40 235 L40 40 C40 25, 60 25, 60 40 L60 120" fill="none" stroke="url(#metalGrad)" stroke-width="12" stroke-linecap="round"/>
+    <!-- Left Grip Rubber -->
+    <rect x="34" y="30" width="12" height="45" rx="6" fill="url(#blueCoating)"/>
+
+    <!-- Right Handle Post -->
+    <path d="M160 235 L160 40 C160 25, 140 25, 140 40 L140 120" fill="none" stroke="url(#metalGrad)" stroke-width="12" stroke-linecap="round"/>
+    <!-- Right Grip Rubber -->
+    <rect x="154" y="30" width="12" height="45" rx="6" fill="url(#blueCoating)"/>
+
+    <!-- Center Sock Loading Semi-Cone (U-Shape) -->
+    <path d="M70 120 C70 80, 130 80, 130 120 L125 210 C125 220, 75 220, 75 210 Z" fill="none" stroke="url(#metalGrad)" stroke-width="10"/>
+    
+    <!-- Wire Ribs for Sock Gripping -->
+    <path d="M72 145 C80 155, 120 155, 128 145" fill="none" stroke="url(#metalGrad)" stroke-width="6"/>
+    <path d="M74 175 C82 185, 118 185, 126 175" fill="none" stroke="url(#metalGrad)" stroke-width="6"/>
+    <path d="M75 200 C83 208, 117 208, 125 200" fill="none" stroke="url(#metalGrad)" stroke-width="6"/>
+
+    <!-- Foot entry arrow illustration -->
+    <path d="M100 90 L100 160 M90 148 L100 160 L110 148" stroke="#ef4444" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <text x="100" y="80" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ef4444" text-anchor="middle">XỎ CHÂN VÀO ĐÂY</text>
+  </g>
+
+  <!-- Feature callout -->
+  <g transform="translate(30, 160)">
+    <rect x="0" y="0" width="85" height="40" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="42" y="16" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0284c7" text-anchor="middle">XỎ DỄ 30 GIÂY</text>
+    <text x="42" y="30" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">Không cần cúi sâu</text>
+
+    <rect x="0" y="50" width="85" height="40" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="42" y="66" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#16a34a" text-anchor="middle">BẢO VỆ VỚ</text>
+    <text x="42" y="80" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">Không cào rách sợi</text>
+  </g>
+
+  <!-- Bottom Tag -->
+  <rect x="20" y="340" width="360" height="42" rx="10" fill="#ffffff" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.06))"/>
+  <text x="200" y="365" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#212529" text-anchor="middle">
+    Khung Hỗ Trợ Xỏ Vớ Y Khoa Chuyên Dụng Mediven Butler
+  </text>
+</svg>

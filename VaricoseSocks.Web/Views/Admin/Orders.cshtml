@@ -1,0 +1,118 @@
+@model List<VaricoseSocks.Web.Models.OrderDetailViewModel>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng - Admin";
+    int? selectedStatus = ViewBag.SelectedStatus as int?;
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-primary mb-1">
+                <i class="bi bi-receipt me-2"></i>Quản Lý Đơn Hàng Vớ Y Khoa
+            </h3>
+            <p class="text-muted small mb-0">Theo dõi tiến độ đơn hàng và cập nhật trạng thái giao hàng</p>
+        </div>
+        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
+    </div>
+
+    <!-- Status Filter Buttons -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a asp-controller="Admin" asp-action="Orders" class="btn btn-sm @(!selectedStatus.HasValue ? "btn-primary" : "btn-outline-secondary")">
+            Tất cả (@Model.Count)
+        </a>
+        <a asp-controller="Admin" asp-action="Orders" asp-route-status="1" class="btn btn-sm @(selectedStatus == 1 ? "btn-warning" : "btn-outline-warning text-dark")">
+            Chờ xác nhận
+        </a>
+        <a asp-controller="Admin" asp-action="Orders" asp-route-status="2" class="btn btn-sm @(selectedStatus == 2 ? "btn-info text-white" : "btn-outline-info")">
+            Đã xác nhận
+        </a>
+        <a asp-controller="Admin" asp-action="Orders" asp-route-status="3" class="btn btn-sm @(selectedStatus == 3 ? "btn-secondary" : "btn-outline-secondary")">
+            Đang đóng gói
+        </a>
+        <a asp-controller="Admin" asp-action="Orders" asp-route-status="4" class="btn btn-sm @(selectedStatus == 4 ? "btn-primary" : "btn-outline-primary")">
+            Đang giao hàng
+        </a>
+        <a asp-controller="Admin" asp-action="Orders" asp-route-status="5" class="btn btn-sm @(selectedStatus == 5 ? "btn-success" : "btn-outline-success")">
+            Hoàn thành
+        </a>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle small">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Địa chỉ giao</th>
+                        <th>Phương thức</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái hiện tại</th>
+                        <th style="min-width: 200px;">Cập nhật trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                Chưa có đơn hàng nào theo điều kiện lọc.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var o in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong class="text-primary">@o.OrderCode</strong><br />
+                                    <small class="text-muted">@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    <strong>@o.CustomerName</strong><br />
+                                    <small class="text-muted">@o.CustomerPhone</small>
+                                </td>
+                                <td style="max-width: 250px;">
+                                    <span class="d-inline-block text-truncate" style="max-width: 240px;" title="@o.ShippingAddress">
+                                        @o.ShippingAddress
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@o.PaymentMethodText</span>
+                                </td>
+                                <td class="text-danger fw-bold text-nowrap">
+                                    @o.TotalAmount.ToString("N0") ₫
+                                </td>
+                                <td>
+                                    <span class="badge @(o.OrderStatus == 5 ? "bg-success" : o.OrderStatus == 1 ? "bg-warning text-dark" : "bg-primary")">
+                                        @o.OrderStatusText
+                                    </span>
+                                </td>
+                                <td>
+                                    <form asp-controller="Admin" asp-action="UpdateOrderStatus" method="post" class="d-flex gap-1">
+                                        <input type="hidden" name="orderId" value="@o.Id" />
+                                        <select name="status" class="form-select form-select-sm" style="width: 140px;">
+                                            <option value="1" selected="@(o.OrderStatus == 1)">1. Chờ xác nhận</option>
+                                            <option value="2" selected="@(o.OrderStatus == 2)">2. Đã xác nhận</option>
+                                            <option value="3" selected="@(o.OrderStatus == 3)">3. Đang đóng gói</option>
+                                            <option value="4" selected="@(o.OrderStatus == 4)">4. Đang giao hàng</option>
+                                            <option value="5" selected="@(o.OrderStatus == 5)">5. Hoàn thành</option>
+                                            <option value="6" selected="@(o.OrderStatus == 6)">6. Đã hủy</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-outline-primary btn-sm" title="Lưu">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

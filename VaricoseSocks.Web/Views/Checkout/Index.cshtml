@@ -1,0 +1,159 @@
+@model VaricoseSocks.Web.Models.CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán đơn hàng vớ y khoa";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index">Giỏ hàng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Thanh toán</li>
+        </ol>
+    </nav>
+
+    <h3 class="fw-bold text-primary mb-4">
+        <i class="bi bi-shield-lock me-2"></i>Thông Tin Giao Hàng & Thanh Toán
+    </h3>
+
+    <form asp-controller="Checkout" asp-action="Process" method="post">
+        @Html.AntiForgeryToken()
+        <div class="row g-4">
+            <!-- Left: Customer Form & Payment Method -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+                    <h5 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-person-circle text-primary me-2"></i>1. Thông tin người nhận hàng
+                    </h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label asp-for="CustomerName" class="form-label fw-semibold"></label>
+                            <input asp-for="CustomerName" class="form-control" placeholder="Nguyễn Văn A" required />
+                            <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="CustomerPhone" class="form-label fw-semibold"></label>
+                            <input asp-for="CustomerPhone" class="form-control" placeholder="0901234567" required />
+                            <span asp-validation-for="CustomerPhone" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="CustomerEmail" class="form-label fw-semibold"></label>
+                            <input asp-for="CustomerEmail" class="form-control" placeholder="email@gmail.com" required />
+                            <span asp-validation-for="CustomerEmail" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label asp-for="ShippingAddress" class="form-label fw-semibold"></label>
+                            <input asp-for="ShippingAddress" class="form-control" placeholder="Số 123, đường Nguyễn Huệ" required />
+                            <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="City" class="form-label fw-semibold"></label>
+                            <input asp-for="City" class="form-control" placeholder="TP. Hồ Chí Minh" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="District" class="form-label fw-semibold"></label>
+                            <input asp-for="District" class="form-control" placeholder="Quận 1" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label asp-for="Note" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Note" class="form-control" rows="2" placeholder="Ghi chú thêm về thời gian nhận hàng hoặc hướng dẫn đường..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method Card -->
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                    <h5 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-wallet2 text-primary me-2"></i>2. Phương thức thanh toán
+                    </h5>
+
+                    <div class="d-flex flex-column gap-3">
+                        <label class="form-check p-3 border rounded-3 bg-light d-flex align-items-center cursor-pointer">
+                            <input class="form-check-input me-3" type="radio" asp-for="PaymentMethod" value="1" checked />
+                            <div class="flex-grow-1">
+                                <strong class="d-block text-dark"><i class="bi bi-cash-stack text-success me-2"></i>Thanh toán khi nhận hàng (COD)</strong>
+                                <small class="text-muted">Nhận bưu kiện, kiểm tra đúng size và loại vớ y khoa rồi mới thanh toán tiền mặt cho nhân viên giao hàng.</small>
+                            </div>
+                        </label>
+
+                        <label class="form-check p-3 border rounded-3 bg-light d-flex align-items-center cursor-pointer">
+                            <input class="form-check-input me-3" type="radio" asp-for="PaymentMethod" value="2" />
+                            <div class="flex-grow-1">
+                                <strong class="d-block text-dark"><i class="bi bi-qr-code text-primary me-2"></i>Chuyển khoản VietQR (Ngân hàng)</strong>
+                                <small class="text-muted">Quét mã QR tự động điền số tiền và nội dung đơn hàng qua mọi app ngân hàng.</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-4 sticky-top" style="top: 80px;">
+                    <h5 class="fw-bold text-dark mb-3">Đơn hàng của bạn (@Model.Cart.TotalQuantity)</h5>
+
+                    <!-- Items list -->
+                    <div class="d-flex flex-column gap-3 mb-3 overflow-y-auto" style="max-height: 280px;">
+                        @foreach (var item in Model.Cart.Items)
+                        {
+                            <div class="d-flex align-items-center justify-content-between pb-2 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "https://placehold.co/100x100?text=Vớ" : item.ProductImageUrl)" 
+                                         class="rounded me-2 border" style="width: 50px; height: 50px; object-fit: contain;" />
+                                    <div>
+                                        <div class="fw-bold small text-dark text-truncate" style="max-width: 170px;">@item.ProductName</div>
+                                        <small class="text-muted">Size: @item.Size | SL: @item.Quantity</small>
+                                    </div>
+                                </div>
+                                <div class="text-danger fw-bold small text-nowrap">
+                                    @item.TotalPrice.ToString("N0") ₫
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Tạm tính:</span>
+                        <span class="fw-bold">@Model.Cart.SubTotal.ToString("N0") ₫</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted">Phí vận chuyển:</span>
+                        @if (Model.Cart.ShippingFee == 0)
+                        {
+                            <span class="text-success fw-bold">Miễn phí toàn quốc</span>
+                        }
+                        else
+                        {
+                            <span class="fw-bold">@Model.Cart.ShippingFee.ToString("N0") ₫</span>
+                        }
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between align-items-baseline mb-4">
+                        <span class="fs-5 fw-bold text-dark">Tổng cộng:</span>
+                        <span class="fs-4 fw-bold text-danger">@Model.Cart.TotalAmount.ToString("N0") ₫</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold text-dark shadow-sm">
+                        <i class="bi bi-check-circle-fill me-2"></i> Xác Nhận Đặt Hàng
+                    </button>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-shield-check text-success me-1"></i> Đổi size miễn phí trong 7 ngày nếu không vừa chân
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

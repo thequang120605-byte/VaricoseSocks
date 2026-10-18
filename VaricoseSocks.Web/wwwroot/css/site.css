@@ -1,31 +1,74 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+/* Varicose Socks - Custom Medical eCommerce Styling */
+:root {
+    --primary-color: #0d6efd;
+    --primary-dark: #0a58ca;
+    --accent-warning: #ffc107;
 }
 
 body {
-  margin-bottom: 60px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #212529;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.product-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border-radius: 14px;
+    overflow: hidden;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(13, 110, 253, 0.12) !important;
+}
+
+.category-card {
+    border-radius: 14px;
+    transition: all 0.2s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    background-color: #f1f5f9;
+}
+
+.btn-size.active, .btn-color.active {
+    border-width: 2px !important;
+    font-weight: bold;
+}
+
+/* Chatbot Floating Widget Styling */
+#chatbotWindow {
+    border-radius: 16px;
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+#chatbotMessages::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chatbotMessages::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+/* Responsive tweaks for mobile */
+@media (max-width: 576px) {
+    #chatbotWindow {
+        width: 100% !important;
+        height: 80vh !important;
+        right: 0 !important;
+        bottom: 0 !important;
+    }
 }

@@ -1,0 +1,91 @@
+@model VaricoseSocks.Web.Models.OrderDetailViewModel
+@{
+    ViewData["Title"] = "Đặt hàng thành công - Mã " + Model.OrderCode;
+}
+
+<div class="container py-5">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mx-auto" style="max-width: 780px;">
+        <div class="text-center mb-4">
+            <div class="bg-success text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                <i class="bi bi-check-lg fs-1"></i>
+            </div>
+            <h2 class="fw-bold text-success mb-2">ĐẶT HÀNG THÀNH CÔNG!</h2>
+            <p class="text-muted">Cảm ơn bạn đã tin tưởng lựa chọn vớ y khoa tại Varicose Socks.</p>
+            <div class="badge bg-primary fs-5 px-3 py-2">
+                Mã đơn hàng: @Model.OrderCode
+            </div>
+        </div>
+
+        <!-- Order Information Box -->
+        <div class="bg-light p-3 p-md-4 rounded-3 mb-4 border">
+            <div class="row g-3 small">
+                <div class="col-sm-6">
+                    <span class="text-muted d-block">Người nhận:</span>
+                    <strong class="text-dark">@Model.CustomerName</strong>
+                </div>
+                <div class="col-sm-6">
+                    <span class="text-muted d-block">Số điện thoại:</span>
+                    <strong class="text-dark">@Model.CustomerPhone</strong>
+                </div>
+                <div class="col-sm-6">
+                    <span class="text-muted d-block">Email:</span>
+                    <strong class="text-dark">@Model.CustomerEmail</strong>
+                </div>
+                <div class="col-sm-6">
+                    <span class="text-muted d-block">Hình thức thanh toán:</span>
+                    <strong class="text-primary">@Model.PaymentMethodText</strong>
+                </div>
+                <div class="col-12">
+                    <span class="text-muted d-block">Địa chỉ nhận hàng:</span>
+                    <strong class="text-dark">@Model.ShippingAddress, @(Model.District ?? ""), @(Model.City ?? "TP.HCM")</strong>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.PaymentMethodText.Contains("VietQR") || Model.PaymentMethodText.Contains("Chuyển khoản"))
+        {
+            <div class="alert alert-warning p-3 rounded-3 text-center mb-4">
+                <h6 class="fw-bold mb-2"><i class="bi bi-qr-code-scan me-1"></i> Quét mã VietQR để thanh toán:</h6>
+                <img src="https://api.vietqr.io/image/970422-0901234567-compact2.jpg?amount=@Model.TotalAmount&addInfo=@Model.OrderCode&accountName=VARICOSE%20SOCKS%20MEDICAL" 
+                     class="img-fluid border rounded p-2 bg-white mb-2" style="max-height: 220px;" alt="Mã VietQR" />
+                <div class="small text-muted">Ngân hàng Quân Đội (MB Bank) - STK: <strong>0901234567</strong> - Nội dung: <strong>@Model.OrderCode</strong></div>
+            </div>
+        }
+
+        <!-- Items Purchased -->
+        <h5 class="fw-bold text-dark mb-3">Sản phẩm đã đặt</h5>
+        <div class="list-group list-group-flush mb-4 border rounded">
+            @foreach (var item in Model.Items)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                    <div class="d-flex align-items-center">
+                        <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "https://placehold.co/80x80?text=Vớ" : item.ProductImageUrl)" 
+                             class="rounded border me-3" style="width: 50px; height: 50px; object-fit: contain;" />
+                        <div>
+                            <div class="fw-bold">@item.ProductName</div>
+                            <small class="text-muted">Size: @item.Size | Màu: @item.Color | SL: @item.Quantity</small>
+                        </div>
+                    </div>
+                    <div class="text-danger fw-bold">
+                        @item.TotalPrice.ToString("N0") ₫
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="d-flex justify-content-between align-items-baseline mb-4 p-3 bg-light rounded">
+            <span class="fs-5 fw-bold text-dark">Tổng số tiền thanh toán:</span>
+            <span class="fs-4 fw-bold text-danger">@Model.TotalAmount.ToString("N0") ₫</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <a asp-controller="Order" asp-action="Track" asp-route-query="@Model.OrderCode" class="btn btn-primary px-4 py-2 fw-bold">
+                <i class="bi bi-truck me-1"></i> Theo dõi hành trình đơn hàng
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                <i class="bi bi-house me-1"></i> Quay về trang chủ
+            </a>
+        </div>
+    </div>
+</div>

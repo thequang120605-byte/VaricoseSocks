@@ -1,0 +1,87 @@
+@model List<VaricoseSocks.Web.Models.ProductViewModel>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm - Admin";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-primary mb-1">
+                <i class="bi bi-box-seam me-2"></i>Quản Lý Sản Phẩm Vớ Y Khoa
+            </h3>
+            <p class="text-muted small mb-0">Danh sách tất cả sản phẩm, tồn kho và cấu hình y khoa</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Dashboard
+            </a>
+            <a asp-controller="Admin" asp-action="CreateProduct" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i> Thêm sản phẩm mới
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle small">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Hình ảnh</th>
+                        <th>Tên vớ y khoa</th>
+                        <th>Danh mục</th>
+                        <th>Áp lực (CCL)</th>
+                        <th>Giá bán</th>
+                        <th>Tồn kho</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>@p.Id</td>
+                            <td>
+                                <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://placehold.co/60x60" : p.ImageUrl)" 
+                                     class="rounded border" style="width: 50px; height: 50px; object-fit: contain;" />
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">@p.Name</div>
+                                <small class="text-muted">SKU: @p.Sku | Xuất xứ: @p.Origin</small>
+                            </td>
+                            <td>@(p.CategoryName ?? "Y khoa")</td>
+                            <td>
+                                <span class="badge bg-primary">@p.CompressionLevelText</span>
+                            </td>
+                            <td class="text-danger fw-bold text-nowrap">
+                                @((p.DiscountPrice ?? p.Price).ToString("N0")) ₫
+                            </td>
+                            <td>
+                                @if (p.StockQuantity <= 50)
+                                {
+                                    <span class="badge bg-danger">@p.StockQuantity</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">@p.StockQuantity</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a asp-controller="Admin" asp-action="EditProduct" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm py-0 px-2" title="Sửa">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form asp-controller="Admin" asp-action="DeleteProduct" asp-route-id="@p.Id" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" title="Xóa">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

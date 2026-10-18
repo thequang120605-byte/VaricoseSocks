@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad7" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ecfeff"/>
+      <stop offset="100%" stop-color="#cffafe"/>
+    </linearGradient>
+    <linearGradient id="sigvarisGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0d4c8"/>
+      <stop offset="50%" stop-color="#cebfaa"/>
+      <stop offset="100%" stop-color="#b6a38b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="400" rx="20" fill="url(#bgGrad7)"/>
+  
+  <!-- Swiss Flag Badge -->
+  <circle cx="50" cy="50" r="22" fill="#ef4444" opacity="0.15"/>
+  <rect x="36" y="36" width="28" height="28" rx="6" fill="#ef4444"/>
+  <path d="M48 42 h4 v6 h6 v4 h-6 v6 h-4 v-6 h-6 v-4 h6 z" fill="#ffffff"/>
+  <text x="75" y="55" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#0891b2">SIGVARIS COTTON</text>
+
+  <!-- Compression Pill -->
+  <rect x="250" y="32" width="120" height="30" rx="15" fill="#0891b2"/>
+  <text x="310" y="52" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">CCL2 (23-32 mmHg)</text>
+
+  <!-- Swiss Sigvaris Thigh Sock with Cotton soft texture -->
+  <g transform="translate(130, 65)">
+    <!-- Top Lace Rib -->
+    <rect x="15" y="5" width="100" height="24" rx="4" fill="#a48f76"/>
+    <line x1="15" y1="12" x2="115" y2="12" stroke="#ffffff" stroke-width="2" stroke-dasharray="4,2"/>
+    <line x1="15" y1="20" x2="115" y2="20" stroke="#ffffff" stroke-width="2" stroke-dasharray="4,2"/>
+
+    <!-- Thigh to Ankle -->
+    <path d="M15 29 C22 75, 23 125, 25 165 C24 195, 25 215, 23 250 L68 250 C72 220, 75 190, 80 160 C88 120, 100 80, 115 29 Z" fill="url(#sigvarisGrad)"/>
+    
+    <!-- Foot part (Open toe with ribbed finish) -->
+    <path d="M23 250 C16 260, 12 280, 26 290 C45 300, 80 295, 120 280 C132 272, 138 260, 134 250 L120 240 C105 244, 80 248, 68 250 Z" fill="url(#sigvarisGrad)"/>
+
+    <ellipse cx="138" cy="252" rx="4" ry="12" fill="none" stroke="#0891b2" stroke-width="2"/>
+
+    <!-- Cotton Flower Emblem watermark -->
+    <circle cx="65" cy="110" r="14" fill="#ffffff" opacity="0.3"/>
+    <circle cx="55" cy="100" r="10" fill="#ffffff" opacity="0.3"/>
+    <circle cx="75" cy="100" r="10" fill="#ffffff" opacity="0.3"/>
+    <circle cx="65" cy="90" r="10" fill="#ffffff" opacity="0.3"/>
+  </g>
+
+  <!-- Left Callout -->
+  <g transform="translate(35, 150)">
+    <rect x="0" y="0" width="85" height="40" rx="8" fill="#ffffff" stroke="#a5f3fc"/>
+    <text x="42" y="16" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0891b2" text-anchor="middle">100% COTTON</text>
+    <text x="42" y="30" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">Sợi bông tự nhiên</text>
+
+    <rect x="0" y="50" width="85" height="40" rx="8" fill="#ffffff" stroke="#a5f3fc"/>
+    <text x="42" y="66" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#16a34a" text-anchor="middle">DA NHẠY CẢM</text>
+    <text x="42" y="80" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">Chống ngứa rát</text>
+  </g>
+
+  <!-- Bottom Tag -->
+  <rect x="20" y="340" width="360" height="42" rx="10" fill="#ffffff" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.06))"/>
+  <text x="200" y="365" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#212529" text-anchor="middle">
+    Vớ Đùi Sigvaris Cotton CCL2 (Thụy Sĩ - Sợi Bông Tự Nhiên)
+  </text>
+</svg>

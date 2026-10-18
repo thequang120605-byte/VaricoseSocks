@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="100%" stop-color="#ffedd5"/>
+    </linearGradient>
+    <linearGradient id="pantyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2bf9e"/>
+      <stop offset="50%" stop-color="#d4aa82"/>
+      <stop offset="100%" stop-color="#bf9067"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="400" rx="20" fill="url(#bgGrad4)"/>
+  
+  <!-- Italian Flag / RelaxSan Badge -->
+  <circle cx="50" cy="50" r="22" fill="#ea580c" opacity="0.15"/>
+  <rect x="38" y="44" width="8" height="12" fill="#009246"/>
+  <rect x="46" y="44" width="8" height="12" fill="#ffffff"/>
+  <rect x="54" y="44" width="8" height="12" fill="#ce2b37"/>
+  <text x="75" y="55" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#ea580c">RELAXSAN ITALY</text>
+
+  <!-- Compression Pill -->
+  <rect x="250" y="32" width="120" height="30" rx="15" fill="#ea580c"/>
+  <text x="310" y="52" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">CCL2 (23-32 mmHg)</text>
+
+  <!-- Pantyhose Body (Waist + 2 legs) -->
+  <g transform="translate(125, 75)">
+    <!-- Waistband -->
+    <rect x="25" y="0" width="100" height="16" rx="4" fill="#b07d54"/>
+    <line x1="25" y1="8" x2="125" y2="8" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4,2"/>
+
+    <!-- Brief / Hip section -->
+    <path d="M25 16 C22 45, 20 70, 40 85 L75 90 L110 85 C130 70, 128 45, 125 16 Z" fill="#c99b73"/>
+
+    <!-- Left Leg -->
+    <path d="M40 85 C38 120, 35 180, 36 210 C34 230, 33 245, 30 260 L60 260 C64 245, 66 220, 68 190 C70 150, 72 110, 75 90 Z" fill="url(#pantyGrad)"/>
+    <!-- Left Foot -->
+    <path d="M30 260 C25 268, 20 280, 32 288 C45 295, 68 290, 85 280 C95 272, 92 262, 85 255 L60 260 Z" fill="url(#pantyGrad)"/>
+
+    <!-- Right Leg -->
+    <path d="M75 90 C78 110, 80 150, 82 190 C84 220, 86 245, 90 260 L120 260 C117 245, 116 230, 114 210 C115 180, 112 120, 110 85 Z" fill="url(#pantyGrad)"/>
+    <!-- Right Foot -->
+    <path d="M90 260 L65 255 C58 262, 55 272, 65 280 C82 290, 105 295, 118 288 C130 280, 125 268, 120 260 Z" fill="url(#pantyGrad)"/>
+
+    <!-- Shading & Contours -->
+    <path d="M42 30 Q75 40 108 30" stroke="#f5dfcc" stroke-width="2" fill="none" opacity="0.5"/>
+  </g>
+
+  <!-- Left Callouts -->
+  <g transform="translate(30, 150)">
+    <rect x="0" y="0" width="80" height="38" rx="8" fill="#ffffff" stroke="#fed7aa"/>
+    <text x="40" y="16" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ea580c" text-anchor="middle">DÁNG QUẦN TẤT</text>
+    <text x="40" y="30" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">Nâng đỡ đến eo</text>
+
+    <rect x="0" y="50" width="80" height="38" rx="8" fill="#ffffff" stroke="#fed7aa"/>
+    <text x="40" y="66" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#16a34a" text-anchor="middle">CHỐNG TUỘT VỚ</text>
+    <text x="40" y="80" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">Định hình chân thon</text>
+  </g>
+
+  <!-- Bottom Tag -->
+  <rect x="20" y="340" width="360" height="42" rx="10" fill="#ffffff" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.06))"/>
+  <text x="200" y="365" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#212529" text-anchor="middle">
+    Quần Vớ Y Khoa RelaxSan Basic CCL2 (Kín Ngón, Đến Thắt Lưng)
+  </text>
+</svg>

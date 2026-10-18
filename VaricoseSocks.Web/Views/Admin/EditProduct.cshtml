@@ -1,0 +1,124 @@
+@model VaricoseSocks.Web.Models.AdminProductEditViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa sản phẩm - " + Model.Name;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold text-primary mb-1">
+                <i class="bi bi-pencil-square me-2"></i>Chỉnh Sửa Vớ Y Khoa
+            </h3>
+            <p class="text-muted small mb-0">Cập nhật giá, khuyến mãi, tồn kho và thông số y khoa</p>
+        </div>
+        <a asp-controller="Admin" asp-action="Products" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mx-auto" style="max-width: 850px;">
+        <form asp-controller="Admin" asp-action="EditProduct" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label asp-for="Name" class="form-label fw-bold">Tên sản phẩm (*)</label>
+                    <input asp-for="Name" class="form-control" required />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="CategoryId" class="form-label fw-bold">Danh mục (*)</label>
+                    <select asp-for="CategoryId" class="form-select" required>
+                        @foreach (var c in Model.Categories)
+                        {
+                            <option value="@c.Id" selected="@(c.Id == Model.CategoryId)">@c.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Price" class="form-label fw-bold">Giá niêm yết (₫) (*)</label>
+                    <input asp-for="Price" type="number" class="form-control" required />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="DiscountPrice" class="form-label fw-bold">Giá khuyến mãi (₫)</label>
+                    <input asp-for="DiscountPrice" type="number" class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="StockQuantity" class="form-label fw-bold">Số lượng tồn kho (*)</label>
+                    <input asp-for="StockQuantity" type="number" class="form-control" required />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="CompressionLevel" class="form-label fw-bold">Cấp độ nén (CCL)</label>
+                    <select asp-for="CompressionLevel" class="form-select">
+                        <option value="1" selected="@(Model.CompressionLevel == 1)">CCL1 (15-21 mmHg)</option>
+                        <option value="2" selected="@(Model.CompressionLevel == 2)">CCL2 (23-32 mmHg)</option>
+                        <option value="3" selected="@(Model.CompressionLevel == 3)">CCL3 (34-46 mmHg)</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Style" class="form-label fw-bold">Kiểu dáng</label>
+                    <select asp-for="Style" class="form-select">
+                        <option value="1" selected="@(Model.Style == 1)">Vớ gối (AD)</option>
+                        <option value="2" selected="@(Model.Style == 2)">Vớ đùi (AG)</option>
+                        <option value="3" selected="@(Model.Style == 3)">Quần vớ (AT)</option>
+                        <option value="4" selected="@(Model.Style == 4)">Quần vớ bà bầu</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="ToeType" class="form-label fw-bold">Kiểu ngón</label>
+                    <select asp-for="ToeType" class="form-select">
+                        <option value="1" selected="@(Model.ToeType == 1)">Hở ngón (Open Toe)</option>
+                        <option value="2" selected="@(Model.ToeType == 2)">Kín ngón (Closed Toe)</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Brand" class="form-label fw-bold">Thương hiệu</label>
+                    <input asp-for="Brand" class="form-control" />
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Origin" class="form-label fw-bold">Xuất xứ quốc gia</label>
+                    <input asp-for="Origin" class="form-control" />
+                </div>
+
+                <div class="col-md-12">
+                    <label asp-for="ImageUrl" class="form-label fw-bold">Đường dẫn hình ảnh (URL)</label>
+                    <input asp-for="ImageUrl" class="form-control" />
+                </div>
+
+                <div class="col-md-12">
+                    <label asp-for="ShortDescription" class="form-label fw-bold">Mô tả ngắn</label>
+                    <textarea asp-for="ShortDescription" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="col-md-12">
+                    <label asp-for="Description" class="form-label fw-bold">Mô tả chi tiết & Chỉ định y khoa</label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="IsFeatured" />
+                        <label class="form-check-label fw-bold" asp-for="IsFeatured">
+                            Hiển thị là sản phẩm nổi bật trên Trang chủ
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top text-end">
+                <a asp-controller="Admin" asp-action="Products" class="btn btn-outline-secondary me-2">Hủy</a>
+                <button type="submit" class="btn btn-primary px-4 fw-bold">Cập nhật sản phẩm</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,40 +1,100 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Varicose Socks Medical</title>
+    <title>@ViewData["Title"] - Varicose Socks Y Khoa</title>
+    <!-- Bootstrap 5 CSS & Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-            <div class="container">
-                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-heart-pulse-fill me-2"></i>VARICOSE SOCKS
+<body class="d-flex flex-column min-vh-100 bg-light">
+    <!-- Top Announcement Bar -->
+    <div class="bg-dark text-white py-1 px-3 small text-center d-none d-md-block">
+        <span><i class="bi bi-truck me-1 text-warning"></i> Miễn phí giao hàng toàn quốc cho đơn từ 500.000₫</span>
+        <span class="mx-3">|</span>
+        <span><i class="bi bi-patch-check-fill me-1 text-info"></i> 100% Vớ y khoa chuẩn áp lực quốc tế RAL-GZ 387</span>
+        <span class="mx-3">|</span>
+        <span><i class="bi bi-telephone-fill me-1 text-success"></i> Hotline bác sĩ tư vấn: <strong>1900 6868</strong></span>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky-top shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-2">
+            <div class="container-fluid px-lg-4">
+                <a class="navbar-brand fw-bold d-flex align-items-center text-nowrap" asp-controller="Home" asp-action="Index">
+                    <div class="bg-white text-primary rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-heart-pulse-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="lh-1 fs-5">VARICOSE SOCKS</div>
+                        <small class="fw-normal text-white-50" style="font-size: 0.7rem;">Chuyên Vớ Suy Giãn Tĩnh Mạch</small>
+                    </div>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 text-nowrap">
                         <li class="nav-item">
-                            <a class="nav-link active" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                            <a class="nav-link text-white fw-semibold" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-1"></i> Trang chủ
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-grid me-1"></i> Danh mục vớ
+                            </a>
+                            <ul class="dropdown-menu shadow">
+                                <li><a class="dropdown-item" asp-controller="Product" asp-action="Index">Tất cả sản phẩm</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="Product" asp-action="Index" asp-route-categoryId="1">Vớ gối y khoa (AD)</a></li>
+                                <li><a class="dropdown-item" asp-controller="Product" asp-action="Index" asp-route-categoryId="2">Vớ đùi y khoa (AG)</a></li>
+                                <li><a class="dropdown-item" asp-controller="Product" asp-action="Index" asp-route-categoryId="3">Quần vớ y khoa (AT)</a></li>
+                                <li><a class="dropdown-item" asp-controller="Product" asp-action="Index" asp-route-categoryId="4">Quần vớ cho bà bầu</a></li>
+                                <li><a class="dropdown-item" asp-controller="Product" asp-action="Index" asp-route-categoryId="5">Phụ kiện & Khung xỏ vớ</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Product" asp-action="Index">Tất cả sản phẩm</a>
+                            <a class="nav-link text-white fw-semibold" asp-controller="Product" asp-action="Index">
+                                <i class="bi bi-bag-check me-1"></i> Sản phẩm
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white fw-semibold" asp-controller="Order" asp-action="Track">
+                                <i class="bi bi-truck me-1"></i> Tra cứu đơn hàng
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-semibold" asp-controller="Admin" asp-action="Index">
+                                <i class="bi bi-speedometer2 me-1"></i> Quản trị Admin
+                            </a>
                         </li>
                     </ul>
-                    <form class="d-flex me-3" asp-controller="Product" asp-action="Index" method="get">
-                        <input class="form-control me-2" type="search" name="searchTerm" placeholder="Tìm vớ y khoa..." />
-                        <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i></button>
+
+                    <!-- Search Form -->
+                    <form class="d-flex me-lg-3 my-2 my-lg-0 flex-grow-1 flex-lg-grow-0" style="min-width: 220px; max-width: 320px;" asp-controller="Product" asp-action="Index" method="get">
+                        <div class="input-group">
+                            <input class="form-control" type="search" name="searchTerm" placeholder="Tìm vớ CCL1, CCL2..." aria-label="Search" />
+                            <button class="btn btn-warning text-dark fw-bold" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
                     </form>
-                    <div class="d-flex">
-                        <a href="javascript:void(0)" class="btn btn-warning position-relative" onclick="openMiniCart()">
-                            <i class="bi bi-cart3"></i>
-                            <span id="cartCountBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+
+                    <!-- Cart and Consultation Actions -->
+                    <div class="d-flex align-items-center gap-2 text-nowrap">
+                        <button type="button" class="btn btn-light btn-sm text-primary fw-bold text-nowrap" onclick="openChatbot()">
+                            <i class="bi bi-robot text-danger me-1"></i> AI Tư Vấn
+                        </button>
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-warning position-relative fw-bold text-dark text-nowrap">
+                            <i class="bi bi-cart3 me-1"></i> Giỏ hàng
+                            <span id="cartCountBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                0
+                            </span>
                         </a>
                     </div>
                 </div>
@@ -42,17 +102,192 @@
         </nav>
     </header>
 
+    <!-- Main Content Area -->
     <main role="main" class="flex-grow-1">
         @RenderBody()
     </main>
 
-    <footer class="footer bg-light border-top py-4 mt-auto">
-        <div class="container text-center text-muted">
-            <p class="mb-1">&copy; 2026 - Varicose Socks - Giải pháp chuyên biệt cho người suy giãn tĩnh mạch</p>
-            <small>Chất lượng y tế - Chuẩn áp lực CCL1, CCL2, CCL3</small>
+    <!-- Footer -->
+    <footer class="bg-white border-top py-5 mt-auto">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle p-2 me-2">
+                            <i class="bi bi-heart-pulse-fill fs-5"></i>
+                        </div>
+                        <h5 class="fw-bold text-primary mb-0">VARICOSE SOCKS</h5>
+                    </div>
+                    <p class="text-muted small">
+                        Hệ thống phân phối vớ y khoa điều trị suy giãn tĩnh mạch chính hãng từ Đức, Mỹ, Ý. Đạt chuẩn áp lực y khoa giảm dần, chứng chỉ CE, FDA và khuyến cáo từ Hội Mạch Máu Việt Nam.
+                    </p>
+                    <div class="d-flex gap-2 text-primary fs-5">
+                        <i class="bi bi-facebook"></i>
+                        <i class="bi bi-youtube"></i>
+                        <i class="bi bi-shield-fill-check text-success"></i>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-3 text-dark">Về Sản Phẩm</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a class="text-decoration-none text-muted" asp-controller="Product" asp-action="Index" asp-route-compression="1">Vớ áp lực CCL1</a></li>
+                        <li class="mb-2"><a class="text-decoration-none text-muted" asp-controller="Product" asp-action="Index" asp-route-compression="2">Vớ áp lực CCL2</a></li>
+                        <li class="mb-2"><a class="text-decoration-none text-muted" asp-controller="Product" asp-action="Index" asp-route-compression="3">Vớ áp lực CCL3</a></li>
+                        <li class="mb-2"><a class="text-decoration-none text-muted" asp-controller="Product" asp-action="Index" asp-route-categoryId="4">Vớ cho mẹ bầu</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3 text-dark">Hỗ Trợ Khách Hàng</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a class="text-decoration-none text-muted" href="javascript:void(0)" onclick="openSizeModal()">Hướng dẫn đo size chân cB/cC</a></li>
+                        <li class="mb-2"><a class="text-decoration-none text-muted" asp-controller="Order" asp-action="Track">Tra cứu hành trình đơn hàng</a></li>
+                        <li class="mb-2"><a class="text-decoration-none text-muted" href="javascript:void(0)" onclick="openChatbot()">Trợ lý AI tư vấn tình trạng tĩnh mạch</a></li>
+                        <li class="mb-2"><a class="text-decoration-none text-muted" asp-controller="Admin" asp-action="Index">Hệ thống quản trị nội bộ</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3 text-dark">Liên Hệ Tư Vấn</h6>
+                    <p class="small text-muted mb-1"><i class="bi bi-geo-alt-fill text-danger me-2"></i>123 Hai Bà Trưng, Quận 1, TP. Hồ Chí Minh</p>
+                    <p class="small text-muted mb-1"><i class="bi bi-telephone-fill text-success me-2"></i>Hotline: 1900 6868 - 0987.654.321</p>
+                    <p class="small text-muted mb-1"><i class="bi bi-envelope-fill text-primary me-2"></i>tuvan@varicosesocks.vn</p>
+                    <div class="mt-3">
+                        <span class="badge bg-success-subtle text-success border border-success p-2">
+                            <i class="bi bi-patch-check me-1"></i> Bác sĩ chuyên khoa trực tuyến 24/7
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-muted">
+                <div>&copy; 2026 Varicose Socks. Dự án thực tập .NET Core Clean Architecture - Chu Văn Quốc Trung</div>
+                <div class="mt-2 mt-md-0">
+                    <span class="me-3">Giao diện chuẩn Responsive Mobile</span>
+                    <span>Tích hợp Chatbot AI Sizing & Triệu chứng</span>
+                </div>
+            </div>
         </div>
     </footer>
 
+    <!-- Floating AI Chatbot Widget -->
+    <div id="aiChatbotContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1060;">
+        <!-- Trigger Button -->
+        <button id="chatbotToggleBtn" class="btn btn-primary rounded-circle shadow-lg p-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;" onclick="toggleChatbot()">
+            <i class="bi bi-robot fs-3 text-white"></i>
+            <span class="position-absolute top-0 start-0 translate-middle p-2 bg-danger border border-light rounded-circle">
+                <span class="visually-hidden">New alerts</span>
+            </span>
+        </button>
+
+        <!-- Chat Window Card -->
+        <div id="chatbotWindow" class="card shadow-lg border-0 d-none" style="width: 370px; max-width: 92vw; height: 530px;">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-robot fs-4 me-2"></i>
+                    <div>
+                        <strong class="d-block lh-1">Bác sĩ AI Tư Vấn Vớ Y Khoa</strong>
+                        <small class="text-white-50" style="font-size: 0.75rem;">Hỗ trợ chẩn đoán & đo size chân</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" onclick="toggleChatbot()"></button>
+            </div>
+
+            <!-- Chat Messages Log -->
+            <div class="card-body overflow-y-auto p-3" id="chatbotMessages" style="height: 380px; background-color: #f8fafc;">
+                <div class="d-flex mb-3">
+                    <div class="bg-white p-3 rounded-3 shadow-sm border small text-dark" style="max-width: 85%;">
+                        <div class="fw-bold text-primary mb-1"><i class="bi bi-shield-plus me-1"></i> Bác sĩ AI Varicose</div>
+                        Xin chào bạn! Tôi là trợ lý AI chuyên về vớ y khoa suy giãn tĩnh mạch. Bạn có thể cho tôi biết:
+                        <ul class="mb-1 ps-3 mt-1">
+                            <li>Bạn có triệu chứng mỏi chân, nặng chân hay nổi gân xanh không?</li>
+                            <li>Bạn đang mang thai hay đứng nhiều không?</li>
+                            <li>Hoặc nhập số đo cổ chân (cB) để tôi tính size chuẩn xác nhé!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Pills -->
+            <div class="px-2 py-1 bg-white border-top d-flex gap-1 overflow-x-auto text-nowrap" style="scrollbar-width: none;">
+                <button class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi hay bị mỏi phù chân vào buổi chiều')">Mỏi phù chân</button>
+                <button class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi bị nổi gân xanh ngoằn ngoèo ở bắp chân')">Nổi gân xanh</button>
+                <button class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi đang mang thai muốn tìm vớ cho bà bầu')">Mẹ bầu</button>
+                <button class="btn btn-outline-success btn-sm py-0 px-2" style="font-size: 0.75rem;" onclick="promptSizeTool()">Tính Size</button>
+            </div>
+
+            <!-- Chat Input Form -->
+            <div class="card-footer bg-white border-top p-2">
+                <form id="chatbotForm" onsubmit="handleChatSubmit(event)" class="d-flex gap-2">
+                    <input type="text" id="chatInput" class="form-control form-control-sm" placeholder="Nhập triệu chứng hoặc số đo..." autocomplete="off" />
+                    <button type="submit" class="btn btn-primary btn-sm px-3">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Size Guide Modal -->
+    <div class="modal fade" id="sizeGuideModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-rulers me-2"></i>Bảng Hướng Dẫn Đo Size Vớ Y Khoa Chuẩn RAL-GZ 387</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row align-items-center mb-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary">Các vị trí đo chuẩn xác (đo vào buổi sáng):</h6>
+                            <ul>
+                                <li><strong>cB (Vòng cổ chân):</strong> Đo vòng nhỏ nhất phía trên mắt cá chân. (Quan trọng nhất quyết định size).</li>
+                                <li><strong>cC (Vòng bắp chân):</strong> Đo vị trí nở to nhất của bắp chân.</li>
+                                <li><strong>cG (Vòng đùi):</strong> Đo dưới nếp lằn mông 5cm (áp dụng cho vớ đùi & quần vớ).</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 bg-light p-3 rounded">
+                            <h6 class="fw-bold text-success"><i class="bi bi-calculator me-1"></i> Tính size tự động ngay:</h6>
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text">Vòng cổ chân cB:</span>
+                                <input type="number" step="0.1" id="modalAnkleInput" class="form-control" placeholder="Vd: 22.5" />
+                                <span class="input-group-text">cm</span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="calculateModalSize()">Xem Size Của Bạn</button>
+                            <div id="modalSizeResult" class="mt-2 text-center small fw-bold text-danger"></div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped text-center align-middle">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Kích thước (Size)</th>
+                                    <th>Chu vi cổ chân cB (cm)</th>
+                                    <th>Chu vi bắp chân cC (cm)</th>
+                                    <th>Chu vi đùi cG (cm)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong class="text-primary">Size S</strong></td><td>18 - 21</td><td>28 - 38</td><td>40 - 62</td></tr>
+                                <tr><td><strong class="text-primary">Size M</strong></td><td>21 - 25</td><td>30 - 42</td><td>46 - 70</td></tr>
+                                <tr><td><strong class="text-primary">Size L</strong></td><td>25 - 29</td><td>32 - 46</td><td>54 - 78</td></tr>
+                                <tr><td><strong class="text-primary">Size XL</strong></td><td>29 - 33</td><td>34 - 50</td><td>60 - 81</td></tr>
+                                <tr><td><strong class="text-primary">Size XXL</strong></td><td>> 33</td><td>> 50</td><td>> 81</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

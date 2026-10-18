@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdfbf7"/>
+      <stop offset="100%" stop-color="#f5efe6"/>
+    </linearGradient>
+    <linearGradient id="sockSheer" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a4440"/>
+      <stop offset="50%" stop-color="#2d2926"/>
+      <stop offset="100%" stop-color="#1f1b18"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="400" rx="20" fill="url(#bgGrad2)"/>
+  
+  <!-- Medical Badge -->
+  <circle cx="50" cy="50" r="22" fill="#198754" opacity="0.15"/>
+  <path d="M46 38 h8 v8 h8 v8 h-8 v8 h-8 v-8 h-8 v-8 h8 z" fill="#198754"/>
+  <text x="80" y="55" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#198754">JOBST ULTRASHEER</text>
+
+  <!-- Compression Pill -->
+  <rect x="250" y="32" width="120" height="30" rx="15" fill="#198754"/>
+  <text x="310" y="52" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">CCL1 (15-20 mmHg)</text>
+
+  <!-- Closed Toe Sheer Sock Body -->
+  <g transform="translate(140, 75)">
+    <!-- Top ribbed cuff -->
+    <rect x="20" y="10" width="80" height="18" rx="4" fill="#1a1816"/>
+    <line x1="20" y1="16" x2="100" y2="16" stroke="#333" stroke-width="2"/>
+
+    <!-- Calf part -->
+    <path d="M20 28 C12 80, 8 140, 25 190 C30 205, 30 220, 28 240 L70 240 C75 220, 78 200, 85 180 C95 130, 98 70, 100 28 Z" fill="url(#sockSheer)"/>
+    
+    <!-- Heel & Foot (Closed Toe) -->
+    <path d="M28 240 C20 250, 15 270, 30 280 C50 290, 80 285, 120 270 C140 262, 155 250, 150 235 C145 225, 130 228, 120 232 C100 236, 75 238, 70 240 Z" fill="url(#sockSheer)"/>
+    
+    <!-- Heel Reinforcement -->
+    <path d="M28 240 C18 255, 25 275, 45 278 C35 265, 35 250, 42 240 Z" fill="#151311"/>
+
+    <!-- Closed toe cup -->
+    <path d="M130 232 C140 230, 155 236, 150 246 C145 255, 132 263, 122 268 Z" fill="#151311"/>
+
+    <!-- Glossy silky reflection -->
+    <path d="M35 50 Q45 120 40 180" stroke="#ffffff" stroke-width="3" fill="none" opacity="0.25" stroke-linecap="round"/>
+    <path d="M42 55 Q50 120 46 175" stroke="#ffffff" stroke-width="1.5" fill="none" opacity="0.2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Feature callouts -->
+  <g transform="translate(45, 150)">
+    <rect x="0" y="0" width="85" height="24" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+    <text x="42" y="16" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333333" text-anchor="middle">Mỏng mịn tất da</text>
+    
+    <rect x="0" y="70" width="85" height="24" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+    <text x="42" y="86" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333333" text-anchor="middle">Bít ngón chân</text>
+  </g>
+
+  <!-- Bottom Tag -->
+  <rect x="20" y="340" width="360" height="42" rx="10" fill="#ffffff" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.06))"/>
+  <text x="200" y="365" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#212529" text-anchor="middle">
+    Vớ Gối Jobst UltraSheer CCL1 - Kín Ngón (Đen Thời Trang)
+  </text>
+</svg>

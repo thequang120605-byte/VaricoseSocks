@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5f3ff"/>
+      <stop offset="100%" stop-color="#ede9fe"/>
+    </linearGradient>
+    <linearGradient id="thighGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eed8c5"/>
+      <stop offset="40%" stop-color="#e2c3a9"/>
+      <stop offset="100%" stop-color="#cca080"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="400" rx="20" fill="url(#bgGrad3)"/>
+  
+  <!-- German Flag / Mediven Badge -->
+  <circle cx="50" cy="50" r="22" fill="#6f42c1" opacity="0.15"/>
+  <rect x="38" y="44" width="24" height="4" fill="#000000"/>
+  <rect x="38" y="48" width="24" height="4" fill="#dd0000"/>
+  <rect x="38" y="52" width="24" height="4" fill="#ffce00"/>
+  <text x="80" y="55" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#6f42c1">MEDIVEN GERMANY</text>
+
+  <!-- Compression Pill -->
+  <rect x="250" y="32" width="120" height="30" rx="15" fill="#6f42c1"/>
+  <text x="310" y="52" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff" text-anchor="middle">CCL2 (23-32 mmHg)</text>
+
+  <!-- Thigh-High Sock -->
+  <g transform="translate(130, 65)">
+    <!-- Silicone Lace Top Band -->
+    <rect x="15" y="5" width="100" height="26" rx="4" fill="#d9b69b" stroke="#6f42c1" stroke-width="1.5"/>
+    <!-- Silicone Dots -->
+    <circle cx="25" cy="14" r="2" fill="#ffffff"/>
+    <circle cx="35" cy="14" r="2" fill="#ffffff"/>
+    <circle cx="45" cy="14" r="2" fill="#ffffff"/>
+    <circle cx="55" cy="14" r="2" fill="#ffffff"/>
+    <circle cx="65" cy="14" r="2" fill="#ffffff"/>
+    <circle cx="75" cy="14" r="2" fill="#ffffff"/>
+    <circle cx="85" cy="14" r="2" fill="#ffffff"/>
+    <circle cx="95" cy="14" r="2" fill="#ffffff"/>
+    <circle cx="105" cy="14" r="2" fill="#ffffff"/>
+    <circle cx="30" cy="22" r="2" fill="#ffffff"/>
+    <circle cx="40" cy="22" r="2" fill="#ffffff"/>
+    <circle cx="50" cy="22" r="2" fill="#ffffff"/>
+    <circle cx="60" cy="22" r="2" fill="#ffffff"/>
+    <circle cx="70" cy="22" r="2" fill="#ffffff"/>
+    <circle cx="80" cy="22" r="2" fill="#ffffff"/>
+    <circle cx="90" cy="22" r="2" fill="#ffffff"/>
+    <circle cx="100" cy="22" r="2" fill="#ffffff"/>
+
+    <!-- Thigh to knee to ankle -->
+    <path d="M15 31 C22 80, 24 130, 26 170 C24 200, 25 220, 23 250 L68 250 C72 220, 75 190, 80 160 C88 120, 100 80, 115 31 Z" fill="url(#thighGrad)"/>
+    
+    <!-- Foot part -->
+    <path d="M23 250 C16 260, 12 280, 26 290 C45 300, 80 295, 120 280 C138 272, 148 260, 142 245 C138 238, 125 240, 115 242 C95 246, 75 248, 68 250 Z" fill="url(#thighGrad)"/>
+
+    <!-- Silicone Band Callout Line -->
+    <path d="M115 18 L150 18" stroke="#6f42c1" stroke-width="2" stroke-dasharray="3,3"/>
+    <text x="155" y="22" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#6f42c1">Hạt Silicone chống tụt</text>
+  </g>
+
+  <!-- Left Side Badges -->
+  <g transform="translate(45, 150)">
+    <rect x="0" y="0" width="75" height="40" rx="8" fill="#ffffff" stroke="#ddd"/>
+    <text x="37" y="16" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#6f42c1" text-anchor="middle">CHUẨN ĐỨC</text>
+    <text x="37" y="30" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">RAL-GZ 387</text>
+
+    <rect x="0" y="55" width="75" height="40" rx="8" fill="#ffffff" stroke="#ddd"/>
+    <text x="37" y="72" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#dc3545" text-anchor="middle">VỚ ĐÙI (AG)</text>
+    <text x="37" y="86" font-family="Arial, sans-serif" font-size="9" fill="#666" text-anchor="middle">Toàn bộ chân</text>
+  </g>
+
+  <!-- Bottom Tag -->
+  <rect x="20" y="340" width="360" height="42" rx="10" fill="#ffffff" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.06))"/>
+  <text x="200" y="365" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#212529" text-anchor="middle">
+    Vớ Đùi Mediven Elegance CCL2 - Viền Hạt Silicone Chống Trượt
+  </text>
+</svg>
