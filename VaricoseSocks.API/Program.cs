@@ -1,8 +1,14 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using VaricoseSocks.Application.Interfaces;
 using VaricoseSocks.Application.Services;
+using VaricoseSocks.Domain.Entities;
 using VaricoseSocks.Infrastructure.Data;
 using VaricoseSocks.Infrastructure.Repositories;
+using VaricoseSocks.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,14 +41,65 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     }
 });
 
-// Đăng ký Dependency Injection cho toàn bộ Repositories và Services
+// Cấu hình Password Hasher (PBKDF2 HMAC-SHA256)
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+// Cấu hình JWT Service & Authentication
+builder.Services.AddScoped<IJwtService, JwtService>();
+
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
+    ?? builder.Configuration["JwtSettings:Secret"]
+    ?? "VaricoseSocks_Medical_Secure_Secret_Key_2026_Minimum_32_Bytes_Long_JWT_Secret!";
+
+if (builder.Environment.IsProduction())
+{
+    var envSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
+    if (string.IsNullOrWhiteSpace(envSecret) || envSecret.Contains("Default", StringComparison.OrdinalIgnoreCase))
+    {
+        throw new InvalidOperationException("BẢO MẬT: Trong môi trường Production, khóa bí mật JWT bắt buộc phải được thiết lập qua biến môi trường 'JWT_SECRET' và không được sử dụng giá trị mặc định!");
+    }
+    jwtSecret = envSecret;
+}
+
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? builder.Configuration["JwtSettings:Issuer"] ?? "VaricoseSocks.API";
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? builder.Configuration["JwtSettings:Audience"] ?? "VaricoseSocks.Clients";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddAuthorization();
+
+// Đăng ký Dependency Injection cho toàn bộ Repositories và Application Services
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChatbotRepository, ChatbotRepository>();
+
 builder.Services.AddScoped<IChatbotAiService, ChatbotAiService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 var app = builder.Build();
 
@@ -52,12 +109,15 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        context.Database.EnsureCreated();
+        if (context.Database.IsRelational())
+        {
+            await context.Database.MigrateAsync();
+        }
         await DbInitializer.SeedAsync(context);
     }
     catch (Exception ex)
     {
-        app.Logger.LogWarning("Khởi tạo DB: " + ex.Message);
+        app.Logger.LogWarning("Khởi tạo DB / Migration: " + ex.Message);
     }
 }
 
@@ -68,6 +128,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Trang chủ API hiển thị trực tiếp khi truy cập localhost:5046
 app.MapGet("/", () => Results.Content(@"
@@ -90,7 +153,7 @@ app.MapGet("/", () => Results.Content(@"
                 <div>
                     <h2 class='fw-bold text-primary mb-1'>VARICOSE SOCKS MEDICAL - BACKEND REST API</h2>
                     <p class='text-muted mb-0'>Hệ thống API Vớ Y Khoa & Thương Mại Điện Tử .NET 9 Core</p>
-                    <small class='badge bg-success-subtle text-success border border-success'>Trạng thái: Máy chủ API đang hoạt động ổn định (Cổng 5046)</small>
+                    <small class='badge bg-success-subtle text-success border border-success'>Trạng thái: Máy chủ API đang hoạt động ổn định (Cổng 5046) - Bảo mật JWT & PBKDF2</small>
                 </div>
             </div>
 

@@ -1,110 +1,214 @@
 @model VaricoseSocks.Web.Models.ProductListViewModel
 @{
-    ViewData["Title"] = "Trang chủ - Vớ Y Khoa Chuyên Biệt Điều Trị Suy Giãn Tĩnh Mạch";
+    ViewData["Title"] = "Trang chủ - Nền Tảng Vớ Y Khoa Chuyên Biệt Điều Trị Suy Giãn Tĩnh Mạch";
 }
 
-<!-- Hero Banner Section -->
-<div class="bg-primary text-white py-5 shadow-sm mb-5" style="background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);">
-    <div class="container py-4">
-        <div class="row align-items-center">
+<!-- =========================================================================
+     1. MEDTECH DYNAMIC HERO SECTION WITH INTERACTIVE CCL SIMULATOR
+     ========================================================================= -->
+<div class="position-relative text-white py-5 mb-5 overflow-hidden" style="background: radial-gradient(circle at 85% 30%, #0369a1 0%, #0a192f 65%, #020617 100%);">
+    <!-- Ambient Glow Circles -->
+    <div class="position-absolute" style="top: -100px; right: 10%; width: 450px; height: 450px; background: rgba(14, 165, 233, 0.18); filter: blur(90px); border-radius: 50%; pointer-events: none;"></div>
+    <div class="position-absolute" style="bottom: -150px; left: 5%; width: 400px; height: 400px; background: rgba(16, 185, 129, 0.12); filter: blur(80px); border-radius: 50%; pointer-events: none;"></div>
+
+    <div class="container py-4 position-relative" style="z-index: 2;">
+        <div class="row align-items-center g-5">
+            <!-- Left: Hero Headline & Action CTAs -->
             <div class="col-lg-7">
-                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3">
-                    <i class="bi bi-patch-check-fill me-1"></i> Chuẩn Áp Lực Y Khoa Quốc Tế RAL-GZ 387
-                </span>
-                <h1 class="display-5 fw-bold mb-3">GIẢI PHÁP TOÀN DIỆN CHO ĐÔI CHÂN SUY GIÃN TĨNH MẠCH</h1>
-                <p class="lead mb-4 text-white-50">
-                    Phục hồi van tĩnh mạch, giảm nhanh cảm giác nặng mỏi, tê bì và sưng phù mắt cá chân với các thương hiệu vớ y tế hàng đầu từ Đức, Mỹ, Ý.
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3 border" style="background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18) !important; backdrop-filter: blur(10px);">
+                    <span class="pulse-indicator bg-success"></span>
+                    <span class="small fw-bold text-white tracking-wide" style="font-size: 0.78rem;">CHỨNG NHẬN Y TẾ ĐỨC RAL-GZ 387</span>
+                </div>
+
+                <h1 class="display-4 fw-bold mb-3 lh-sm text-white" style="letter-spacing: -0.03em;">
+                    GIẢI PHÁP TÁC ĐỘNG <span class="text-transparent bg-clip-text" style="background: linear-gradient(90deg, #38bdf8 0%, #a7f3d0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TUẦN HOÀN VAN TĨNH MẠCH</span>
+                </h1>
+
+                <p class="lead mb-4 text-white-50" style="font-size: 1.12rem; line-height: 1.7;">
+                    Phục hồi sự co bóp tự nhiên của van tĩnh mạch chi dưới, đánh tan cảm giác mỏi nặng, phù nề mắt cá và chuột rút ban đêm với công nghệ dệt nén y khoa vi sợi từ Mỹ, Đức, Ý.
                 </p>
-                <div class="d-flex flex-wrap gap-3">
-                    <a asp-controller="Product" asp-action="Index" class="btn btn-warning btn-lg px-4 fw-bold text-dark shadow">
-                        <i class="bi bi-bag-check-fill me-2"></i> Mua Ngay
+
+                <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-warning btn-lg px-4 py-3 rounded-pill fw-bold text-dark shadow-glow-warning d-flex align-items-center gap-2">
+                        <i class="bi bi-bag-check-fill fs-5"></i>
+                        <span>Mua Vớ Y Khoa Ngay</span>
                     </a>
-                    <button type="button" class="btn btn-outline-light btn-lg px-4 fw-semibold" onclick="openChatbot()">
-                        <i class="bi bi-robot me-2 text-warning"></i> AI Bác Sĩ Tư Vấn Cấp Độ Vớ
-                    </button>
-                    <button type="button" class="btn btn-link text-white text-decoration-none d-flex align-items-center" onclick="openSizeModal()">
-                        <i class="bi bi-rulers fs-4 me-2"></i> Hướng dẫn đo size
+                    <button type="button" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill fw-semibold d-flex align-items-center gap-2 border-secondary" onclick="openChatbot()" style="background: rgba(255,255,255,0.06); backdrop-filter: blur(8px);">
+                        <i class="bi bi-robot text-info fs-5"></i>
+                        <span>AI Bác Sĩ Đo Size & Cấp Độ</span>
                     </button>
                 </div>
+
+                <!-- Live Metrics Ticker -->
+                <div class="row g-3 pt-3 border-top border-white border-opacity-10">
+                    <div class="col-4">
+                        <div class="h3 fw-bold mb-0 text-white"><span class="counter-animate" data-target="98">0</span>%</div>
+                        <small class="text-white-50" style="font-size: 0.75rem;">Giảm phù nề sau 7 ngày</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="h3 fw-bold mb-0 text-white"><span class="counter-animate" data-target="100">0</span>%</div>
+                        <small class="text-white-50" style="font-size: 0.75rem;">Chuẩn áp lực RAL y tế</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="h3 fw-bold mb-0 text-white"><span class="counter-animate" data-target="12500">0</span>+</div>
+                        <small class="text-white-50" style="font-size: 0.75rem;">Đôi chân được phục hồi</small>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-5 text-center mt-4 mt-lg-0">
-                <img src="https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=600" alt="Vớ y khoa giãn tĩnh mạch" class="img-fluid rounded-4 shadow-lg border border-4 border-white-50" style="max-height: 380px; object-fit: cover;" />
+
+            <!-- Right: Interactive CCL Pressure & Venous Valve Simulator -->
+            <div class="col-lg-5">
+                <div class="glass-card p-4 text-dark position-relative shadow-float" style="background: rgba(255, 255, 255, 0.92);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary-subtle text-primary fw-bold p-2 rounded-circle">
+                                <i class="bi bi-heart-pulse-fill"></i>
+                            </span>
+                            <span class="fw-bold small text-dark">MÔ PHỎNG ÁP LỰC CO BÓP TĨNH MẠCH</span>
+                        </div>
+                        <span class="badge bg-success-subtle text-success small">Tương tác thời gian thực</span>
+                    </div>
+
+                    <!-- Pressure Selector Pills -->
+                    <div class="d-flex gap-2 mb-3">
+                        <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1 pressure-pill-btn" data-ccl="1">CCL1</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1 pressure-pill-btn active" data-ccl="2">CCL2</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1 pressure-pill-btn" data-ccl="3">CCL3</button>
+                    </div>
+
+                    <!-- Visual Vein Diagram -->
+                    <div class="vein-container d-flex flex-column justify-content-center align-items-center text-center p-3 mb-3">
+                        <div class="blood-flow-wave"></div>
+                        <div id="simVeinValve" class="position-relative transition-all" style="transition: transform 0.4s ease;">
+                            <img src="/images/products/vo-goi-jobst-ccl2.svg" alt="Vớ y khoa" style="height: 100px; object-fit: contain;" class="filter-drop-shadow" />
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 border mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted small">Áp lực nén:</span>
+                            <strong id="simPressureValue" class="text-primary fw-bold">20 - 30 mmHg (CCL2)</strong>
+                        </div>
+                        <p id="simPressureDesc" class="small text-muted mb-0">
+                            Chuẩn y tế điều trị suy giãn tĩnh mạch giai đoạn C2-C4, nổi gân xanh, sau can thiệp xơ hóa.
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <a asp-controller="Product" asp-action="Index" asp-route-compression="2" class="btn btn-primary w-100 rounded-pill btn-sm fw-bold py-2 shadow-sm">
+                            Xem các dòng vớ CCL2 phù hợp <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="container mb-5">
-    <!-- Trust Features Row -->
+    <!-- =========================================================================
+         2. BENTO GRID ARCHITECTURE (QUICK TOOLS & PROMO)
+         ========================================================================= -->
     <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm p-3 text-center">
-                <i class="bi bi-shield-check text-primary fs-1 mb-2"></i>
-                <h5 class="fw-bold">Chuẩn Y Tế Đức</h5>
-                <p class="text-muted small mb-0">Áp lực giảm dần đúng chuẩn RAL, được bác sĩ chuyên khoa tim mạch khuyên dùng.</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm p-3 text-center">
-                <i class="bi bi-truck text-primary fs-1 mb-2"></i>
-                <h5 class="fw-bold">Giao Hàng Miễn Phí</h5>
-                <p class="text-muted small mb-0">Miễn phí vận chuyển toàn quốc cho đơn từ 500k. Nhận hàng kiểm tra thanh toán (COD).</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm p-3 text-center">
-                <i class="bi bi-robot text-primary fs-1 mb-2"></i>
-                <h5 class="fw-bold">Trợ Lý AI Đo Size</h5>
-                <p class="text-muted small mb-0">Tự động chẩn đoán triệu chứng chân và tính size chính xác 100% theo chu vi cổ chân.</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100 border-0 shadow-sm p-3 text-center">
-                <i class="bi bi-arrow-repeat text-primary fs-1 mb-2"></i>
-                <h5 class="fw-bold">Đổi Size Trong 7 Ngày</h5>
-                <p class="text-muted small mb-0">Hỗ trợ đổi size linh hoạt nếu mang không vừa, đảm bảo điều trị hiệu quả và thoải mái nhất.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Symptom Assessment Banner -->
-    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-5">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <span class="badge bg-danger-subtle text-danger fw-bold mb-2">TƯ VẤN NHANH</span>
-                <h4 class="fw-bold text-dark">Bạn đang gặp triệu chứng nào ở đôi chân?</h4>
-                <p class="text-muted small mb-3">Chọn đúng tình trạng của bạn để hệ thống lọc ngay cấp độ áp lực y khoa (CCL) tương ứng:</p>
-                <div class="d-flex flex-wrap gap-2">
-                    <a asp-controller="Product" asp-action="Index" asp-route-compression="1" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                        <i class="bi bi-check-circle me-1"></i> Mỏi phù chân cuối ngày, đứng nhiều (CCL1)
-                    </a>
-                    <a asp-controller="Product" asp-action="Index" asp-route-compression="2" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                        <i class="bi bi-check-circle me-1"></i> Nổi gân xanh bắp chân, phù mắt cá (CCL2)
-                    </a>
-                    <a asp-controller="Product" asp-action="Index" asp-route-compression="3" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                        <i class="bi bi-check-circle me-1"></i> Sưng to kéo dài, huyết khối sâu (CCL3)
-                    </a>
-                    <a asp-controller="Product" asp-action="Index" asp-route-categoryId="4" class="btn btn-outline-success btn-sm rounded-pill px-3">
-                        <i class="bi bi-heart me-1"></i> Mẹ bầu bị chuột rút & nặng chân
-                    </a>
+        <!-- Box 1: Live Interactive Sizing Slider (cB) -->
+        <div class="col-lg-5">
+            <div class="glass-card p-4 h-100 border bg-white shadow-subtle position-relative overflow-hidden">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-info-subtle text-info fw-bold"><i class="bi bi-rulers me-1"></i>THƯỚC ĐO SIZE NHANH</span>
+                    <span id="liveSizeBadge" class="badge bg-primary fs-6 px-3 py-1 rounded-pill">Size M</span>
                 </div>
-            </div>
-            <div class="col-lg-4 text-center mt-3 mt-lg-0 border-start ps-lg-4">
-                <div class="fw-bold text-primary mb-2">Chưa rõ số đo bắp chân của mình?</div>
-                <button type="button" class="btn btn-primary w-100 fw-bold py-2 shadow-sm" onclick="openSizeModal()">
-                    <i class="bi bi-rulers me-2"></i> Bấm Tra Cứu Bảng Đo Size
+                <h5 class="fw-bold text-dark mb-1">Kéo thước đo cổ chân của bạn</h5>
+                <p class="text-muted small mb-3">Đo vòng nhỏ nhất phía trên mắt cá chân (vị trí cB):</p>
+
+                <!-- Slider Control -->
+                <div class="p-3 bg-light rounded-4 border mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted small">Chu vi vòng cổ chân (cB):</span>
+                        <strong id="liveAnkleDisplay" class="fs-4 text-primary fw-bold">23 cm</strong>
+                    </div>
+                    <input type="range" class="form-range" id="liveAnkleSlider" min="18" max="33" step="0.5" value="23" />
+                    <div class="d-flex justify-content-between text-muted small" style="font-size: 0.72rem;">
+                        <span>18cm (S)</span>
+                        <span>22cm (M)</span>
+                        <span>26cm (L)</span>
+                        <span>30cm+ (XL)</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-2 px-3 small rounded-3 mb-3 border-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-info-circle-fill fs-5 text-info"></i>
+                    <span id="liveSizeAdvice">Dành cho cổ chân trung bình (21 - 25 cm). Kích cỡ phổ biến nhất.</span>
+                </div>
+
+                <button type="button" class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-bold" onclick="openSizeModal()">
+                    <i class="bi bi-table me-1"></i> Xem bảng đối chiếu chi tiết đầy đủ
                 </button>
             </div>
         </div>
+
+        <!-- Box 2: Visual Symptom Triage Quiz -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100 border bg-white shadow-subtle">
+                <span class="badge bg-danger-subtle text-danger fw-bold mb-2"><i class="bi bi-heart-pulse me-1"></i>CHẨN ĐOÁN TRIỆU CHỨNG</span>
+                <h5 class="fw-bold text-dark mb-1">Bạn đang gặp cảm giác nào?</h5>
+                <p class="text-muted small mb-3">Chọn đúng tình trạng để lọc ngay cấp độ áp lực chuẩn:</p>
+
+                <div class="d-flex flex-column gap-2">
+                    <a asp-controller="Product" asp-action="Index" asp-route-compression="1" class="btn btn-outline-secondary btn-sm text-start p-2 rounded-3 d-flex align-items-center justify-content-between hover-lift">
+                        <span><i class="bi bi-check2-circle text-primary me-2"></i>Mỏi nặng chân, đứng nhiều</span>
+                        <span class="badge bg-primary-subtle text-primary">CCL1</span>
+                    </a>
+                    <a asp-controller="Product" asp-action="Index" asp-route-compression="2" class="btn btn-outline-secondary btn-sm text-start p-2 rounded-3 d-flex align-items-center justify-content-between hover-lift">
+                        <span><i class="bi bi-check2-circle text-purple me-2"></i>Nổi gân xanh ngoằn ngoèo</span>
+                        <span class="badge bg-purple-subtle text-purple" style="color: #7c3aed; background: #f3e8ff;">CCL2</span>
+                    </a>
+                    <a asp-controller="Product" asp-action="Index" asp-route-categoryId="4" class="btn btn-outline-secondary btn-sm text-start p-2 rounded-3 d-flex align-items-center justify-content-between hover-lift">
+                        <span><i class="bi bi-heart text-danger me-2"></i>Mẹ bầu chuột rút ban đêm</span>
+                        <span class="badge bg-danger-subtle text-danger">Bà bầu</span>
+                    </a>
+                    <a asp-controller="Product" asp-action="Index" asp-route-compression="3" class="btn btn-outline-secondary btn-sm text-start p-2 rounded-3 d-flex align-items-center justify-content-between hover-lift">
+                        <span><i class="bi bi-check2-circle text-danger me-2"></i>Sưng phù kéo dài, biến đổi da</span>
+                        <span class="badge bg-danger-subtle text-danger">CCL3</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Box 3: Flash Voucher 24H -->
+        <div class="col-lg-3">
+            <div class="glass-card p-4 h-100 text-white shadow-subtle position-relative overflow-hidden d-flex flex-column justify-content-between" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(255,255,255,0.15);">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-warning text-dark fw-bold">ƯU ĐÃI HÔM NAY</span>
+                        <i class="bi bi-lightning-charge-fill text-warning fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1">Mã Giảm 10% Y Tế</h5>
+                    <p class="text-white-50 small mb-3">Hỗ trợ bệnh nhân suy giãn tĩnh mạch toàn quốc.</p>
+                    
+                    <div class="p-2 bg-dark rounded-3 text-center border border-secondary mb-3">
+                        <span class="fw-bold fs-5 text-warning tracking-wider" style="letter-spacing: 0.1em;">VARICOSE10</span>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="button" class="btn btn-warning w-100 rounded-pill fw-bold text-dark btn-sm py-2" onclick="navigator.clipboard.writeText('VARICOSE10'); triggerConfetti(); showModernToast('Đã lưu mã voucher!', 'Mã VARICOSE10 đã được sao chép vào bộ nhớ tạm.', 'success');">
+                        <i class="bi bi-clipboard-check me-1"></i> Sao chép mã ngay
+                    </button>
+                    <div class="text-center text-white-50 small mt-2" style="font-size: 0.72rem;">Áp dụng cho mọi đơn từ 500k</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Categories Highlights -->
+    <!-- =========================================================================
+         3. CATEGORIES HIGHLIGHTS
+         ========================================================================= -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="fw-bold text-primary mb-1">Danh Mục Vớ Y Khoa</h3>
-            <p class="text-muted small mb-0">Các dòng vớ thiết kế theo chuẩn áp lực y tế giảm dần</p>
+            <h3 class="fw-bold text-primary mb-1">Danh Mục Vớ Y Khoa Chuyên Biệt</h3>
+            <p class="text-muted small mb-0">Lựa chọn kiểu dáng theo vị trí tĩnh mạch bị suy giãn</p>
         </div>
-        <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary btn-sm fw-semibold">
+        <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">
             Xem tất cả <i class="bi bi-arrow-right"></i>
         </a>
     </div>
@@ -114,9 +218,9 @@
         {
             <div class="col">
                 <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@c.Id" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm text-center p-3 category-card transition-hover">
-                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
-                            <i class="bi bi-heart-pulse text-primary fs-3"></i>
+                    <div class="card h-100 border-0 shadow-subtle text-center p-3 category-card glass-card-hover bg-white">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 64px; height: 64px; border: 1px solid #e2e8f0;">
+                            <img src="@(string.IsNullOrEmpty(c.ImageUrl) ? "/images/products/vo-goi-jobst-ccl2.svg" : c.ImageUrl)" alt="@c.Name" style="width: 40px; height: 40px; object-fit: contain;" />
                         </div>
                         <h6 class="fw-bold text-dark mb-1">@c.Name</h6>
                         <small class="text-muted" style="font-size: 0.75rem;">@c.Description</small>
@@ -126,15 +230,17 @@
         }
     </div>
 
-    <!-- Featured Products Section -->
+    <!-- =========================================================================
+         4. FEATURED PRODUCTS (WITH 3D TILT & PARABOLIC FLY-TO-CART)
+         ========================================================================= -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="fw-bold text-primary mb-1">Sản Phẩm Vớ Y Khoa Nổi Bật</h3>
-            <p class="text-muted small mb-0">Top vớ điều trị suy giãn tĩnh mạch bán chạy nhất đạt kiểm định y tế</p>
+            <h3 class="fw-bold text-primary mb-1">Top Vớ Y Khoa Khuyên Dùng</h3>
+            <p class="text-muted small mb-0">Các dòng vớ chuẩn áp lực RAL-GZ 387 được các bác sĩ chuyên khoa tin dùng</p>
         </div>
         <div class="d-flex gap-2">
-            <a asp-controller="Product" asp-action="Index" asp-route-compression="1" class="btn btn-sm btn-light border">CCL1</a>
-            <a asp-controller="Product" asp-action="Index" asp-route-compression="2" class="btn btn-sm btn-light border">CCL2</a>
+            <a asp-controller="Product" asp-action="Index" asp-route-compression="1" class="btn btn-sm btn-light border rounded-pill px-3">CCL1 (15-20)</a>
+            <a asp-controller="Product" asp-action="Index" asp-route-compression="2" class="btn btn-sm btn-light border rounded-pill px-3">CCL2 (20-30)</a>
         </div>
     </div>
 
@@ -142,37 +248,42 @@
         @foreach (var p in Model.Products)
         {
             <div class="col">
-                <div class="card h-100 shadow-sm border-0 product-card position-relative">
+                <div class="card h-100 product-card shadow-subtle position-relative d-flex flex-column">
                     <!-- Badges -->
                     <div class="position-absolute top-0 start-0 m-2 d-flex flex-column gap-1" style="z-index: 2;">
-                        <span class="badge bg-primary">@p.CompressionLevelText</span>
+                        <span class="badge badge-ccl @(p.CompressionLevel == 2 ? "badge-ccl2" : "badge-ccl1")">
+                            @p.CompressionLevelText
+                        </span>
                         @if (p.DiscountPrice.HasValue && p.DiscountPrice < p.Price)
                         {
-                            <span class="badge bg-danger">Giảm @(((p.Price - p.DiscountPrice.Value) / p.Price * 100).ToString("F0"))%</span>
+                            <span class="badge bg-danger rounded-pill" style="font-size: 0.7rem;">
+                                Giảm @(((p.Price - p.DiscountPrice.Value) / p.Price * 100).ToString("F0"))%
+                            </span>
                         }
                     </div>
 
-                    <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="text-center p-3 bg-white d-block">
+                    <!-- Image with subtle hover scale -->
+                    <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="card-img-wrapper text-center d-block">
                         <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://placehold.co/300x300?text=No+Image" : p.ImageUrl)" 
                              class="card-img-top" alt="@p.Name" style="height: 200px; object-fit: contain;">
                     </a>
 
-                    <div class="card-body d-flex flex-column pt-1">
+                    <div class="card-body d-flex flex-column pt-2 p-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="badge bg-light text-secondary border" style="font-size: 0.7rem;">@(p.CategoryName ?? "Y khoa")</span>
-                            <small class="text-muted fw-bold">@(p.Origin ?? "Mỹ/Đức")</small>
+                            <small class="text-muted fw-bold">@(p.Origin ?? "Mỹ / Đức")</small>
                         </div>
-                        <h6 class="card-title fw-bold">
-                            <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="text-decoration-none text-dark">
+                        <h6 class="card-title fw-bold mb-1">
+                            <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="text-decoration-none text-dark hover-primary">
                                 @p.Name
                             </a>
                         </h6>
-                        <p class="small text-muted mb-3 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        <p class="small text-muted mb-3 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 0.82rem;">
                             @p.ShortDescription
                         </p>
 
                         <div class="mt-auto">
-                            <div class="d-flex align-items-baseline gap-2 mb-2">
+                            <div class="d-flex align-items-baseline gap-2 mb-3">
                                 <span class="text-danger fw-bold fs-5">
                                     @((p.DiscountPrice ?? p.Price).ToString("N0")) ₫
                                 </span>
@@ -184,11 +295,11 @@
                                 }
                             </div>
                             <div class="d-flex gap-2">
-                                <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm flex-grow-1">
+                                <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm rounded-pill flex-grow-1 fw-bold">
                                     Chi tiết
                                 </a>
-                                <button type="button" class="btn btn-warning btn-sm text-dark fw-bold px-3" onclick="addToCartLive(@p.Id, 'M', 'Màu Da (Beige)', 1)">
-                                    <i class="bi bi-cart-plus"></i>
+                                <button type="button" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="addToCartLive(@p.Id, 'M', 'Màu Da (Beige)', 1, this.closest('.product-card').querySelector('img'))" title="Thêm nhanh vào giỏ">
+                                    <i class="bi bi-cart-plus fs-6"></i>
                                 </button>
                             </div>
                         </div>
@@ -198,29 +309,36 @@
         }
     </div>
 
-    <!-- Medical Education Info Section -->
-    <div class="card border-0 bg-white shadow-sm rounded-4 p-4 p-md-5 mb-5">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <span class="badge bg-primary-subtle text-primary fw-bold mb-2">CƠ CHẾ Y HỌC</span>
-                <h3 class="fw-bold text-dark">Tại sao Vớ Y Khoa có thể điều trị Suy Giãn Tĩnh Mạch?</h3>
-                <p class="text-secondary">
-                    Khác với tất vớ thông thường, <strong>vớ y khoa giãn tĩnh mạch (Graduated Compression Stockings)</strong> áp dụng nguyên lý tạo lực nén giảm dần chính xác theo tiêu chuẩn y tế quốc tế:
-                </p>
-                <ul class="list-unstyled text-secondary">
-                    <li class="mb-2"><i class="bi bi-check2-circle text-primary me-2"></i><strong>100% áp lực tại cổ chân:</strong> Là nơi áp lực thủy tĩnh cao nhất, giúp khép kín các van tĩnh mạch bị giãn.</li>
-                    <li class="mb-2"><i class="bi bi-check2-circle text-primary me-2"></i><strong>70% áp lực tại bắp chân:</strong> Thúc đẩy lưu lượng dòng máu tĩnh mạch chảy ngược về tim.</li>
-                    <li class="mb-2"><i class="bi bi-check2-circle text-primary me-2"></i><strong>40% áp lực tại đùi:</strong> Hạn chế ứ trệ máu, ngăn chặn nguy cơ hình thành cục máu đông (DVT).</li>
-                </ul>
+    <!-- =========================================================================
+         5. 14-DAY VENOUS RECOVERY TIMELINE
+         ========================================================================= -->
+    <div class="glass-card p-4 p-md-5 mb-5 bg-white border shadow-subtle">
+        <div class="text-center max-w-2xl mx-auto mb-5">
+            <span class="badge bg-primary-subtle text-primary fw-bold mb-2 px-3 py-1 rounded-pill">LỘ TRÌNH ĐIỀU TRỊ CHUẨN</span>
+            <h3 class="fw-bold text-dark">Tiến Trình Phục Hồi Van Tĩnh Mạch Sau 14 Ngày</h3>
+            <p class="text-muted small">Kiên trì mang vớ y khoa mỗi buổi sáng khi thức dậy mang lại kết quả rõ rệt:</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="p-3 rounded-4 bg-light border h-100 text-center">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3 fw-bold" style="width: 48px; height: 48px;">1-3</div>
+                    <h6 class="fw-bold text-dark">Ngày 1 - 3: Giảm Tức Thì</h6>
+                    <p class="text-muted small mb-0">Cảm giác nặng mỏi và tê bì giảm rõ rệt ngay từ ngày đầu tiên mang vớ. Các van tĩnh mạch được khép kín, ngăn chặn dòng máu ứ trệ.</p>
+                </div>
             </div>
-            <div class="col-lg-6 text-center">
-                <div class="bg-light p-4 rounded-4 border">
-                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-speedometer me-2"></i>Phân Loại Cấp Độ Áp Lực CCL</h5>
-                    <div class="text-start small">
-                        <div class="p-2 border-bottom"><strong>CCL1 (15 - 21 mmHg):</strong> Phòng ngừa, cảm giác mỏi chân, phụ nữ có thai, người đứng nhiều.</div>
-                        <div class="p-2 border-bottom"><strong>CCL2 (23 - 32 mmHg):</strong> Điều trị giãn tĩnh mạch rõ rệt, sưng phù chân, sau can thiệp xơ hóa.</div>
-                        <div class="p-2"><strong>CCL3 (34 - 46 mmHg):</strong> Suy tĩnh mạch nặng, loạn dưỡng mô da hoặc loét chân đã lành.</div>
-                    </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-4 bg-light border h-100 text-center">
+                    <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center mx-auto mb-3 fw-bold" style="width: 48px; height: 48px;">4-7</div>
+                    <h6 class="fw-bold text-dark">Ngày 4 - 7: Tiêu Phù Mắt Cá</h6>
+                    <p class="text-muted small mb-0">Hiện tượng sưng phù mắt cá chân vào buổi chiều tan biến hoàn toàn. Chân nhẹ nhàng, dễ chịu khi vận động hoặc đứng nhiều.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded-4 bg-light border h-100 text-center">
+                    <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-3 fw-bold" style="width: 48px; height: 48px;">8-14</div>
+                    <h6 class="fw-bold text-dark">Ngày 8 - 14: Săn Chắc Tĩnh Mạch</h6>
+                    <p class="text-muted small mb-0">Các búi gân xanh co nhỏ lại, thành mạch phục hồi độ đàn hồi. Giấc ngủ ban đêm sâu hơn, không còn bị chuột rút đánh thức.</p>
                 </div>
             </div>
         </div>

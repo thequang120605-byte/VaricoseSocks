@@ -5,99 +5,136 @@
 
 <div class="container py-4">
     <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index">Giỏ hàng</a></li>
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index" class="text-decoration-none">Giỏ hàng</a></li>
             <li class="breadcrumb-item active" aria-current="page">Thanh toán</li>
         </ol>
     </nav>
 
-    <h3 class="fw-bold text-primary mb-4">
-        <i class="bi bi-shield-lock me-2"></i>Thông Tin Giao Hàng & Thanh Toán
-    </h3>
+    <!-- 2-Step Progress Stepper -->
+    <div class="d-flex justify-content-center mb-5">
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px;">1</span>
+                <span class="fw-bold text-primary">Thông Tin Giao Hàng</span>
+            </div>
+            <div class="border-top border-2 border-primary" style="width: 60px;"></div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px;">2</span>
+                <span class="fw-bold text-dark">Thanh Toán & Xác Nhận</span>
+            </div>
+        </div>
+    </div>
 
     <form asp-controller="Checkout" asp-action="Process" method="post">
         @Html.AntiForgeryToken()
         <div class="row g-4">
             <!-- Left: Customer Form & Payment Method -->
             <div class="col-lg-7">
-                <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+                <div class="glass-card bg-white p-4 mb-4 border shadow-subtle">
                     <h5 class="fw-bold text-dark mb-3">
-                        <i class="bi bi-person-circle text-primary me-2"></i>1. Thông tin người nhận hàng
+                        <i class="bi bi-person-circle text-primary me-2"></i>1. Thông tin người nhận vớ y khoa
                     </h5>
 
                     <div class="row g-3">
                         <div class="col-md-12">
-                            <label asp-for="CustomerName" class="form-label fw-semibold"></label>
-                            <input asp-for="CustomerName" class="form-control" placeholder="Nguyễn Văn A" required />
+                            <label asp-for="CustomerName" class="form-label fw-semibold small">Họ và tên người nhận:</label>
+                            <input asp-for="CustomerName" class="form-control rounded-3" placeholder="Nguyễn Văn A" required />
                             <span asp-validation-for="CustomerName" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="CustomerPhone" class="form-label fw-semibold"></label>
-                            <input asp-for="CustomerPhone" class="form-control" placeholder="0901234567" required />
+                            <label asp-for="CustomerPhone" class="form-label fw-semibold small">Số điện thoại liên hệ:</label>
+                            <input asp-for="CustomerPhone" class="form-control rounded-3" placeholder="0901234567" required />
                             <span asp-validation-for="CustomerPhone" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="CustomerEmail" class="form-label fw-semibold"></label>
-                            <input asp-for="CustomerEmail" class="form-control" placeholder="email@gmail.com" required />
+                            <label asp-for="CustomerEmail" class="form-label fw-semibold small">Email nhận thông báo:</label>
+                            <input asp-for="CustomerEmail" class="form-control rounded-3" placeholder="email@gmail.com" required />
                             <span asp-validation-for="CustomerEmail" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-12">
-                            <label asp-for="ShippingAddress" class="form-label fw-semibold"></label>
-                            <input asp-for="ShippingAddress" class="form-control" placeholder="Số 123, đường Nguyễn Huệ" required />
+                            <label asp-for="ShippingAddress" class="form-label fw-semibold small">Địa chỉ nhận hàng chi tiết:</label>
+                            <input asp-for="ShippingAddress" class="form-control rounded-3" placeholder="Số 123, đường Nguyễn Huệ" required />
                             <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="City" class="form-label fw-semibold"></label>
-                            <input asp-for="City" class="form-control" placeholder="TP. Hồ Chí Minh" />
+                            <label asp-for="City" class="form-label fw-semibold small">Tỉnh / Thành phố:</label>
+                            <input asp-for="City" class="form-control rounded-3" placeholder="TP. Hồ Chí Minh" />
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="District" class="form-label fw-semibold"></label>
-                            <input asp-for="District" class="form-control" placeholder="Quận 1" />
+                            <label asp-for="District" class="form-label fw-semibold small">Quận / Huyện:</label>
+                            <input asp-for="District" class="form-control rounded-3" placeholder="Quận 1" />
                         </div>
 
                         <div class="col-md-12">
-                            <label asp-for="Note" class="form-label fw-semibold"></label>
-                            <textarea asp-for="Note" class="form-control" rows="2" placeholder="Ghi chú thêm về thời gian nhận hàng hoặc hướng dẫn đường..."></textarea>
+                            <label asp-for="Note" class="form-label fw-semibold small">Ghi chú giao hàng:</label>
+                            <textarea asp-for="Note" class="form-control rounded-3" rows="2" placeholder="Ghi chú thêm về giờ giao, mang thử size..."></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Payment Method Card -->
-                <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <!-- Payment Method Card with VietQR laser radar -->
+                <div class="glass-card bg-white p-4 border shadow-subtle">
                     <h5 class="fw-bold text-dark mb-3">
                         <i class="bi bi-wallet2 text-primary me-2"></i>2. Phương thức thanh toán
                     </h5>
 
-                    <div class="d-flex flex-column gap-3">
-                        <label class="form-check p-3 border rounded-3 bg-light d-flex align-items-center cursor-pointer">
-                            <input class="form-check-input me-3" type="radio" asp-for="PaymentMethod" value="1" checked />
+                    <div class="d-flex flex-column gap-3 mb-3">
+                        <label class="form-check p-3 border rounded-4 bg-light d-flex align-items-center cursor-pointer transition-hover">
+                            <input class="form-check-input me-3" type="radio" asp-for="PaymentMethod" value="1" checked onchange="toggleQrCard(false)" />
                             <div class="flex-grow-1">
                                 <strong class="d-block text-dark"><i class="bi bi-cash-stack text-success me-2"></i>Thanh toán khi nhận hàng (COD)</strong>
-                                <small class="text-muted">Nhận bưu kiện, kiểm tra đúng size và loại vớ y khoa rồi mới thanh toán tiền mặt cho nhân viên giao hàng.</small>
+                                <small class="text-muted">Nhận bưu kiện, kiểm tra đúng size và loại vớ y khoa rồi mới thanh toán tiền mặt.</small>
                             </div>
                         </label>
 
-                        <label class="form-check p-3 border rounded-3 bg-light d-flex align-items-center cursor-pointer">
-                            <input class="form-check-input me-3" type="radio" asp-for="PaymentMethod" value="2" />
+                        <label class="form-check p-3 border rounded-4 bg-light d-flex align-items-center cursor-pointer transition-hover">
+                            <input class="form-check-input me-3" type="radio" asp-for="PaymentMethod" value="2" onchange="toggleQrCard(true)" />
                             <div class="flex-grow-1">
-                                <strong class="d-block text-dark"><i class="bi bi-qr-code text-primary me-2"></i>Chuyển khoản VietQR (Ngân hàng)</strong>
-                                <small class="text-muted">Quét mã QR tự động điền số tiền và nội dung đơn hàng qua mọi app ngân hàng.</small>
+                                <strong class="d-block text-dark"><i class="bi bi-qr-code text-primary me-2"></i>Chuyển khoản VietQR Siêu Tốc (Khuyên dùng)</strong>
+                                <small class="text-muted">Quét mã QR tự động điền số tiền và nội dung, xác nhận tự động 24/7 qua mọi App Ngân hàng.</small>
                             </div>
                         </label>
+                    </div>
+
+                    <!-- VietQR Dynamic Card (Shown when VietQR chosen) -->
+                    <div id="vietQrSection" class="p-3 bg-light rounded-4 border d-none">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-5 text-center">
+                                <div class="qr-card-wrapper d-inline-block">
+                                    <div class="radar-laser"></div>
+                                    <img src="https://api.vietqr.io/image/970422-0987654321-compact.jpg?amount=@Model.Cart.TotalAmount&addInfo=VS2026&accountName=VARICOSE%20SOCKS" 
+                                         alt="VietQR Mã Thanh Toán" style="width: 170px; height: 170px; object-fit: contain;" />
+                                </div>
+                                <div class="mt-2 text-danger small fw-bold">
+                                    <i class="bi bi-clock-history me-1"></i>Hết hạn sau: <span id="qrTimer">14:59</span>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <h6 class="fw-bold text-primary mb-2">Thông tin tài khoản y tế:</h6>
+                                <div class="small text-muted mb-1">Ngân hàng: <strong>MBBank (Quân Đội)</strong></div>
+                                <div class="small text-muted mb-1">Số tài khoản: <strong class="text-dark">0987.654.321</strong></div>
+                                <div class="small text-muted mb-1">Chủ tài khoản: <strong>VARICOSE SOCKS VIETNAM</strong></div>
+                                <div class="small text-muted mb-2">Số tiền: <strong class="text-danger fs-6">@Model.Cart.TotalAmount.ToString("N0") ₫</strong></div>
+                                <div class="badge bg-success-subtle text-success p-2 small">
+                                    <i class="bi bi-shield-check me-1"></i> Hệ thống tự động xác nhận sau 3 giây quét mã
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Right: Order Summary -->
             <div class="col-lg-5">
-                <div class="card border-0 shadow-sm rounded-4 bg-white p-4 sticky-top" style="top: 80px;">
-                    <h5 class="fw-bold text-dark mb-3">Đơn hàng của bạn (@Model.Cart.TotalQuantity)</h5>
+                <div class="glass-card bg-white p-4 sticky-top border shadow-subtle" style="top: 90px;">
+                    <h5 class="fw-bold text-dark mb-3">Đơn hàng của bạn (@Model.Cart.TotalQuantity đôi vớ)</h5>
 
                     <!-- Items list -->
                     <div class="d-flex flex-column gap-3 mb-3 overflow-y-auto" style="max-height: 280px;">
@@ -106,7 +143,7 @@
                             <div class="d-flex align-items-center justify-content-between pb-2 border-bottom">
                                 <div class="d-flex align-items-center">
                                     <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "https://placehold.co/100x100?text=Vớ" : item.ProductImageUrl)" 
-                                         class="rounded me-2 border" style="width: 50px; height: 50px; object-fit: contain;" />
+                                         class="rounded-3 me-2 border p-1 bg-light" style="width: 48px; height: 48px; object-fit: contain;" />
                                     <div>
                                         <div class="fw-bold small text-dark text-truncate" style="max-width: 170px;">@item.ProductName</div>
                                         <small class="text-muted">Size: @item.Size | SL: @item.Quantity</small>
@@ -143,17 +180,45 @@
                         <span class="fs-4 fw-bold text-danger">@Model.Cart.TotalAmount.ToString("N0") ₫</span>
                     </div>
 
-                    <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold text-dark shadow-sm">
-                        <i class="bi bi-check-circle-fill me-2"></i> Xác Nhận Đặt Hàng
+                    <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold text-dark rounded-pill shadow-glow-warning py-3">
+                        <i class="bi bi-check-circle-fill me-2"></i> Xác Nhận Đặt Hàng Ngay
                     </button>
 
-                    <div class="text-center mt-3">
-                        <small class="text-muted">
-                            <i class="bi bi-shield-check text-success me-1"></i> Đổi size miễn phí trong 7 ngày nếu không vừa chân
-                        </small>
+                    <div class="text-center mt-3 small text-muted">
+                        <i class="bi bi-shield-check text-success me-1"></i> Đổi size miễn phí trong 7 ngày nếu không vừa chân
                     </div>
                 </div>
             </div>
         </div>
     </form>
 </div>
+
+@section Scripts {
+<script>
+    function toggleQrCard(show) {
+        const qrEl = document.getElementById('vietQrSection');
+        if (qrEl) {
+            if (show) {
+                qrEl.classList.remove('d-none');
+                startQrCountdown();
+            } else {
+                qrEl.classList.add('d-none');
+            }
+        }
+    }
+
+    function startQrCountdown() {
+        let sec = 15 * 60;
+        const timerEl = document.getElementById('qrTimer');
+        if (!timerEl) return;
+
+        const interval = setInterval(() => {
+            sec--;
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            timerEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+            if (sec <= 0) clearInterval(interval);
+        }, 1000);
+    }
+</script>
+}

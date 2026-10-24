@@ -18,6 +18,7 @@ public class ProductRepository : IProductRepository
     public async Task<IEnumerable<Product>> GetAllAsync(int? categoryId = null, string? searchTerm = null, CompressionLevel? compression = null, SockStyle? style = null)
     {
         var query = _context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Variants)
             .AsQueryable();
@@ -51,6 +52,7 @@ public class ProductRepository : IProductRepository
     public async Task<Product?> GetByIdAsync(int id)
     {
         return await _context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Variants)
             .Include(p => p.Images)
@@ -60,6 +62,7 @@ public class ProductRepository : IProductRepository
     public async Task<Product?> GetBySlugAsync(string slug)
     {
         return await _context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Variants)
             .Include(p => p.Images)

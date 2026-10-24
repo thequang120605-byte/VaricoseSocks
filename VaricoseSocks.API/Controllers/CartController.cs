@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using VaricoseSocks.Application.DTOs;
 using VaricoseSocks.Application.Interfaces;
@@ -17,9 +18,21 @@ public class CartController : ControllerBase
         _productRepo = productRepo;
     }
 
+    private int? GetCurrentUserId()
+    {
+        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(idClaim, out var id) ? id : null;
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetCart([FromQuery] int? userId, [FromQuery] string? sessionId)
     {
+        var currentUserId = GetCurrentUserId();
+        if (currentUserId.HasValue)
+        {
+            userId = currentUserId.Value;
+        }
+
         if (!userId.HasValue && string.IsNullOrWhiteSpace(sessionId))
         {
             return BadRequest(new { message = "Cần cung cấp userId hoặc sessionId." });
@@ -57,6 +70,17 @@ public class CartController : ControllerBase
     [HttpPost("items")]
     public async Task<IActionResult> AddItem([FromBody] AddToCartDto dto)
     {
+        if (dto.Quantity <= 0)
+        {
+            return BadRequest(new { message = "Số lượng sản phẩm thêm vào giỏ phải lớn hơn 0." });
+        }
+
+        var currentUserId = GetCurrentUserId();
+        if (currentUserId.HasValue)
+        {
+            dto.UserId = currentUserId.Value;
+        }
+
         var product = await _productRepo.GetByIdAsync(dto.ProductId);
         if (product == null) return NotFound(new { message = "Sản phẩm không tồn tại." });
 
@@ -75,6 +99,11 @@ public class CartController : ControllerBase
     [HttpPut("items/{id:int}")]
     public async Task<IActionResult> UpdateItemQuantity(int id, [FromBody] UpdateCartItemDto dto)
     {
+        if (dto.Quantity < 0)
+        {
+            return BadRequest(new { message = "Số lượng sản phẩm không thể là số âm." });
+        }
+
         var success = await _cartRepo.UpdateItemQuantityAsync(id, dto.Quantity);
         if (!success) return NotFound(new { message = "Không tìm thấy mặt hàng trong giỏ." });
 

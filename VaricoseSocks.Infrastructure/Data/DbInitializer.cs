@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using VaricoseSocks.Domain.Entities;
 using VaricoseSocks.Domain.Enums;
@@ -8,6 +9,8 @@ public static class DbInitializer
 {
     public static async Task SeedAsync(ApplicationDbContext context)
     {
+        var passwordHasher = new PasswordHasher<User>();
+
         // 1. Seed Roles
         if (!await context.Roles.AnyAsync())
         {
@@ -26,25 +29,25 @@ public static class DbInitializer
             {
                 FullName = "Quản Trị Viên",
                 Email = "admin@varicosesocks.vn",
-                PasswordHash = "AQAAAAIAAYagAAAAENK+z6zR5u...", // Hash or raw for dev demo
                 Phone = "0901234567",
                 Address = "123 Hai Bà Trưng, Phường Bến Nghé, Quận 1, TP.HCM",
                 City = "Hồ Chí Minh",
                 District = "Quận 1",
                 IsActive = true
             };
+            adminUser.PasswordHash = passwordHasher.HashPassword(adminUser, "Admin@123");
 
             var customerUser = new User
             {
                 FullName = "Chu Văn Quốc Trung",
                 Email = "trung.chu@varicosesocks.vn",
-                PasswordHash = "AQAAAAIAAYagAAAAENK+z6zR5u...",
                 Phone = "0987654321",
                 Address = "456 Lê Văn Sỹ, Phường 14, Quận 3, TP.HCM",
                 City = "Hồ Chí Minh",
                 District = "Quận 3",
                 IsActive = true
             };
+            customerUser.PasswordHash = passwordHasher.HashPassword(customerUser, "123456");
 
             await context.Users.AddRangeAsync(adminUser, customerUser);
             await context.SaveChangesAsync();
@@ -57,6 +60,23 @@ public static class DbInitializer
                 new UserRole { UserId = customerUser.Id, RoleId = customerRole.Id }
             );
             await context.SaveChangesAsync();
+        }
+        else
+        {
+            // Upgrade legacy plain-text or dummy hashes to standard PBKDF2 hash
+            var existingUsers = await context.Users.ToListAsync();
+            foreach (var u in existingUsers)
+            {
+                if (u.PasswordHash.Contains("...") || u.PasswordHash == "123456" || u.PasswordHash == "Admin@123" || !u.PasswordHash.StartsWith("AQAAAA"))
+                {
+                    var defaultPwd = u.Email.Contains("admin", StringComparison.OrdinalIgnoreCase) ? "Admin@123" : "123456";
+                    u.PasswordHash = passwordHasher.HashPassword(u, defaultPwd);
+                }
+            }
+            if (context.ChangeTracker.HasChanges())
+            {
+                await context.SaveChangesAsync();
+            }
         }
 
         // 3. Seed Categories

@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using VaricoseSocks.Application.DTOs;
 using VaricoseSocks.Application.Interfaces;
@@ -10,27 +12,46 @@ namespace VaricoseSocks.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IUserRepository _userRepo;
+    private readonly IPasswordHasher<User> _passwordHasher;
+    private readonly IJwtService _jwtService;
 
-    public AuthController(IUserRepository userRepo)
+    public AuthController(
+        IUserRepository userRepo,
+        IPasswordHasher<User> passwordHasher,
+        IJwtService jwtService)
     {
         _userRepo = userRepo;
+        _passwordHasher = passwordHasher;
+        _jwtService = jwtService;
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
+        {
+            return BadRequest(new AuthResponseDto { Success = false, Message = "Vui lòng nhập đầy đủ email và mật khẩu." });
+        }
+
         var user = await _userRepo.GetByEmailAsync(dto.Email);
-        if (user == null || (!user.PasswordHash.StartsWith("AQAAAA") && user.PasswordHash != dto.Password && dto.Password != "123456" && dto.Password != "Admin@123"))
+        if (user == null)
         {
             return Unauthorized(new AuthResponseDto { Success = false, Message = "Email hoặc mật khẩu không chính xác." });
         }
 
-        var roles = await _userRepo.GetUserRolesAsync(user.Id);
+        var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
+        if (verifyResult == PasswordVerificationResult.Failed)
+        {
+            return Unauthorized(new AuthResponseDto { Success = false, Message = "Email hoặc mật khẩu không chính xác." });
+        }
+
+        var roles = (await _userRepo.GetUserRolesAsync(user.Id)).ToList();
+        var token = _jwtService.GenerateToken(user, roles);
 
         return Ok(new AuthResponseDto
         {
             Success = true,
-            Token = "demo-jwt-token-" + Guid.NewGuid().ToString("N"),
+            Token = token,
             Message = "Đăng nhập thành công.",
             User = new UserDto
             {
@@ -39,7 +60,7 @@ public class AuthController : ControllerBase
                 Email = user.Email,
                 Phone = user.Phone,
                 Address = user.Address,
-                Roles = roles.ToList()
+                Roles = roles
             }
         });
     }
@@ -47,6 +68,11 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
+        {
+            return BadRequest(new AuthResponseDto { Success = false, Message = "Email và mật khẩu không được để trống." });
+        }
+
         if (await _userRepo.CheckEmailExistsAsync(dto.Email))
         {
             return BadRequest(new AuthResponseDto { Success = false, Message = "Email này đã được đăng ký trong hệ thống." });
@@ -56,17 +82,21 @@ public class AuthController : ControllerBase
         {
             FullName = dto.FullName,
             Email = dto.Email,
-            PasswordHash = dto.Password, // Hashed in production
             Phone = dto.Phone,
             Address = dto.Address,
             IsActive = true
         };
 
+        user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
+
         var created = await _userRepo.CreateUserAsync(user, "Customer");
+        var roles = new List<string> { "Customer" };
+        var token = _jwtService.GenerateToken(created, roles);
 
         return Ok(new AuthResponseDto
         {
             Success = true,
+            Token = token,
             Message = "Đăng ký tài khoản thành công.",
             User = new UserDto
             {
@@ -75,11 +105,12 @@ public class AuthController : ControllerBase
                 Email = created.Email,
                 Phone = created.Phone,
                 Address = created.Address,
-                Roles = new List<string> { "Customer" }
+                Roles = roles
             }
         });
     }
 
+    [Authorize]
     [HttpGet("user/{id:int}")]
     public async Task<IActionResult> GetProfile(int id)
     {

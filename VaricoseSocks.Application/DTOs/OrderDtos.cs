@@ -90,6 +90,7 @@ public class CreateOrderDto
     public string? Ward { get; set; }
     public string? Note { get; set; }
     public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.COD;
+    public string? VoucherCode { get; set; }
     public List<CreateOrderItemDto> Items { get; set; } = new();
 }
 

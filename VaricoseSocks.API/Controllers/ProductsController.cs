@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VaricoseSocks.Application.DTOs;
 using VaricoseSocks.Application.Interfaces;
@@ -43,6 +44,7 @@ public class ProductsController : ControllerBase
         return Ok(MapToDto(p));
     }
 
+    [Authorize(Roles = "Admin,Staff")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateProductDto dto)
     {
@@ -71,6 +73,7 @@ public class ProductsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, MapToDto(created));
     }
 
+    [Authorize(Roles = "Admin,Staff")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] CreateProductDto dto)
     {
@@ -98,6 +101,7 @@ public class ProductsController : ControllerBase
         return Ok(MapToDto(existing));
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

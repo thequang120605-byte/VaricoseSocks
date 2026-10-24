@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using VaricoseSocks.Web.Models;
@@ -7,19 +8,32 @@ namespace VaricoseSocks.Web.Services;
 public class ApiService : IApiService
 {
     private readonly HttpClient _httpClient;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly JsonSerializerOptions _jsonOptions;
-    private static readonly List<OrderDetailViewModel> _fallbackOrders = new();
-    private static readonly CartViewModel _fallbackCart = new();
     private static List<CategoryViewModel>? _cachedCategories;
     private static List<ProductViewModel>? _cachedProducts;
 
-    public ApiService(HttpClient httpClient, IConfiguration configuration)
+    public ApiService(HttpClient httpClient, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
     {
         _httpClient = httpClient;
+        _httpContextAccessor = httpContextAccessor;
         var baseUrl = configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5046/api";
         _httpClient.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
-        _httpClient.Timeout = TimeSpan.FromMilliseconds(400); // 400ms max timeout để trang web luôn phản hồi tức thì
+        _httpClient.Timeout = TimeSpan.FromSeconds(10);
         _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+    }
+
+    private void SetAuthHeader()
+    {
+        var token = _httpContextAccessor?.HttpContext?.User.FindFirst("JwtToken")?.Value;
+        if (!string.IsNullOrEmpty(token))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+        else
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+        }
     }
 
     public async Task<List<CategoryViewModel>> GetCategoriesAsync()
@@ -202,12 +216,12 @@ public class ApiService : IApiService
             {
                 var stream = await response.Content.ReadAsStreamAsync();
                 var cart = await JsonSerializer.DeserializeAsync<CartViewModel>(stream, _jsonOptions);
-                if (cart != null && cart.Items.Any()) return cart;
+                if (cart != null) return cart;
             }
         }
         catch { }
 
-        return _fallbackCart;
+        return new CartViewModel();
     }
 
     public async Task<bool> AddToCartAsync(int productId, int? variantId, string size, string color, int quantity, int? userId, string? sessionId)
@@ -226,36 +240,12 @@ public class ApiService : IApiService
             };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("cart/items", content);
-            if (response.IsSuccessStatusCode) return true;
+            return response.IsSuccessStatusCode;
         }
-        catch { }
-
-        // Local fallback cart update (instantaneous response)
-        var products = await GetProductsAsync();
-        var prod = products.FirstOrDefault(p => p.Id == productId);
-        if (prod != null)
+        catch
         {
-            var existing = _fallbackCart.Items.FirstOrDefault(i => i.ProductId == productId && i.Size == size && i.Color == color);
-            if (existing != null)
-            {
-                existing.Quantity += quantity;
-            }
-            else
-            {
-                _fallbackCart.Items.Add(new CartItemViewModel
-                {
-                    Id = _fallbackCart.Items.Count + 1,
-                    ProductId = prod.Id,
-                    ProductName = prod.Name,
-                    ProductImageUrl = prod.ImageUrl,
-                    Size = size,
-                    Color = color,
-                    Quantity = quantity,
-                    UnitPrice = prod.DiscountPrice ?? prod.Price
-                });
-            }
+            return false;
         }
-        return true;
     }
 
     public async Task<bool> UpdateCartItemQuantityAsync(int cartItemId, int quantity)
@@ -265,17 +255,12 @@ public class ApiService : IApiService
             var payload = new { cartItemId, quantity };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PutAsync($"cart/items/{cartItemId}", content);
-            if (response.IsSuccessStatusCode) return true;
+            return response.IsSuccessStatusCode;
         }
-        catch { }
-
-        var item = _fallbackCart.Items.FirstOrDefault(i => i.Id == cartItemId);
-        if (item != null)
+        catch
         {
-            if (quantity <= 0) _fallbackCart.Items.Remove(item);
-            else item.Quantity = quantity;
+            return false;
         }
-        return true;
     }
 
     public async Task<bool> RemoveCartItemAsync(int cartItemId)
@@ -283,13 +268,12 @@ public class ApiService : IApiService
         try
         {
             var response = await _httpClient.DeleteAsync($"cart/items/{cartItemId}");
-            if (response.IsSuccessStatusCode) return true;
+            return response.IsSuccessStatusCode;
         }
-        catch { }
-
-        var item = _fallbackCart.Items.FirstOrDefault(i => i.Id == cartItemId);
-        if (item != null) _fallbackCart.Items.Remove(item);
-        return true;
+        catch
+        {
+            return false;
+        }
     }
 
     public async Task<OrderDetailViewModel?> CreateOrderAsync(CheckoutViewModel model, string? sessionId, int? userId)
@@ -323,53 +307,12 @@ public class ApiService : IApiService
             {
                 var stream = await response.Content.ReadAsStreamAsync();
                 var created = await JsonSerializer.DeserializeAsync<OrderDetailViewModel>(stream, _jsonOptions);
-                if (created != null)
-                {
-                    _fallbackCart.Items.Clear();
-                    return created;
-                }
+                return created;
             }
         }
         catch { }
 
-        // Local fallback order
-        var orderCode = "VS-" + DateTime.Now.ToString("yyyyMMdd") + "-" + new Random().Next(1000, 9999);
-        var order = new OrderDetailViewModel
-        {
-            Id = _fallbackOrders.Count + 1,
-            OrderCode = orderCode,
-            CustomerName = model.CustomerName,
-            CustomerPhone = model.CustomerPhone,
-            CustomerEmail = model.CustomerEmail,
-            ShippingAddress = model.ShippingAddress,
-            City = model.City,
-            District = model.District,
-            Note = model.Note,
-            PaymentMethodText = model.PaymentMethod == 2 ? "Chuyển khoản VietQR" : "COD (Thanh toán khi nhận hàng)",
-            PaymentStatusText = "Chờ thanh toán",
-            OrderStatusText = "Chờ xác nhận",
-            OrderStatus = 1,
-            SubTotal = model.Cart.SubTotal,
-            ShippingFee = model.Cart.ShippingFee,
-            TotalAmount = model.Cart.TotalAmount,
-            CreatedAt = DateTime.Now,
-            Items = model.Cart.Items.Select(i => new OrderItemViewModel
-            {
-                ProductId = i.ProductId,
-                ProductName = i.ProductName,
-                ProductImageUrl = i.ProductImageUrl,
-                Size = i.Size,
-                Color = i.Color,
-                CompressionText = "CCL1 (15-21 mmHg)",
-                UnitPrice = i.UnitPrice,
-                Quantity = i.Quantity,
-                TotalPrice = i.TotalPrice
-            }).ToList()
-        };
-
-        _fallbackOrders.Add(order);
-        _fallbackCart.Items.Clear();
-        return order;
+        return null;
     }
 
     public async Task<OrderDetailViewModel?> GetOrderByCodeAsync(string orderCode)
@@ -385,57 +328,42 @@ public class ApiService : IApiService
         }
         catch { }
 
-        return _fallbackOrders.FirstOrDefault(o => o.OrderCode.Equals(orderCode, StringComparison.OrdinalIgnoreCase))
-            ?? GetFallbackSeedOrders().FirstOrDefault(o => o.OrderCode.Equals(orderCode, StringComparison.OrdinalIgnoreCase));
+        return null;
     }
 
     public async Task<List<OrderDetailViewModel>> GetAllOrdersAsync(int? status = null)
     {
         try
         {
+            SetAuthHeader();
             var url = "orders" + (status.HasValue ? $"?status={status.Value}" : "");
             var response = await _httpClient.GetAsync(url);
             if (response.IsSuccessStatusCode)
             {
                 var stream = await response.Content.ReadAsStreamAsync();
                 var data = await JsonSerializer.DeserializeAsync<List<OrderDetailViewModel>>(stream, _jsonOptions);
-                if (data != null && data.Any()) return data;
+                if (data != null) return data;
             }
         }
         catch { }
 
-        var list = new List<OrderDetailViewModel>(_fallbackOrders);
-        list.AddRange(GetFallbackSeedOrders());
-        return list;
+        return new List<OrderDetailViewModel>();
     }
 
     public async Task<bool> UpdateOrderStatusAsync(int orderId, int status)
     {
         try
         {
+            SetAuthHeader();
             var payload = new { orderStatus = status };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PatchAsync($"orders/{orderId}/status", content);
-            if (response.IsSuccessStatusCode) return true;
+            return response.IsSuccessStatusCode;
         }
-        catch { }
-
-        var order = _fallbackOrders.FirstOrDefault(o => o.Id == orderId) ?? GetFallbackSeedOrders().FirstOrDefault(o => o.Id == orderId);
-        if (order != null)
+        catch
         {
-            order.OrderStatus = status;
-            order.OrderStatusText = status switch
-            {
-                1 => "Chờ xác nhận",
-                2 => "Đã xác nhận",
-                3 => "Đang đóng gói",
-                4 => "Đang giao",
-                5 => "Hoàn thành",
-                6 => "Đã hủy",
-                _ => "Đang xử lý"
-            };
+            return false;
         }
-        return true;
     }
 
     public async Task<ChatbotConsultResultViewModel> ConsultChatbotAsync(string message, double? ankleCm, double? calfCm, double? thighCm, bool isPregnant, bool hasVaricose, bool hasSwelling)
@@ -514,6 +442,90 @@ public class ApiService : IApiService
         catch { }
 
         return CalculateSizeFallback(ankleCm);
+    }
+
+    public async Task<AuthResponseViewModel?> LoginAsync(string email, string password)
+    {
+        try
+        {
+            var payload = new { email, password };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("auth/login", content);
+            var stream = await response.Content.ReadAsStreamAsync();
+            var data = await JsonSerializer.DeserializeAsync<AuthResponseViewModel>(stream, _jsonOptions);
+            return data;
+        }
+        catch (Exception ex)
+        {
+            return new AuthResponseViewModel
+            {
+                Success = false,
+                Message = "Không thể kết nối đến máy chủ xác thực: " + ex.Message
+            };
+        }
+    }
+
+    public async Task<AuthResponseViewModel?> RegisterAsync(RegisterViewModel model)
+    {
+        try
+        {
+            var payload = new
+            {
+                fullName = model.FullName,
+                email = model.Email,
+                password = model.Password,
+                phone = model.Phone,
+                address = model.Address
+            };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("auth/register", content);
+            var stream = await response.Content.ReadAsStreamAsync();
+            var data = await JsonSerializer.DeserializeAsync<AuthResponseViewModel>(stream, _jsonOptions);
+            return data;
+        }
+        catch (Exception ex)
+        {
+            return new AuthResponseViewModel
+            {
+                Success = false,
+                Message = "Lỗi khi gửi yêu cầu đăng ký: " + ex.Message
+            };
+        }
+    }
+
+    public async Task<UserAccountViewModel?> GetProfileAsync(int userId)
+    {
+        try
+        {
+            SetAuthHeader();
+            var response = await _httpClient.GetAsync($"auth/user/{userId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                return await JsonSerializer.DeserializeAsync<UserAccountViewModel>(stream, _jsonOptions);
+            }
+        }
+        catch { }
+
+        return null;
+    }
+
+    public async Task<List<OrderDetailViewModel>> GetUserOrdersAsync(int userId)
+    {
+        try
+        {
+            SetAuthHeader();
+            var response = await _httpClient.GetAsync($"orders/user/{userId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<List<OrderDetailViewModel>>(stream, _jsonOptions);
+                if (data != null) return data;
+            }
+        }
+        catch { }
+
+        return new List<OrderDetailViewModel>();
     }
 
     private static SizeResultViewModel CalculateSizeFallback(double ankleCm)
@@ -746,48 +758,6 @@ public class ApiService : IApiService
                 ShortDescription = "Cảm giác mát lạnh tức thì, làm dịu đôi chân nhức mỏi, kết hợp hoàn hảo cùng vớ y khoa.",
                 Description = "Gel thảo dược chiết xuất từ hạt dẻ ngựa (Horse Chestnut) và tinh chất bạc hà, thẩm thấu nhanh không bết dính. Giúp tăng cường sức bền thành mạch và xoa dịu cảm giác nóng rát, phù nề.",
                 IsFeatured = false
-            }
-        };
-    }
-
-    private static List<OrderDetailViewModel> GetFallbackSeedOrders()
-    {
-        return new List<OrderDetailViewModel>
-        {
-            new()
-            {
-                Id = 1,
-                OrderCode = "VS-20261019-8921",
-                CustomerName = "Chu Văn Quốc Trung",
-                CustomerPhone = "0987654321",
-                CustomerEmail = "trung.chu@varicosesocks.vn",
-                ShippingAddress = "456 Lê Văn Sỹ, Phường 14, Quận 3, TP.HCM",
-                City = "Hồ Chí Minh",
-                District = "Quận 3",
-                Note = "Giao giờ hành chính",
-                PaymentMethodText = "COD (Thanh toán khi nhận hàng)",
-                PaymentStatusText = "Chờ thanh toán",
-                OrderStatusText = "Đã xác nhận",
-                OrderStatus = 2,
-                SubTotal = 690000,
-                ShippingFee = 30000,
-                TotalAmount = 720000,
-                CreatedAt = DateTime.Now.AddDays(-1),
-                Items = new List<OrderItemViewModel>
-                {
-                    new()
-                    {
-                        ProductId = 1,
-                        ProductName = "Vớ gối y khoa Jobst Relief CCL2 (Hở ngón)",
-                        ProductImageUrl = "/images/products/vo-goi-jobst-ccl2.svg",
-                        Size = "M",
-                        Color = "Màu Da (Beige)",
-                        CompressionText = "CCL2 (20-30 mmHg)",
-                        UnitPrice = 690000,
-                        Quantity = 1,
-                        TotalPrice = 690000
-                    }
-                }
             }
         };
     }

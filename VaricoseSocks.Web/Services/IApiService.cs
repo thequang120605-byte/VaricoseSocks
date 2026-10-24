@@ -27,6 +27,12 @@ public interface IApiService
     // Chatbot AI
     Task<ChatbotConsultResultViewModel> ConsultChatbotAsync(string message, double? ankleCm, double? calfCm, double? thighCm, bool isPregnant, bool hasVaricose, bool hasSwelling);
     Task<SizeResultViewModel> CalculateSizeAsync(double ankleCm, double? calfCm, double? thighCm);
+
+    // Authentication & Users
+    Task<AuthResponseViewModel?> LoginAsync(string email, string password);
+    Task<AuthResponseViewModel?> RegisterAsync(RegisterViewModel model);
+    Task<UserAccountViewModel?> GetProfileAsync(int userId);
+    Task<List<OrderDetailViewModel>> GetUserOrdersAsync(int userId);
 }
 
 public class ChatbotConsultResultViewModel

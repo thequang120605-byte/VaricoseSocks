@@ -1,21 +1,22 @@
 @model VaricoseSocks.Web.Models.OrderTrackingViewModel
 @{
-    ViewData["Title"] = "Tra cứu đơn hàng - Varicose Socks";
+    ViewData["Title"] = "Tra cứu hành trình đơn hàng vớ y khoa - Varicose Socks";
 }
 
 <div class="container py-5">
     <div class="text-center mb-5">
+        <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1 rounded-pill mb-2">HỆ THỐNG ĐỊNH VỊ ĐƠN HÀNG</span>
         <h2 class="fw-bold text-primary mb-2">
             <i class="bi bi-truck me-2"></i>Tra Cứu Hành Trình Đơn Hàng
         </h2>
-        <p class="text-muted">Nhập mã đơn hàng của bạn (Ví dụ: <strong>VS-20261019-8921</strong>) để kiểm tra trạng thái đóng gói và giao hàng.</p>
+        <p class="text-muted small">Nhập mã đơn hàng của bạn (Ví dụ: <strong class="text-dark">VS-20261019-8921</strong>) để kiểm tra tiến độ giao vớ y khoa.</p>
 
         <!-- Search Form -->
         <div class="row justify-content-center mt-3">
             <div class="col-md-7 col-lg-5">
                 <form asp-controller="Order" asp-action="Track" method="get" class="d-flex gap-2">
-                    <input type="text" name="query" value="@Model.SearchQuery" class="form-control form-control-lg" placeholder="Nhập mã đơn hàng..." required />
-                    <button type="submit" class="btn btn-warning btn-lg fw-bold px-4 text-dark text-nowrap">
+                    <input type="text" name="query" value="@Model.SearchQuery" class="form-control form-control-lg rounded-pill px-4 shadow-sm" placeholder="Nhập mã đơn hàng (Vd: VS-20261019-8921)..." required />
+                    <button type="submit" class="btn btn-warning btn-lg fw-bold rounded-pill px-4 text-dark text-nowrap shadow-sm">
                         <i class="bi bi-search me-1"></i> Tra cứu
                     </button>
                 </form>
@@ -30,112 +31,115 @@
             var o = Model.Order;
             var currentStep = o.OrderStatus; // 1 to 5
 
-            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5 mx-auto" style="max-width: 850px;">
+            <div class="glass-card bg-white p-4 p-md-5 mx-auto border shadow-subtle" style="max-width: 850px;">
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom">
                     <div>
-                        <h4 class="fw-bold text-dark mb-1">Mã đơn: @o.OrderCode</h4>
-                        <small class="text-muted">Ngày đặt: @o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="pulse-indicator bg-primary"></span>
+                            <h4 class="fw-bold text-dark mb-0">Mã đơn: @o.OrderCode</h4>
+                        </div>
+                        <small class="text-muted">Ngày đặt hàng: @o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
                     </div>
                     <div>
-                        <span class="badge bg-primary fs-6 px-3 py-2">Trạng thái: @o.OrderStatusText</span>
+                        <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm">Trạng thái: @o.OrderStatusText</span>
                     </div>
                 </div>
 
-                <!-- Timeline Progress Bar -->
-                <div class="row text-center mb-5 position-relative">
+                <!-- 5-Stage Timeline Progress Bar -->
+                <div class="row text-center mb-5 position-relative g-2">
                     <div class="col">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 @(currentStep >= 1 ? "bg-primary text-white" : "bg-light text-muted border")" style="width: 50px; height: 50px;">
-                            <i class="bi bi-receipt"></i>
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 shadow-sm @(currentStep >= 1 ? "bg-primary text-white" : "bg-light text-muted border")" style="width: 52px; height: 52px;">
+                            <i class="bi bi-receipt fs-5"></i>
                         </div>
-                        <div class="small fw-bold @(currentStep >= 1 ? "text-primary" : "text-muted")">Chờ xác nhận</div>
+                        <div class="small fw-bold @(currentStep >= 1 ? "text-primary" : "text-muted")">1. Đã đặt</div>
                     </div>
 
                     <div class="col">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 @(currentStep >= 2 ? "bg-primary text-white" : "bg-light text-muted border")" style="width: 50px; height: 50px;">
-                            <i class="bi bi-check2-circle"></i>
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 shadow-sm @(currentStep >= 2 ? "bg-primary text-white" : "bg-light text-muted border")" style="width: 52px; height: 52px;">
+                            <i class="bi bi-check2-circle fs-5"></i>
                         </div>
-                        <div class="small fw-bold @(currentStep >= 2 ? "text-primary" : "text-muted")">Đã xác nhận</div>
+                        <div class="small fw-bold @(currentStep >= 2 ? "text-primary" : "text-muted")">2. Xác nhận</div>
                     </div>
 
                     <div class="col">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 @(currentStep >= 3 ? "bg-primary text-white" : "bg-light text-muted border")" style="width: 50px; height: 50px;">
-                            <i class="bi bi-box-seam"></i>
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 shadow-sm @(currentStep >= 3 ? "bg-primary text-white" : "bg-light text-muted border")" style="width: 52px; height: 52px;">
+                            <i class="bi bi-box-seam fs-5"></i>
                         </div>
-                        <div class="small fw-bold @(currentStep >= 3 ? "text-primary" : "text-muted")">Đang đóng gói</div>
+                        <div class="small fw-bold @(currentStep >= 3 ? "text-primary" : "text-muted")">3. Đóng gói</div>
                     </div>
 
                     <div class="col">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 @(currentStep >= 4 ? "bg-primary text-white" : "bg-light text-muted border")" style="width: 50px; height: 50px;">
-                            <i class="bi bi-truck"></i>
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 shadow-sm @(currentStep >= 4 ? "bg-primary text-white" : "bg-light text-muted border")" style="width: 52px; height: 52px;">
+                            <i class="bi bi-truck fs-5"></i>
                         </div>
-                        <div class="small fw-bold @(currentStep >= 4 ? "text-primary" : "text-muted")">Đang giao hàng</div>
+                        <div class="small fw-bold @(currentStep >= 4 ? "text-primary" : "text-muted")">4. Đang giao</div>
                     </div>
 
                     <div class="col">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 @(currentStep >= 5 ? "bg-success text-white" : "bg-light text-muted border")" style="width: 50px; height: 50px;">
-                            <i class="bi bi-house-check"></i>
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-2 shadow-sm @(currentStep >= 5 ? "bg-success text-white" : "bg-light text-muted border")" style="width: 52px; height: 52px;">
+                            <i class="bi bi-house-check fs-5"></i>
                         </div>
-                        <div class="small fw-bold @(currentStep >= 5 ? "text-success" : "text-muted")">Hoàn thành</div>
+                        <div class="small fw-bold @(currentStep >= 5 ? "text-success" : "text-muted")">5. Giao thành công</div>
                     </div>
                 </div>
 
                 <!-- Customer Details -->
-                <div class="bg-light p-3 rounded-3 mb-4 border">
+                <div class="bg-light p-4 rounded-4 mb-4 border">
+                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-lines-fill me-1"></i>Chi tiết người nhận:</h6>
                     <div class="row g-2 small">
-                        <div class="col-md-6"><strong>Người nhận:</strong> @o.CustomerName - @o.CustomerPhone</div>
-                        <div class="col-md-6"><strong>Địa chỉ:</strong> @o.ShippingAddress, @(o.District ?? ""), @(o.City ?? "")</div>
-                        <div class="col-md-6"><strong>Hình thức:</strong> @o.PaymentMethodText (@o.PaymentStatusText)</div>
-                        <div class="col-md-6"><strong>Ghi chú:</strong> @(string.IsNullOrEmpty(o.Note) ? "Không có" : o.Note)</div>
+                        <div class="col-md-6 text-muted">Người nhận: <strong class="text-dark">@o.CustomerName</strong> (@o.CustomerPhone)</div>
+                        <div class="col-md-6 text-muted">Địa chỉ nhận: <strong class="text-dark">@o.ShippingAddress, @(o.District ?? ""), @(o.City ?? "")</strong></div>
+                        <div class="col-md-6 text-muted">Phương thức: <strong class="text-primary">@o.PaymentMethodText</strong></div>
+                        <div class="col-md-6 text-muted">Tình trạng thanh toán: <strong class="text-success">@o.PaymentStatusText</strong></div>
                     </div>
                 </div>
 
                 <!-- Items list -->
-                <h6 class="fw-bold text-dark mb-2">Chi tiết sản phẩm:</h6>
-                <div class="table-responsive mb-3">
-                    <table class="table table-bordered align-middle small">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Sản phẩm</th>
-                                <th>Size / Màu</th>
-                                <th>Đơn giá</th>
-                                <th>Số lượng</th>
-                                <th>Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in o.Items)
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "https://placehold.co/80x80?text=Vớ" : item.ProductImageUrl)" 
-                                                 class="rounded border me-2" style="width: 40px; height: 40px; object-fit: contain;" />
-                                            <span>@item.ProductName</span>
-                                        </div>
-                                    </td>
-                                    <td>@item.Size - @item.Color</td>
-                                    <td>@item.UnitPrice.ToString("N0") ₫</td>
-                                    <td>@item.Quantity</td>
-                                    <td class="text-danger fw-bold">@item.TotalPrice.ToString("N0") ₫</td>
-                                </tr>
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="4" class="text-end fw-bold">Tổng thanh toán:</td>
-                                <td class="text-danger fw-bold fs-6">@o.TotalAmount.ToString("N0") ₫</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                <h6 class="fw-bold text-dark mb-3">Sản phẩm trong kiện hàng:</h6>
+                <div class="list-group list-group-flush border rounded-4 overflow-hidden mb-4">
+                    @foreach (var item in o.Items)
+                    {
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3 bg-white">
+                            <div class="d-flex align-items-center">
+                                <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "/images/products/vo-goi-jobst-ccl2.svg" : item.ProductImageUrl)" 
+                                     class="rounded-3 border p-1 me-3 bg-light" style="width: 44px; height: 44px; object-fit: contain;" />
+                                <div>
+                                    <div class="fw-bold">@item.ProductName</div>
+                                    <small class="text-muted">Size: @item.Size | Màu: @item.Color | SL: @item.Quantity</small>
+                                </div>
+                            </div>
+                            <div class="text-danger fw-bold">
+                                @item.TotalPrice.ToString("N0") ₫
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-flex justify-content-between align-items-baseline mb-4 p-3 bg-light rounded-4 border">
+                    <span class="fs-5 fw-bold text-dark">Tổng thanh toán:</span>
+                    <span class="fs-4 fw-bold text-danger">@o.TotalAmount.ToString("N0") ₫</span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center small text-muted">
+                    <span><i class="bi bi-shield-check text-success me-1"></i>Hỗ trợ đổi size trong 7 ngày nếu không vừa</span>
+                    <a href="tel:19006868" class="text-decoration-none text-primary fw-bold"><i class="bi bi-telephone-fill me-1"></i>Tổng đài: 1900 6868</a>
                 </div>
             </div>
         }
         else
         {
-            <div class="alert alert-danger mx-auto text-center p-4 rounded-4" style="max-width: 600px;">
-                <i class="bi bi-exclamation-triangle-fill fs-2 mb-2 d-block"></i>
-                <h5 class="fw-bold">@Model.ErrorMessage</h5>
-                <p class="small mb-0">Vui lòng kiểm tra lại mã đơn hàng trên email hoặc liên hệ hotline 1900 6868 để được hỗ trợ.</p>
+            <div class="glass-card bg-white p-5 text-center mx-auto border shadow-subtle" style="max-width: 600px;">
+                <div class="rounded-circle bg-danger-subtle text-danger d-inline-flex align-items-center justify-content-center p-3 mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-search fs-2"></i>
+                </div>
+                <h4 class="fw-bold text-danger mb-2">Không Tìm Thấy Đơn Hàng</h4>
+                <p class="text-muted">Không tìm thấy mã đơn hàng "<strong>@Model.SearchQuery</strong>" trong hệ thống.</p>
+                <div class="small text-muted mb-4">
+                    Gợi ý: Bạn có thể thử tra cứu với mã đơn mẫu: <strong>VS-20261019-8921</strong>
+                </div>
+                <a asp-controller="Order" asp-action="Track" asp-route-query="VS-20261019-8921" class="btn btn-primary rounded-pill px-4 fw-bold">
+                    Thử tra cứu mã mẫu VS-20261019-8921
+                </a>
             </div>
         }
     }

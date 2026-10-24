@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VaricoseSocks.Web.Models;
 using VaricoseSocks.Web.Services;
 
 namespace VaricoseSocks.Web.Controllers;
 
+[Authorize(Roles = "Admin,Staff")]
 public class AdminController : Controller
 {
     private readonly IApiService _apiService;

@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using VaricoseSocks.Domain.Entities;
 using VaricoseSocks.Infrastructure.Data;
 
 namespace VaricoseSocks.API.Controllers;
 
+[Authorize(Roles = "Admin,Staff")]
 [ApiController]
 [Route("api/[controller]")]
 public class CustomersController : ControllerBase
@@ -20,6 +21,7 @@ public class CustomersController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var customers = await _context.Users
+            .AsNoTracking()
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .Include(u => u.Orders)
@@ -48,6 +50,7 @@ public class CustomersController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var user = await _context.Users
+            .AsNoTracking()
             .Include(u => u.Orders)
                 .ThenInclude(o => o.OrderDetails)
             .FirstOrDefaultAsync(u => u.Id == id);
@@ -71,34 +74,10 @@ public class CustomersController : ControllerBase
                 o.OrderCode,
                 o.TotalAmount,
                 o.OrderStatus,
-                o.CreatedAt
-            })
+                o.PaymentStatus,
+                o.CreatedAt,
+                ItemCount = o.OrderDetails.Count
+            }).ToList()
         });
     }
-
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateProfile(int id, [FromBody] UpdateProfileDto dto)
-    {
-        var user = await _context.Users.FindAsync(id);
-        if (user == null) return NotFound(new { message = "Không tìm thấy khách hàng." });
-
-        user.FullName = dto.FullName;
-        user.Phone = dto.Phone;
-        user.Address = dto.Address;
-        user.City = dto.City;
-        user.District = dto.District;
-        user.UpdatedAt = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync();
-        return Ok(new { message = "Cập nhật hồ sơ thành công." });
-    }
-}
-
-public class UpdateProfileDto
-{
-    public string FullName { get; set; } = string.Empty;
-    public string? Phone { get; set; }
-    public string? Address { get; set; }
-    public string? City { get; set; }
-    public string? District { get; set; }
 }

@@ -15,10 +15,10 @@ public class CategoryRepository : ICategoryRepository
     }
 
     public async Task<IEnumerable<Category>> GetAllAsync()
-        => await _context.Categories.ToListAsync();
+        => await _context.Categories.AsNoTracking().ToListAsync();
 
     public async Task<Category?> GetByIdAsync(int id)
-        => await _context.Categories.FindAsync(id);
+        => await _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task<Category> AddAsync(Category category)
     {

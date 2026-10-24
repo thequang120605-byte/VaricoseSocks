@@ -34,13 +34,18 @@ public class CheckoutController : Controller
             return RedirectToAction("Index", "Cart");
         }
 
+        string name = User.Identity?.IsAuthenticated == true ? (User.Identity.Name ?? "Chu Văn Quốc Trung") : "Chu Văn Quốc Trung";
+        string email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "trung.chu@varicosesocks.vn";
+        string phone = User.FindFirst("Phone")?.Value ?? "0987654321";
+        string address = User.FindFirst("Address")?.Value ?? "456 Lê Văn Sỹ, Phường 14";
+
         var model = new CheckoutViewModel
         {
             Cart = cart,
-            CustomerName = "Chu Văn Quốc Trung",
-            CustomerEmail = "trung.chu@varicosesocks.vn",
-            CustomerPhone = "0987654321",
-            ShippingAddress = "456 Lê Văn Sỹ, Phường 14",
+            CustomerName = name,
+            CustomerEmail = email,
+            CustomerPhone = phone,
+            ShippingAddress = address,
             City = "Hồ Chí Minh",
             District = "Quận 3"
         };
@@ -66,7 +71,10 @@ public class CheckoutController : Controller
             return View("Index", model);
         }
 
-        var order = await _apiService.CreateOrderAsync(model, sessionId, null);
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        int? userId = int.TryParse(userIdClaim, out var uid) ? uid : null;
+
+        var order = await _apiService.CreateOrderAsync(model, sessionId, userId);
         if (order != null)
         {
             return RedirectToAction(nameof(Success), new { orderCode = order.OrderCode });
