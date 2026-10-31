@@ -100,6 +100,7 @@ builder.Services.AddScoped<IChatbotAiService, ChatbotAiService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
 
 var app = builder.Build();
 

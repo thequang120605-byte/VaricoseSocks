@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initPressureSimulator();
     initSizingSlider();
     initCounters();
+    initSeniorAccessibilityMode();
 });
 
 // =========================================================================
@@ -584,4 +585,118 @@ async function calculateModalSize() {
     } catch {
         resElem.innerText = 'Vui lòng kiểm tra lại số đo.';
     }
+}
+
+// =========================================================================
+// 8. SENIOR ACCESSIBILITY MODE (LARGE FONT & HIGH READABILITY)
+// =========================================================================
+function initSeniorAccessibilityMode() {
+    const isSeniorMode = localStorage.getItem('varicose_senior_mode') === 'true';
+    if (isSeniorMode) {
+        document.body.classList.add('accessible-senior-mode');
+        updateSeniorBtnText(true);
+    }
+}
+
+function toggleSeniorAccessibilityMode() {
+    const isNowActive = document.body.classList.toggle('accessible-senior-mode');
+    localStorage.setItem('varicose_senior_mode', isNowActive ? 'true' : 'false');
+    updateSeniorBtnText(isNowActive);
+    
+    if (typeof showModernToast === 'function') {
+        showModernToast(
+            isNowActive ? 'Đã bật Chế độ Chữ Lớn' : 'Đã về Giao diện Chuẩn',
+            isNowActive ? 'Cỡ chữ và độ tương phản được phóng to tối ưu cho người lớn tuổi.' : 'Giao diện đã quay về kích thước tiêu chuẩn.',
+            'info'
+        );
+    }
+}
+
+function updateSeniorBtnText(isActive) {
+    const span = document.getElementById('seniorModeText');
+    if (span) {
+        span.innerText = isActive ? 'Chế độ Chuẩn' : 'Chế độ Chữ Lớn';
+    }
+}
+
+// =========================================================================
+// 9. CLINICAL CEAP MODAL OPENER & INTERACTIVE DIAGNOSIS
+// =========================================================================
+function openCeapModal() {
+    const modalEl = document.getElementById('sizeGuideModal');
+    if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+        // Activate Tab 2 (CEAP)
+        const ceapTabBtn = document.getElementById('ceap-stage-tab');
+        if (ceapTabBtn) {
+            const tab = new bootstrap.Tab(ceapTabBtn);
+            tab.show();
+        }
+    }
+}
+
+const CEAP_STAGE_INFO = {
+    0: {
+        title: 'Giai đoạn C0 - Chưa có biểu hiện nhìn thấy',
+        ccl: 'CCL1 (15 - 21 mmHg)',
+        compressionId: 1,
+        desc: 'Bệnh nhân cảm thấy mỏi chân, nặng bắp chân hoặc cảm giác nóng rát về cuối ngày, không nhìn thấy tĩnh mạch giãn hay sưng phù.',
+        advice: 'Khuyến nghị: Mang vớ gối dự phòng CCL1 khi đứng/ngồi làm việc trên 2 tiếng, kết hợp kê cao chân khi ngủ.'
+    },
+    1: {
+        title: 'Giai đoạn C1 - Giãn mao mạch mạng nhện / lưới',
+        ccl: 'CCL1 (15 - 21 mmHg)',
+        compressionId: 1,
+        desc: 'Tĩnh mạch mạng nhện nhỏ li ti (< 1mm) hoặc tĩnh mạch lưới (1 - 3mm) màu xanh tím li ti xuất hiện dưới da, gây mất thẩm mỹ.',
+        advice: 'Khuyến nghị: Sử dụng vớ gối hoặc vớ đùi CCL1 để ngăn ngừa tĩnh mạch tiếp tục giãn lan rộng.'
+    },
+    2: {
+        title: 'Giai đoạn C2 - Giãn tĩnh mạch nông (> 3mm)',
+        ccl: 'CCL2 (23 - 32 mmHg)',
+        compressionId: 2,
+        desc: 'Tĩnh mạch nông phình to, ngoằn ngoèo nổi gồ trên bề mặt bắp chân, thường kèm chuột rút ban đêm.',
+        advice: 'Khuyến nghị: Bắt buộc điều trị vớ áp lực y khoa chuẩn CCL2 hàng ngày nhằm phục hồi van tĩnh mạch.'
+    },
+    3: {
+        title: 'Giai đoạn C3 - Phù mắt cá chân & cẳng chân',
+        ccl: 'CCL2 (23 - 32 mmHg)',
+        compressionId: 2,
+        desc: 'Ứ đọng tuần hoàn gây sưng phù mắt cá chân và cẳng chân vào buổi chiều, ấn vào da có vết lõm lâu đàn hồi.',
+        advice: 'Khuyến nghị: Dùng vớ đùi CCL2 kết hợp tập vận động cổ chân, hạn chế ăn mặn.'
+    },
+    4: {
+        title: 'Giai đoạn C4 - Rối loạn dinh dưỡng sắc tố da',
+        ccl: 'CCL2 - CCL3 (23 - 40 mmHg)',
+        compressionId: 2,
+        desc: 'Vùng da quanh cổ chân bị sạm màu nâu/đen, chàm tĩnh mạch, xơ cứng mỡ dưới da có nguy cơ loét cao.',
+        advice: 'Khuyến nghị: Cần thăm khám chuyên khoa mạch máu, sử dụng vớ CCL2 hoặc CCL3 theo chỉ định nghiêm ngặt.'
+    },
+    5: {
+        title: 'Giai đoạn C5 / C6 - Vết loét tĩnh mạch',
+        ccl: 'CCL3 (34 - 46 mmHg)',
+        compressionId: 3,
+        desc: 'Loét dinh dưỡng tĩnh mạch mạn tính đã lành (C5) hoặc đang tiến triển, rỉ dịch (C6) tại vùng mắt cá chân trong.',
+        advice: 'Khuyến nghị: Bắt buộc chăm sóc vết thương vô khuẩn và mang vớ y khoa chuyên dụng theo phác đồ bác sĩ mạch máu.'
+    }
+};
+
+function selectCeapModalStage(stage, cardEl) {
+    document.querySelectorAll('.ceap-pick-card').forEach(c => {
+        c.classList.remove('border-primary', 'bg-primary-subtle', 'shadow-sm');
+    });
+    if (cardEl) {
+        cardEl.classList.add('border-primary', 'bg-primary-subtle', 'shadow-sm');
+    }
+
+    const info = CEAP_STAGE_INFO[stage];
+    const resultBox = document.getElementById('modalCeapResultBox');
+    if (!resultBox || !info) return;
+
+    resultBox.classList.remove('d-none');
+    document.getElementById('modalCeapBadge').innerText = info.title;
+    document.getElementById('modalCclBadge').innerText = info.ccl;
+    document.getElementById('modalCeapDesc').innerText = info.desc;
+    document.getElementById('modalCeapAdvice').innerText = info.advice;
+    document.getElementById('modalCeapShopLink').href = `/Product?compression=${info.compressionId}`;
 }

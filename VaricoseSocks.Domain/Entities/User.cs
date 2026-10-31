@@ -19,4 +19,5 @@ public class User
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     public ICollection<Order> Orders { get; set; } = new List<Order>();
     public ICollection<Cart> Carts { get; set; } = new List<Cart>();
+    public ICollection<PatientHealthRecord> HealthRecords { get; set; } = new List<PatientHealthRecord>();
 }

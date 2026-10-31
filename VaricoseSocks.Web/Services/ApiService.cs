@@ -528,6 +528,56 @@ public class ApiService : IApiService
         return new List<OrderDetailViewModel>();
     }
 
+    public async Task<List<HealthRecordViewModel>> GetUserHealthRecordsAsync(int userId)
+    {
+        try
+        {
+            SetAuthHeader();
+            var response = await _httpClient.GetAsync($"healthrecords/user/{userId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<List<HealthRecordViewModel>>(stream, _jsonOptions);
+                if (data != null) return data;
+            }
+        }
+        catch { }
+
+        return new List<HealthRecordViewModel>();
+    }
+
+    public async Task<bool> SaveHealthRecordAsync(CreateHealthRecordViewModel model)
+    {
+        try
+        {
+            SetAuthHeader();
+            var content = new StringContent(JsonSerializer.Serialize(model), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("healthrecords", content);
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<CeapResultViewModel?> AssessCeapAsync(int stage, bool hasUlcer, bool hasSkinChanges, bool hasEdema, bool hasVaricose)
+    {
+        try
+        {
+            var url = $"healthrecords/ceap-assessment?stage={stage}&hasUlcer={hasUlcer}&hasSkinChanges={hasSkinChanges}&hasEdema={hasEdema}&hasVaricose={hasVaricose}";
+            var response = await _httpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                return await JsonSerializer.DeserializeAsync<CeapResultViewModel>(stream, _jsonOptions);
+            }
+        }
+        catch { }
+
+        return null;
+    }
+
     private static SizeResultViewModel CalculateSizeFallback(double ankleCm)
     {
         string size;

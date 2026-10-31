@@ -24,6 +24,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ChatbotConsultation> ChatbotConsultations => Set<ChatbotConsultation>();
     public DbSet<Promotion> Promotions => Set<Promotion>();
     public DbSet<InventoryTransaction> InventoryTransactions => Set<InventoryTransaction>();
+    public DbSet<PatientHealthRecord> PatientHealthRecords => Set<PatientHealthRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -213,6 +214,21 @@ public class ApplicationDbContext : DbContext
             entity.Property(c => c.CustomerName).HasMaxLength(150);
             entity.Property(c => c.CustomerPhone).HasMaxLength(20);
             entity.Property(c => c.RecommendedSize).HasMaxLength(20);
+        });
+
+        // PatientHealthRecord configuration
+        modelBuilder.Entity<PatientHealthRecord>(entity =>
+        {
+            entity.HasKey(h => h.Id);
+            entity.Property(h => h.DoctorName).HasMaxLength(150);
+            entity.Property(h => h.PrescribedCompression).HasMaxLength(50);
+            entity.Property(h => h.RecommendedSize).HasMaxLength(20);
+            entity.Property(h => h.Symptoms).HasMaxLength(500);
+
+            entity.HasOne(h => h.User)
+                  .WithMany(u => u.HealthRecords)
+                  .HasForeignKey(h => h.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

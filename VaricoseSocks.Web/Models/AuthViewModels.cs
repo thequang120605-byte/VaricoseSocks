@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using VaricoseSocks.Web.Services;
 
 namespace VaricoseSocks.Web.Models;
 
@@ -64,4 +65,5 @@ public class UserProfileViewModel
 {
     public UserAccountViewModel User { get; set; } = new();
     public List<OrderDetailViewModel> Orders { get; set; } = new();
+    public List<HealthRecordViewModel> HealthRecords { get; set; } = new();
 }

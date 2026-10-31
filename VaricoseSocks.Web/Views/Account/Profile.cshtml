@@ -1,6 +1,6 @@
 @model VaricoseSocks.Web.Models.UserProfileViewModel
 @{
-    ViewData["Title"] = "Tài khoản của tôi - Varicose Socks Y Khoa";
+    ViewData["Title"] = "Hồ sơ y tế & Tài khoản - Varicose Socks Y Khoa";
 }
 
 <div class="container py-4">
@@ -8,9 +8,25 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb small">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Hồ sơ khách hàng</li>
+            <li class="breadcrumb-item active" aria-current="page">Hồ sơ khách hàng & Bệnh án tĩnh mạch</li>
         </ol>
     </nav>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     <div class="row g-4">
         <!-- Left: User Profile Summary Card -->
@@ -36,7 +52,8 @@
                 <div class="text-start small text-muted">
                     <div class="mb-2"><i class="bi bi-telephone text-primary me-2"></i>Số điện thoại: <strong class="text-dark">@(string.IsNullOrEmpty(Model.User.Phone) ? "Chưa cập nhật" : Model.User.Phone)</strong></div>
                     <div class="mb-2"><i class="bi bi-geo-alt text-primary me-2"></i>Địa chỉ: <strong class="text-dark">@(string.IsNullOrEmpty(Model.User.Address) ? "Chưa cập nhật" : Model.User.Address)</strong></div>
-                    <div><i class="bi bi-shield-check text-success me-2"></i>Bảo hiểm y tế vớ: <strong class="text-success">Đang hiệu lực</strong></div>
+                    <div class="mb-2"><i class="bi bi-shield-check text-success me-2"></i>Bảo hiểm y tế vớ: <strong class="text-success">Đang hiệu lực</strong></div>
+                    <div><i class="bi bi-file-medical text-info me-2"></i>Số bản ghi theo dõi: <strong class="text-info">@Model.HealthRecords.Count bản ghi</strong></div>
                 </div>
 
                 @if (Model.User.Roles.Contains("Admin"))
@@ -55,87 +72,291 @@
                 </div>
             </div>
 
-            <!-- Medical Reminder Card -->
-            <div class="glass-card p-4 border shadow-subtle text-white" style="background: linear-gradient(135deg, #0369a1 0%, #0a192f 100%);">
+            <!-- Medical Replacement Cycle Alert Card -->
+            <div class="glass-card p-4 border shadow-subtle text-white mb-4" style="background: linear-gradient(135deg, #0369a1 0%, #0a192f 100%);">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <i class="bi bi-info-circle-fill fs-5 text-info"></i>
-                    <h6 class="fw-bold mb-0">Khuyến Cáo Y Khoa Định Kỳ</h6>
+                    <i class="bi bi-bell-fill fs-5 text-warning"></i>
+                    <h6 class="fw-bold mb-0">Cảnh Báo Chu Kỳ Thay Vớ (6 Tháng)</h6>
                 </div>
-                <p class="small text-white-50 mb-0 lh-lg">
-                    Theo hiệp hội y khoa RAL, vớ nén tĩnh mạch nên được thay mới sau <strong>6 tháng sử dụng hàng ngày</strong> để đảm bảo áp lực co bóp van tĩnh mạch đạt chuẩn 100%.
+                @{
+                    var latestRecord = Model.HealthRecords.FirstOrDefault();
+                }
+                @if (latestRecord != null && latestRecord.ReplacementDueDate.HasValue)
+                {
+                    <div class="p-3 bg-white bg-opacity-10 rounded-3 my-2">
+                        <div class="small text-white-50">Lần đo gần nhất: <strong>@latestRecord.MeasurementDate.ToString("dd/MM/yyyy")</strong></div>
+                        <div class="small mt-1">Hạn thay vớ định kỳ: <strong class="text-warning">@latestRecord.ReplacementDueDate.Value.ToString("dd/MM/yyyy")</strong></div>
+                        @if (latestRecord.NeedsReplacement)
+                        {
+                            <span class="badge bg-danger mt-2"><i class="bi bi-exclamation-diamond me-1"></i>Đã đến hạn thay vớ mới!</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success-subtle text-success mt-2"><i class="bi bi-clock me-1"></i>Còn @latestRecord.DaysUntilReplacement ngày nữa</span>
+                        }
+                    </div>
+                }
+                <p class="small text-white-50 mb-0 lh-base">
+                    Sợi dệt đàn hồi y khoa sẽ hao hụt lực ép sau 180 ngày mang liên tục. Thay vớ đúng hạn giúp khép kín van tĩnh mạch hiệu quả.
                 </p>
             </div>
         </div>
 
-        <!-- Right: Order History & Health Tracking -->
+        <!-- Right: Tabs for Health Record & Orders -->
         <div class="col-lg-8">
-            <div class="glass-card bg-white p-4 border shadow-subtle">
-                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-                    <div>
-                        <h5 class="fw-bold text-primary mb-1">
-                            <i class="bi bi-receipt-cutoff me-2"></i>Lịch Sử Đơn Hàng Vớ Y Khoa
-                        </h5>
-                        <p class="text-muted small mb-0">Theo dõi tiến trình vận chuyển và đổi size trong 7 ngày</p>
-                    </div>
-                    <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">
-                        <i class="bi bi-bag-plus me-1"></i> Mua thêm vớ
-                    </a>
-                </div>
+            <ul class="nav nav-pills mb-3 p-2 bg-white rounded-pill border shadow-subtle" id="profileTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill fw-bold px-4" id="health-tab" data-bs-toggle="pill" data-bs-target="#health-pane" type="button" role="tab">
+                        <i class="bi bi-heart-pulse-fill me-1 text-danger"></i> Hồ Sơ Bệnh Án & Số Đo
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill fw-bold px-4" id="orders-tab" data-bs-toggle="pill" data-bs-target="#orders-pane" type="button" role="tab">
+                        <i class="bi bi-receipt-cutoff me-1 text-primary"></i> Lịch Sử Đơn Hàng (@Model.Orders.Count)
+                    </button>
+                </li>
+            </ul>
 
-                @if (!Model.Orders.Any())
-                {
-                    <div class="p-5 text-center text-muted">
-                        <i class="bi bi-box-seam fs-1 d-block mb-2 text-muted opacity-50"></i>
-                        <h6>Bạn chưa có đơn hàng nào tại Varicose Socks.</h6>
-                        <p class="small">Hãy lựa chọn các dòng vớ chuẩn áp lực để bảo vệ đôi chân của bạn.</p>
-                        <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-4">Khám phá sản phẩm</a>
+            <div class="tab-content" id="profileTabContent">
+                <!-- Tab 1: Health Record & CEAP Sizing Tool -->
+                <div class="tab-pane fade show active" id="health-pane" role="tabpanel">
+                    <!-- New Measurement Form -->
+                    <div class="glass-card bg-white p-4 border shadow-subtle mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <div>
+                                <h5 class="fw-bold text-primary mb-1">
+                                    <i class="bi bi-rulers me-2"></i>Cập Nhật Số Đo Chân & Phân Tầng CEAP Mới
+                                </h5>
+                                <p class="text-muted small mb-0">Hệ thống sẽ tự động đối soát kích thước và tính toán chu kỳ 6 tháng</p>
+                            </div>
+                        </div>
+
+                        <form asp-controller="Account" asp-action="SaveHealthRecord" method="post" id="healthRecordForm">
+                            @Html.AntiForgeryToken()
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-dark">Vòng cổ chân cB (cm) <span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" step="0.1" name="AnkleCircumferenceCm" id="hrAnkle" class="form-control" placeholder="Vd: 22.5" required oninput="calcSizeAuto()" />
+                                        <span class="input-group-text">cm</span>
+                                    </div>
+                                    <small class="text-muted" style="font-size: 0.7rem;">Nhỏ nhất trên mắt cá chân</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-dark">Vòng bắp chân cC (cm)</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" step="0.1" name="CalfCircumferenceCm" id="hrCalf" class="form-control" placeholder="Vd: 34.0" oninput="calcSizeAuto()" />
+                                        <span class="input-group-text">cm</span>
+                                    </div>
+                                    <small class="text-muted" style="font-size: 0.7rem;">Nở to nhất của bắp</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-dark">Vòng đùi cG (cm)</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" step="0.1" name="ThighCircumferenceCm" id="hrThigh" class="form-control" placeholder="Vd: 52.0" />
+                                        <span class="input-group-text">cm</span>
+                                    </div>
+                                    <small class="text-muted" style="font-size: 0.7rem;">Dưới nếp lằn mông 5cm</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark">Phân tầng bệnh học CEAP</label>
+                                    <select name="CeapStage" class="form-select form-select-sm" id="hrCeapSelect" onchange="updateCeapHelper()">
+                                        <option value="0">C0: Chỉ mỏi chân, nặng chân, chưa có tổn thương</option>
+                                        <option value="1" selected>C1: Giãn mao mạch mạng nhện / Tĩnh mạch dạng lưới</option>
+                                        <option value="2">C2: Búi gân xanh ngoằn ngoèo nổi rõ (> 3mm)</option>
+                                        <option value="3">C3: Phù chân vào buổi chiều tối</option>
+                                        <option value="4">C4: Sạm da, xơ cứng da quanh cổ chân</option>
+                                        <option value="5">C5: Vết loét tĩnh mạch đã liền sẹo</option>
+                                        <option value="6">C6: Vết loét tĩnh mạch đang hở miệng rỉ dịch</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold text-dark">Size gợi ý tự động</label>
+                                    <input type="text" name="RecommendedSize" id="hrSizeOutput" class="form-control form-control-sm bg-light fw-bold text-primary" value="M" readonly />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold text-dark">Áp lực chỉ định</label>
+                                    <input type="text" name="PrescribedCompression" id="hrCompOutput" class="form-control form-control-sm bg-light fw-bold text-success" value="CCL1 (15-20 mmHg)" readonly />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark">Triệu chứng lâm sàng</label>
+                                    <input type="text" name="Symptoms" class="form-control form-control-sm" placeholder="Vd: Nặng mỏi bắp chân, chuột rút ban đêm..." />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark">Bác sĩ khám / Bệnh viện</label>
+                                    <input type="text" name="DoctorName" class="form-control form-control-sm" placeholder="Vd: BS. Nguyễn Văn A - BV Chợ Rẫy" />
+                                </div>
+
+                                <div class="col-12 text-end mt-3">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm">
+                                        <i class="bi bi-save me-1"></i> Lưu Vào Hồ Sơ Bệnh Án
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                }
-                else
-                {
-                    <div class="d-flex flex-column gap-3">
-                        @foreach (var o in Model.Orders)
+
+                    <!-- Health Records History List -->
+                    <div class="glass-card bg-white p-4 border shadow-subtle">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history text-primary me-2"></i>Lịch Sử Nhật Ký Đo & Theo Dõi Tĩnh Mạch</h6>
+                        @if (!Model.HealthRecords.Any())
                         {
-                            <div class="p-3 bg-light rounded-4 border">
-                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                                    <div>
-                                        <strong class="text-primary me-2">@o.OrderCode</strong>
-                                        <small class="text-muted">(@o.CreatedAt.ToString("dd/MM/yyyy HH:mm"))</small>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="badge @(o.OrderStatus == 5 ? "bg-success" : o.OrderStatus == 1 ? "bg-warning text-dark" : "bg-primary") rounded-pill px-3">
-                                            @o.OrderStatusText
-                                        </span>
-                                        <span class="fw-bold text-danger">@o.TotalAmount.ToString("N0") ₫</span>
-                                    </div>
-                                </div>
-
-                                <!-- Items Preview -->
-                                <div class="mb-2">
-                                    @foreach (var it in o.Items)
-                                    {
-                                        <div class="d-flex align-items-center justify-content-between py-1 small">
-                                            <div class="d-flex align-items-center">
-                                                <img src="@(string.IsNullOrEmpty(it.ProductImageUrl) ? "/images/products/vo-goi-jobst-ccl2.svg" : it.ProductImageUrl)" 
-                                                     class="rounded me-2 border bg-white" style="width: 32px; height: 32px; object-fit: contain;" />
-                                                <span>@it.ProductName (Size @it.Size, @it.Color) x @it.Quantity</span>
-                                            </div>
-                                            <span class="text-muted fw-bold">@it.TotalPrice.ToString("N0") ₫</span>
-                                        </div>
-                                    }
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center pt-2 border-top small text-muted">
-                                    <span>Giao đến: @o.ShippingAddress</span>
-                                    <a asp-controller="Order" asp-action="Track" asp-route-query="@o.OrderCode" class="btn btn-outline-primary btn-sm py-0 px-3 rounded-pill fw-bold">
-                                        <i class="bi bi-truck me-1"></i> Theo dõi hành trình
-                                    </a>
-                                </div>
+                            <div class="p-4 text-center text-muted">
+                                <i class="bi bi-file-earmark-medical fs-2 text-muted opacity-50 mb-2 d-block"></i>
+                                <p class="small mb-0">Chưa có bản ghi số đo nào. Hãy nhập thông số đầu tiên phía trên để hệ thống theo dõi chu kỳ sức khỏe cho bạn.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle small">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ngày đo</th>
+                                            <th>Số đo (cB - cC - cG)</th>
+                                            <th>Phân tầng CEAP</th>
+                                            <th>Size & Cấp nén</th>
+                                            <th>Hạn thay vớ</th>
+                                            <th>Bác sĩ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var r in Model.HealthRecords)
+                                        {
+                                            <tr>
+                                                <td><strong>@r.MeasurementDate.ToString("dd/MM/yyyy")</strong></td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark border">cB: @r.AnkleCircumferenceCm cm</span>
+                                                    @if (r.CalfCircumferenceCm.HasValue) { <span class="badge bg-light text-dark border">cC: @r.CalfCircumferenceCm cm</span> }
+                                                    @if (r.ThighCircumferenceCm.HasValue) { <span class="badge bg-light text-dark border">cG: @r.ThighCircumferenceCm cm</span> }
+                                                </td>
+                                                <td><span class="badge bg-info-subtle text-info fw-bold">@r.CeapStageText</span></td>
+                                                <td>
+                                                    <strong class="text-primary">Size @r.RecommendedSize</strong> - <small class="text-muted">@r.PrescribedCompression</small>
+                                                </td>
+                                                <td>
+                                                    @if (r.NeedsReplacement)
+                                                    {
+                                                        <span class="badge bg-danger rounded-pill">Đã đến hạn thay</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-success-subtle text-success rounded-pill">@(r.ReplacementDueDate?.ToString("dd/MM/yyyy") ?? "-")</span>
+                                                    }
+                                                </td>
+                                                <td>@(string.IsNullOrEmpty(r.DoctorName) ? "Tự theo dõi" : r.DoctorName)</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         }
                     </div>
-                }
+                </div>
+
+                <!-- Tab 2: Orders List -->
+                <div class="tab-pane fade" id="orders-pane" role="tabpanel">
+                    <div class="glass-card bg-white p-4 border shadow-subtle">
+                        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                            <div>
+                                <h5 class="fw-bold text-primary mb-1">
+                                    <i class="bi bi-receipt-cutoff me-2"></i>Lịch Sử Đơn Hàng Vớ Y Khoa
+                                </h5>
+                                <p class="text-muted small mb-0">Theo dõi tiến trình vận chuyển và đổi size trong 7 ngày</p>
+                            </div>
+                            <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">
+                                <i class="bi bi-bag-plus me-1"></i> Mua thêm vớ
+                            </a>
+                        </div>
+
+                        @if (!Model.Orders.Any())
+                        {
+                            <div class="p-5 text-center text-muted">
+                                <i class="bi bi-box-seam fs-1 d-block mb-2 text-muted opacity-50"></i>
+                                <h6>Bạn chưa có đơn hàng nào tại Varicose Socks.</h6>
+                                <p class="small">Hãy lựa chọn các dòng vớ chuẩn áp lực để bảo vệ đôi chân của bạn.</p>
+                                <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-4">Khám phá sản phẩm</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column gap-3">
+                                @foreach (var o in Model.Orders)
+                                {
+                                    <div class="p-3 bg-light rounded-4 border">
+                                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                            <div>
+                                                <strong class="text-primary me-2">@o.OrderCode</strong>
+                                                <small class="text-muted">(@o.CreatedAt.ToString("dd/MM/yyyy HH:mm"))</small>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge @(o.OrderStatus == 5 ? "bg-success" : o.OrderStatus == 1 ? "bg-warning text-dark" : "bg-primary") rounded-pill px-3">
+                                                    @o.OrderStatusText
+                                                </span>
+                                                <span class="fw-bold text-danger">@o.TotalAmount.ToString("N0") ₫</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            @foreach (var it in o.Items)
+                                            {
+                                                <div class="d-flex align-items-center justify-content-between py-1 small">
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="@(string.IsNullOrEmpty(it.ProductImageUrl) ? "/images/products/vo-goi-jobst-ccl2.svg" : it.ProductImageUrl)" 
+                                                             class="rounded me-2 border bg-white" style="width: 32px; height: 32px; object-fit: contain;" />
+                                                        <span>@it.ProductName (Size @it.Size, @it.Color) x @it.Quantity</span>
+                                                    </div>
+                                                    <span class="text-muted fw-bold">@it.TotalPrice.ToString("N0") ₫</span>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center pt-2 border-top small text-muted">
+                                            <span>Giao đến: @o.ShippingAddress</span>
+                                            <a asp-controller="Order" asp-action="Track" asp-route-query="@o.OrderCode" class="btn btn-outline-primary btn-sm py-0 px-3 rounded-pill fw-bold">
+                                                <i class="bi bi-truck me-1"></i> Theo dõi hành trình
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+function calcSizeAuto() {
+    const ankle = parseFloat(document.getElementById('hrAnkle').value) || 0;
+    const calf = parseFloat(document.getElementById('hrCalf').value) || 0;
+    let size = 'M';
+    if (ankle < 18) size = 'S';
+    else if (ankle <= 21) size = 'S';
+    else if (ankle <= 25) size = 'M';
+    else if (ankle <= 29) size = 'L';
+    else if (ankle <= 33) size = 'XL';
+    else size = 'XXL';
+
+    if (calf > 42 && (size === 'S' || size === 'M')) {
+        size = size === 'S' ? 'M' : 'L';
+    }
+    document.getElementById('hrSizeOutput').value = size;
+}
+
+function updateCeapHelper() {
+    const stage = parseInt(document.getElementById('hrCeapSelect').value) || 0;
+    let comp = 'CCL1 (15-20 mmHg)';
+    if (stage === 0 || stage === 1) comp = 'CCL1 (15-21 mmHg)';
+    else if (stage === 2 || stage === 3) comp = 'CCL2 (23-32 mmHg)';
+    else comp = 'CCL3 (34-46 mmHg)';
+    document.getElementById('hrCompOutput').value = comp;
+}
+</script>
+}

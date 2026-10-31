@@ -443,3 +443,39 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3, .display-4, .display
     background: #cbd5e1;
     border-radius: 10px;
 }
+
+/* =========================================================================
+   12. ACCESSIBILITY MODE: LARGE FONT & HIGH CONTRAST (FOR SENIOR PATIENTS)
+   ========================================================================= */
+body.accessible-senior-mode {
+    font-size: 1.15rem;
+    line-height: 1.7;
+}
+
+body.accessible-senior-mode h1, 
+body.accessible-senior-mode h2, 
+body.accessible-senior-mode h3 {
+    font-size: 1.25em;
+    font-weight: 800;
+}
+
+body.accessible-senior-mode p, 
+body.accessible-senior-mode span, 
+body.accessible-senior-mode li, 
+body.accessible-senior-mode input, 
+body.accessible-senior-mode select, 
+body.accessible-senior-mode button {
+    font-size: 1.12rem !important;
+}
+
+body.accessible-senior-mode .btn {
+    padding: 0.65rem 1.4rem;
+}
+
+.font-size-toggle-btn {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.font-size-toggle-btn:hover {
+    transform: scale(1.08);
+}

@@ -382,6 +382,70 @@ namespace VaricoseSocks.Infrastructure.Migrations
                     b.ToTable("OrderDetails");
                 });
 
+            modelBuilder.Entity("VaricoseSocks.Domain.Entities.PatientHealthRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("AnkleCircumferenceCm")
+                        .HasColumnType("double");
+
+                    b.Property<double?>("CalfCircumferenceCm")
+                        .HasColumnType("double");
+
+                    b.Property<int>("CeapStage")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DiagnosisNote")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DoctorName")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<double?>("LegLengthCm")
+                        .HasColumnType("double");
+
+                    b.Property<DateTime>("MeasurementDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PrescribedCompression")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("RecommendedSize")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<bool>("ReminderSent")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("ReplacementDueDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Symptoms")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<double?>("ThighCircumferenceCm")
+                        .HasColumnType("double");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PatientHealthRecords");
+                });
+
             modelBuilder.Entity("VaricoseSocks.Domain.Entities.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -828,6 +892,17 @@ namespace VaricoseSocks.Infrastructure.Migrations
                     b.Navigation("ProductVariant");
                 });
 
+            modelBuilder.Entity("VaricoseSocks.Domain.Entities.PatientHealthRecord", b =>
+                {
+                    b.HasOne("VaricoseSocks.Domain.Entities.User", "User")
+                        .WithMany("HealthRecords")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("VaricoseSocks.Domain.Entities.Payment", b =>
                 {
                     b.HasOne("VaricoseSocks.Domain.Entities.Order", "Order")
@@ -927,6 +1002,8 @@ namespace VaricoseSocks.Infrastructure.Migrations
             modelBuilder.Entity("VaricoseSocks.Domain.Entities.User", b =>
                 {
                     b.Navigation("Carts");
+
+                    b.Navigation("HealthRecords");
 
                     b.Navigation("Orders");
 

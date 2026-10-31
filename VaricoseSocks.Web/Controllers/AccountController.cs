@@ -189,14 +189,46 @@ public class AccountController : Controller
         };
 
         var orders = await _apiService.GetUserOrdersAsync(userId);
+        var healthRecords = await _apiService.GetUserHealthRecordsAsync(userId);
 
         var model = new UserProfileViewModel
         {
             User = userAccount,
-            Orders = orders
+            Orders = orders,
+            HealthRecords = healthRecords
         };
 
         return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveHealthRecord(CreateHealthRecordViewModel model)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            return RedirectToAction("Login");
+        }
+
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            return RedirectToAction("Login");
+        }
+
+        model.UserId = userId;
+        var success = await _apiService.SaveHealthRecordAsync(model);
+
+        if (success)
+        {
+            TempData["SuccessMessage"] = "Đã lưu thông số đo và hồ sơ theo dõi tĩnh mạch thành công!";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = "Có lỗi xảy ra khi lưu hồ sơ. Vui lòng kiểm tra lại số đo.";
+        }
+
+        return RedirectToAction(nameof(Profile));
     }
 
     [HttpGet]
