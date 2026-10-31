@@ -18,30 +18,35 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="d-flex flex-column min-vh-100">
-    <!-- Top Announcement Bar -->
-    <div class="bg-dark text-white py-1 px-3 small text-center d-none d-md-block" style="background: linear-gradient(90deg, #0a192f 0%, #0f172a 100%); border-bottom: 1px solid rgba(255,255,255,0.08);">
-        <span><i class="bi bi-truck me-1 text-warning"></i> Miễn phí giao hàng toàn quốc cho đơn từ 500.000₫</span>
-        <span class="mx-3 opacity-50">|</span>
-        <span><i class="bi bi-patch-check-fill me-1 text-info"></i> 100% Vớ y khoa chuẩn áp lực quốc tế RAL-GZ 387</span>
-        <span class="mx-3 opacity-50">|</span>
-        <span><i class="bi bi-telephone-fill me-1 text-success"></i> Hotline bác sĩ tư vấn: <strong>1900 6868</strong></span>
-        <span class="mx-3 opacity-50">|</span>
-        <button type="button" class="btn btn-outline-light btn-sm rounded-pill py-0 px-2 border-secondary font-size-toggle-btn" onclick="toggleSeniorAccessibilityMode()" title="Chế độ Chữ Lớn Dễ Đọc cho Người Cao Tuổi">
-            <i class="bi bi-fonts me-1 text-warning"></i><span id="seniorModeText">Chế độ Chữ Lớn</span>
-        </button>
+    <!-- Top Announcement Bar (Contained & Centered) -->
+    <div class="text-white py-1 small d-none d-md-block" style="background: linear-gradient(90deg, #071324 0%, #0a192f 50%, #071324 100%); border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <div class="container-xl d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <span><i class="bi bi-truck me-1 text-warning"></i> Miễn phí giao hàng từ 500.000₫</span>
+                <span class="opacity-25">|</span>
+                <span><i class="bi bi-patch-check-fill me-1 text-info"></i> Chuẩn quốc tế RAL-GZ 387</span>
+                <span class="opacity-25">|</span>
+                <span><i class="bi bi-telephone-fill me-1 text-success"></i> Hotline bác sĩ tư vấn: <strong>1900 6868</strong></span>
+            </div>
+            <div>
+                <button type="button" class="btn btn-outline-light btn-sm rounded-pill py-0 px-2 border-secondary font-size-toggle-btn" onclick="toggleSeniorAccessibilityMode()" title="Chế độ Chữ Lớn Dễ Đọc cho Người Cao Tuổi">
+                    <i class="bi bi-fonts me-1 text-warning"></i><span id="seniorModeText">Chế độ Chữ Lớn</span>
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- Smart Floating Glass Navigation Bar -->
+    <!-- Smart Floating Glass Navigation Bar (Contained & Bounded) -->
     <header class="sticky-top">
         <nav class="navbar navbar-expand-lg navbar-dark glass-nav py-2">
-            <div class="container-fluid px-lg-4">
-                <a class="navbar-brand fw-bold d-flex align-items-center text-nowrap" asp-controller="Home" asp-action="Index">
-                    <div class="bg-white text-primary rounded-circle p-2 me-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 42px; height: 42px;">
+            <div class="container-xl px-3">
+                <a class="navbar-brand fw-bold d-flex align-items-center text-nowrap me-3" asp-controller="Home" asp-action="Index">
+                    <div class="bg-white text-primary rounded-circle p-2 me-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
                         <i class="bi bi-heart-pulse-fill fs-5" style="color: #0284c7;"></i>
                     </div>
                     <div>
-                        <div class="lh-1 fs-5 fw-bold" style="letter-spacing: -0.03em;">VARICOSE SOCKS</div>
-                        <small class="fw-medium text-white-50" style="font-size: 0.68rem; letter-spacing: 0.05em;">MEDTECH CLINICAL</small>
+                        <div class="lh-1 fs-6 fw-bold" style="letter-spacing: -0.02em;">VARICOSE SOCKS</div>
+                        <small class="fw-medium text-white-50" style="font-size: 0.62rem; letter-spacing: 0.05em;">MEDTECH CLINICAL</small>
                     </div>
                 </a>
 
@@ -50,17 +55,17 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 text-nowrap">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 text-nowrap align-items-lg-center">
                         <li class="nav-item">
-                            <a class="nav-link text-white fw-semibold px-3" asp-controller="Home" asp-action="Index">
-                                <i class="bi bi-house-door me-1 text-info"></i> Trang chủ
+                            <a class="nav-link text-white fw-semibold px-2" asp-controller="Home" asp-action="Index">
+                                Trang chủ
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white fw-semibold px-3" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-grid me-1 text-info"></i> Danh mục vớ
+                            <a class="nav-link dropdown-toggle text-white fw-semibold px-2" href="#" role="button" data-bs-toggle="dropdown">
+                                Danh mục vớ
                             </a>
-                            <ul class="dropdown-menu shadow-lg border-0 rounded-4 p-2 mt-2" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(16px);">
+                            <ul class="dropdown-menu shadow-lg border-0 rounded-4 p-2 mt-2" style="background: rgba(255,255,255,0.96); backdrop-filter: blur(16px);">
                                 <li><a class="dropdown-item rounded-3 py-2" asp-controller="Product" asp-action="Index"><i class="bi bi-collection me-2 text-primary"></i>Tất cả sản phẩm</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item rounded-3 py-2" asp-controller="Product" asp-action="Index" asp-route-categoryId="1"><i class="bi bi-check2-circle me-2 text-info"></i>Vớ gối y khoa (AD)</a></li>
@@ -71,56 +76,67 @@
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white fw-semibold px-3" asp-controller="Product" asp-action="Index">
-                                <i class="bi bi-bag-check me-1 text-info"></i> Sản phẩm
+                            <a class="nav-link text-white fw-semibold px-2" asp-controller="Product" asp-action="Index">
+                                Sản phẩm
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white fw-semibold px-3" asp-controller="Order" asp-action="Track">
-                                <i class="bi bi-truck me-1 text-info"></i> Tra cứu đơn hàng
+                            <a class="nav-link text-white fw-semibold px-2" asp-controller="Order" asp-action="Track">
+                                Tra cứu đơn
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-warning fw-semibold px-3" asp-controller="Admin" asp-action="Index">
-                                <i class="bi bi-speedometer2 me-1"></i> Quản trị Admin
+                            <a class="nav-link text-info fw-semibold px-2" href="javascript:void(0)" onclick="openCeapModal()" title="Tự chẩn đoán mức độ suy tĩnh mạch chuẩn CEAP">
+                                <i class="bi bi-clipboard2-pulse me-1"></i>Khám CEAP
                             </a>
                         </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-warning fw-semibold px-2" asp-controller="Admin" asp-action="Index">
+                                    <i class="bi bi-speedometer2 me-1"></i>Admin
+                                </a>
+                            </li>
+                        }
                     </ul>
 
-                    <!-- Spotlight Search Quick Trigger -->
-                    <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3 py-1 me-lg-3 my-2 my-lg-0 text-white-50 d-flex align-items-center gap-2 border-secondary" onclick="toggleSpotlightSearch()" style="background: rgba(255,255,255,0.08);">
-                        <i class="bi bi-search text-info"></i>
-                        <span>Tìm vớ, cấp độ nén...</span>
-                        <kbd class="bg-dark text-white-50 py-0 px-1 rounded small border border-secondary" style="font-size: 0.65rem;">Ctrl K</kbd>
-                    </button>
+                    <!-- Right Action Controls (Strictly No Overflow) -->
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0 text-nowrap my-2 my-lg-0">
+                        <!-- Spotlight Search Quick Trigger (Single line, strictly no wrap) -->
+                        <button type="button" class="btn nav-search-trigger rounded-pill px-3 py-1" onclick="toggleSpotlightSearch()" title="Tìm sản phẩm, mức nén CCL...">
+                            <i class="bi bi-search text-info"></i>
+                            <span class="search-text">Tìm kiếm sản phẩm...</span>
+                            <kbd class="bg-dark text-white-50 py-0 px-1 rounded small border border-secondary" style="font-size: 0.65rem;">Ctrl K</kbd>
+                        </button>
 
-                    <!-- Cart and Consultation Actions -->
-                    <div class="d-flex align-items-center gap-2 text-nowrap">
-                        <button type="button" class="btn btn-outline-info btn-sm rounded-pill px-3 py-2 text-white border-info-subtle shadow-sm" onclick="openCeapModal()">
-                            <i class="bi bi-clipboard2-pulse me-1 text-info"></i> Khám CEAP
+                        <!-- AI Consult quick button (Clean & compact) -->
+                        <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-2 px-xl-3 py-1 text-white border-secondary flex-shrink-0 d-flex align-items-center gap-1" onclick="openChatbot()" style="height: 38px; background: rgba(255,255,255,0.06);" title="Trợ lý AI Bác Sĩ Tư Vấn">
+                            <i class="bi bi-robot text-info"></i>
+                            <span class="small fw-semibold d-none d-xl-inline">AI Bác Sĩ</span>
                         </button>
-                        <button type="button" class="btn btn-light btn-sm fw-bold rounded-pill px-3 py-2 text-primary shadow-sm" onclick="openChatbot()">
-                            <i class="bi bi-robot text-primary me-1"></i> AI Tư Vấn
-                        </button>
-                        <a asp-controller="Cart" asp-action="Index" class="btn btn-warning rounded-pill px-3 py-2 position-relative fw-bold text-dark shadow-sm">
-                            <i class="bi bi-cart3 me-1"></i> Giỏ hàng
-                            <span id="cartCountBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white">
+
+                        <!-- Cart Button (Strictly within bounds, high-contrast) -->
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-warning btn-sm rounded-pill px-3 py-1 position-relative fw-bold text-dark shadow-sm flex-shrink-0 d-flex align-items-center gap-1" style="height: 38px;">
+                            <i class="bi bi-cart3 fs-6"></i>
+                            <span>Giỏ hàng</span>
+                            <span id="cartCountBadge" class="badge rounded-pill bg-danger border border-white ms-1" style="font-size: 0.72rem;">
                                 0
                             </span>
                         </a>
 
+                        <!-- User Auth Area -->
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <div class="dropdown">
-                                <button class="btn btn-outline-light btn-sm rounded-pill px-3 py-2 dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
-                                    <div class="rounded-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 0.75rem;">
+                            <div class="dropdown flex-shrink-0">
+                                <button class="btn btn-outline-light btn-sm rounded-pill px-3 py-1 dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="height: 38px;">
+                                    <div class="rounded-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center" style="width: 22px; height: 22px; font-size: 0.72rem;">
                                         @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
                                     </div>
-                                    <span class="text-truncate" style="max-width: 120px;">@User.Identity.Name</span>
+                                    <span class="text-truncate" style="max-width: 90px;">@User.Identity.Name</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2 mt-2" style="background: rgba(255,255,255,0.96); backdrop-filter: blur(16px);">
                                     <li><h6 class="dropdown-header small">Tài khoản: @User.Identity.Name</h6></li>
-                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Account" asp-action="Profile"><i class="bi bi-person-circle me-2 text-primary"></i>Hồ sơ cá nhân</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Account" asp-action="Profile"><i class="bi bi-person-circle me-2 text-primary"></i>Hồ sơ bệnh án</a></li>
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Account" asp-action="Profile"><i class="bi bi-receipt me-2 text-info"></i>Lịch sử đơn hàng</a></li>
                                     @if (User.IsInRole("Admin"))
                                     {
@@ -133,16 +149,20 @@
                         }
                         else
                         {
-                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2 fw-semibold">
-                                <i class="bi bi-person me-1"></i> Đăng nhập
-                            </a>
-                            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-sm rounded-pill px-3 py-2 fw-semibold shadow-sm d-none d-sm-inline-block">
-                                Đăng ký
-                            </a>
+                            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-sm rounded-pill px-3 py-1 fw-semibold d-flex align-items-center" style="height: 38px;">
+                                    <i class="bi bi-person me-1"></i> Đăng nhập
+                                </a>
+                                <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-sm rounded-pill px-3 py-1 fw-semibold shadow-sm d-none d-xxl-inline-flex align-items-center" style="height: 38px;">
+                                    Đăng ký
+                                </a>
+                            </div>
                         }
                     </div>
                 </div>
             </div>
+        </nav>
+    </header>
         </nav>
     </header>
 
