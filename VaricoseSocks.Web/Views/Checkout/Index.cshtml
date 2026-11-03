@@ -1,80 +1,86 @@
 @model VaricoseSocks.Web.Models.CheckoutViewModel
 @{
-    ViewData["Title"] = "Thanh toán đơn hàng vớ y khoa";
+    ViewData["Title"] = "Thanh toán đơn hàng vớ y khoa - Varicose Socks";
 }
 
 <div class="container py-4">
+    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb small">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
             <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index" class="text-decoration-none">Giỏ hàng</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Thanh toán</li>
+            <li class="breadcrumb-item active" aria-current="page">Thanh toán & Giao nhận</li>
         </ol>
     </nav>
 
-    <!-- 2-Step Progress Stepper -->
-    <div class="d-flex justify-content-center mb-5">
-        <div class="d-flex align-items-center gap-3">
-            <div class="d-flex align-items-center gap-2">
-                <span class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px;">1</span>
-                <span class="fw-bold text-primary">Thông Tin Giao Hàng</span>
-            </div>
-            <div class="border-top border-2 border-primary" style="width: 60px;"></div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px;">2</span>
-                <span class="fw-bold text-dark">Thanh Toán & Xác Nhận</span>
-            </div>
-        </div>
+    <div class="text-center mb-4">
+        <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1 rounded-pill mb-2">BƯỚC 2: THANH TOÁN AN TOÀN</span>
+        <h2 class="fw-bold text-primary mb-1">
+            <i class="bi bi-shield-check me-2"></i>Thông Tin Giao Nhận & Thanh Toán
+        </h2>
+        <p class="text-muted small">Cam kết bảo mật thông tin y tế bệnh nhân 100%.</p>
     </div>
 
-    <form asp-controller="Checkout" asp-action="Process" method="post">
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger rounded-4 shadow-sm border-0 mb-4" role="alert">
+            <h6 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>Vui lòng kiểm tra lại thông tin:</h6>
+            <div asp-validation-summary="All" class="small"></div>
+        </div>
+    }
+
+    <form asp-controller="Checkout" asp-action="Process" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="VoucherCode" id="hiddenVoucherCode" />
+
         <div class="row g-4">
-            <!-- Left: Customer Form & Payment Method -->
+            <!-- Left: Shipping info & Payment method -->
             <div class="col-lg-7">
+                <!-- Shipping Details Card -->
                 <div class="glass-card bg-white p-4 mb-4 border shadow-subtle">
                     <h5 class="fw-bold text-dark mb-3">
-                        <i class="bi bi-person-circle text-primary me-2"></i>1. Thông tin người nhận vớ y khoa
+                        <i class="bi bi-geo-alt-fill text-primary me-2"></i>1. Địa chỉ nhận vớ y khoa
                     </h5>
 
                     <div class="row g-3">
-                        <div class="col-md-12">
-                            <label asp-for="CustomerName" class="form-label fw-semibold small">Họ và tên người nhận:</label>
-                            <input asp-for="CustomerName" class="form-control rounded-3" placeholder="Nguyễn Văn A" required />
+                        <div class="col-md-6">
+                            <label asp-for="CustomerName" class="form-label small fw-bold text-muted"></label>
+                            <input asp-for="CustomerName" class="form-control rounded-pill px-3" placeholder="Nguyễn Văn A" required />
                             <span asp-validation-for="CustomerName" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="CustomerPhone" class="form-label fw-semibold small">Số điện thoại liên hệ:</label>
-                            <input asp-for="CustomerPhone" class="form-control rounded-3" placeholder="0901234567" required />
+                            <label asp-for="CustomerPhone" class="form-label small fw-bold text-muted"></label>
+                            <input asp-for="CustomerPhone" class="form-control rounded-pill px-3" placeholder="0901234567" required />
                             <span asp-validation-for="CustomerPhone" class="text-danger small"></span>
                         </div>
 
-                        <div class="col-md-6">
-                            <label asp-for="CustomerEmail" class="form-label fw-semibold small">Email nhận thông báo:</label>
-                            <input asp-for="CustomerEmail" class="form-control rounded-3" placeholder="email@gmail.com" required />
+                        <div class="col-12">
+                            <label asp-for="CustomerEmail" class="form-label small fw-bold text-muted"></label>
+                            <input asp-for="CustomerEmail" class="form-control rounded-pill px-3" placeholder="email@example.com" type="email" required />
                             <span asp-validation-for="CustomerEmail" class="text-danger small"></span>
+                            <div class="form-text small" style="font-size: 0.75rem;">Mã vận đơn và hóa đơn điện tử sẽ được gửi về email này.</div>
                         </div>
 
-                        <div class="col-md-12">
-                            <label asp-for="ShippingAddress" class="form-label fw-semibold small">Địa chỉ nhận hàng chi tiết:</label>
-                            <input asp-for="ShippingAddress" class="form-control rounded-3" placeholder="Số 123, đường Nguyễn Huệ" required />
+                        <div class="col-12">
+                            <label asp-for="ShippingAddress" class="form-label small fw-bold text-muted"></label>
+                            <input asp-for="ShippingAddress" class="form-control rounded-pill px-3" placeholder="Số nhà, tên tòa nhà, tên đường, phường/xã..." required />
                             <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="City" class="form-label fw-semibold small">Tỉnh / Thành phố:</label>
-                            <input asp-for="City" class="form-control rounded-3" placeholder="TP. Hồ Chí Minh" />
+                            <label asp-for="City" class="form-label small fw-bold text-muted"></label>
+                            <input asp-for="City" class="form-control rounded-pill px-3" placeholder="TP. Hồ Chí Minh" />
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="District" class="form-label fw-semibold small">Quận / Huyện:</label>
-                            <input asp-for="District" class="form-control rounded-3" placeholder="Quận 1" />
+                            <label asp-for="District" class="form-label small fw-bold text-muted"></label>
+                            <input asp-for="District" class="form-control rounded-pill px-3" placeholder="Quận 1, Quận 3, Bình Thạnh..." />
                         </div>
 
-                        <div class="col-md-12">
-                            <label asp-for="Note" class="form-label fw-semibold small">Ghi chú giao hàng:</label>
-                            <textarea asp-for="Note" class="form-control rounded-3" rows="2" placeholder="Ghi chú thêm về giờ giao, mang thử size..."></textarea>
+                        <div class="col-12">
+                            <label asp-for="Note" class="form-label small fw-bold text-muted"></label>
+                            <textarea asp-for="Note" class="form-control rounded-4 px-3" rows="2" placeholder="Ghi chú giao hàng (Ví dụ: Giao giờ hành chính, gọi trước khi đến...)"></textarea>
                         </div>
                     </div>
                 </div>
@@ -109,7 +115,7 @@
                             <div class="col-md-5 text-center">
                                 <div class="qr-card-wrapper d-inline-block">
                                     <div class="radar-laser"></div>
-                                    <img src="https://api.vietqr.io/image/970422-0987654321-compact.jpg?amount=@Model.Cart.TotalAmount&addInfo=VS2026&accountName=VARICOSE%20SOCKS" 
+                                    <img id="qrImagePreview" src="https://api.vietqr.io/image/970422-0987654321-compact.jpg?amount=@Model.Cart.TotalAmount&addInfo=VS2026&accountName=VARICOSE%20SOCKS" 
                                          alt="VietQR Mã Thanh Toán" style="width: 170px; height: 170px; object-fit: contain;" />
                                 </div>
                                 <div class="mt-2 text-danger small fw-bold">
@@ -121,7 +127,7 @@
                                 <div class="small text-muted mb-1">Ngân hàng: <strong>MBBank (Quân Đội)</strong></div>
                                 <div class="small text-muted mb-1">Số tài khoản: <strong class="text-dark">0987.654.321</strong></div>
                                 <div class="small text-muted mb-1">Chủ tài khoản: <strong>VARICOSE SOCKS VIETNAM</strong></div>
-                                <div class="small text-muted mb-2">Số tiền: <strong class="text-danger fs-6">@Model.Cart.TotalAmount.ToString("N0") ₫</strong></div>
+                                <div class="small text-muted mb-2">Số tiền: <strong class="text-danger fs-6" id="qrAmountDisplay">@Model.Cart.TotalAmount.ToString("N0") ₫</strong></div>
                                 <div class="badge bg-success-subtle text-success p-2 small">
                                     <i class="bi bi-shield-check me-1"></i> Hệ thống tự động xác nhận sau 3 giây quét mã
                                 </div>
@@ -137,12 +143,12 @@
                     <h5 class="fw-bold text-dark mb-3">Đơn hàng của bạn (@Model.Cart.TotalQuantity đôi vớ)</h5>
 
                     <!-- Items list -->
-                    <div class="d-flex flex-column gap-3 mb-3 overflow-y-auto" style="max-height: 280px;">
+                    <div class="d-flex flex-column gap-3 mb-3 overflow-y-auto" style="max-height: 250px;">
                         @foreach (var item in Model.Cart.Items)
                         {
                             <div class="d-flex align-items-center justify-content-between pb-2 border-bottom">
                                 <div class="d-flex align-items-center">
-                                    <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "https://placehold.co/100x100?text=Vớ" : item.ProductImageUrl)" 
+                                    <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "/images/products/vo-goi-jobst-ccl2.svg" : item.ProductImageUrl)" 
                                          class="rounded-3 me-2 border p-1 bg-light" style="width: 48px; height: 48px; object-fit: contain;" />
                                     <div>
                                         <div class="fw-bold small text-dark text-truncate" style="max-width: 170px;">@item.ProductName</div>
@@ -156,28 +162,54 @@
                         }
                     </div>
 
+                    <!-- Single Clean Voucher Input Box -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted"><i class="bi bi-ticket-perforated-fill text-primary me-1"></i>Mã giảm giá / Voucher</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="voucherInput" class="form-control rounded-start-pill text-uppercase" placeholder="Nhập mã (Vd: VARICOSE10)" value="@Model.VoucherCode" />
+                            <button class="btn btn-primary rounded-end-pill px-3 fw-bold" type="button" onclick="applyVoucher()">Áp dụng</button>
+                        </div>
+                        <div class="d-flex gap-1 mt-2">
+                            <button type="button" class="badge bg-light text-primary border rounded-pill px-2 py-1 small" onclick="fillVoucher('VARICOSE10')">
+                                + VARICOSE10 (-10%)
+                            </button>
+                            <button type="button" class="badge bg-light text-success border rounded-pill px-2 py-1 small" onclick="fillVoucher('FREESHIP')">
+                                + FREESHIP
+                            </button>
+                        </div>
+                        <div id="voucherMessage" class="small mt-2" style="display: none;"></div>
+                    </div>
+
                     <div class="d-flex justify-content-between mb-2 small">
                         <span class="text-muted">Tạm tính:</span>
-                        <span class="fw-bold">@Model.Cart.SubTotal.ToString("N0") ₫</span>
+                        <span class="fw-bold" id="summarySubTotal" data-value="@Model.Cart.SubTotal">@Model.Cart.SubTotal.ToString("N0") ₫</span>
                     </div>
 
                     <div class="d-flex justify-content-between mb-2 small">
                         <span class="text-muted">Phí vận chuyển:</span>
                         @if (Model.Cart.ShippingFee == 0)
                         {
-                            <span class="text-success fw-bold">Miễn phí toàn quốc</span>
+                            <span class="text-success fw-bold" id="summaryShipping">Miễn phí toàn quốc</span>
                         }
                         else
                         {
-                            <span class="fw-bold">@Model.Cart.ShippingFee.ToString("N0") ₫</span>
+                            <span class="fw-bold" id="summaryShipping" data-value="@Model.Cart.ShippingFee">@Model.Cart.ShippingFee.ToString("N0") ₫</span>
                         }
+                    </div>
+
+                    <div id="discountRow" class="d-flex justify-content-between align-items-center mb-2 small text-success" style="display: @(Model.DiscountAmount > 0 ? "flex" : "none") !important;">
+                        <span>
+                            <i class="bi bi-tag-fill me-1"></i>Ưu đãi giảm giá:
+                            <button type="button" class="btn btn-link text-danger p-0 ms-1 small" onclick="removeVoucher()" title="Hủy mã này" style="font-size: 0.75rem; text-decoration: none;">[Bỏ mã]</button>
+                        </span>
+                        <span class="fw-bold" id="summaryDiscount">-@Model.DiscountAmount.ToString("N0") ₫</span>
                     </div>
 
                     <hr />
 
                     <div class="d-flex justify-content-between align-items-baseline mb-4">
                         <span class="fs-5 fw-bold text-dark">Tổng cộng:</span>
-                        <span class="fs-4 fw-bold text-danger">@Model.Cart.TotalAmount.ToString("N0") ₫</span>
+                        <span class="fs-4 fw-bold text-danger" id="summaryTotal">@((Model.Cart.TotalAmount - Model.DiscountAmount).ToString("N0")) ₫</span>
                     </div>
 
                     <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold text-dark rounded-pill shadow-glow-warning py-3">
@@ -220,5 +252,105 @@
             if (sec <= 0) clearInterval(interval);
         }, 1000);
     }
+
+    function fillVoucher(code) {
+        const input = document.getElementById('voucherInput');
+        if (input) {
+            input.value = code;
+            applyVoucher();
+        }
+    }
+
+    function removeVoucher() {
+        const input = document.getElementById('voucherInput');
+        if (input) input.value = '';
+        document.getElementById('hiddenVoucherCode').value = '';
+        
+        const msgEl = document.getElementById('voucherMessage');
+        if (msgEl) {
+            msgEl.innerText = '';
+            msgEl.style.display = 'none';
+        }
+
+        document.getElementById('discountRow').style.setProperty('display', 'none', 'important');
+        document.getElementById('summaryDiscount').innerText = '-0 ₫';
+
+        const subTotalEl = document.getElementById('summarySubTotal');
+        const subTotal = subTotalEl ? parseFloat(subTotalEl.getAttribute('data-value')) : 0;
+        const shipping = subTotal >= 500000 ? 0 : 30000;
+        const finalTotal = subTotal + shipping;
+        document.getElementById('summaryTotal').innerText = `${Number(finalTotal).toLocaleString('vi-VN')} ₫`;
+
+        const qrAmtEl = document.getElementById('qrAmountDisplay');
+        if (qrAmtEl) qrAmtEl.innerText = `${Number(finalTotal).toLocaleString('vi-VN')} ₫`;
+
+        const qrImg = document.getElementById('qrImagePreview');
+        if (qrImg) {
+            qrImg.src = `https://api.vietqr.io/image/970422-0987654321-compact.jpg?amount=${finalTotal}&addInfo=VS2026&accountName=VARICOSE%20SOCKS`;
+        }
+    }
+
+    async function applyVoucher() {
+        const codeInput = document.getElementById('voucherInput');
+        const code = codeInput ? codeInput.value.trim() : '';
+        const msgEl = document.getElementById('voucherMessage');
+        const subTotalEl = document.getElementById('summarySubTotal');
+        const subTotal = subTotalEl ? parseFloat(subTotalEl.getAttribute('data-value')) : 0;
+
+        if (!code) {
+            msgEl.className = 'small mt-2 text-danger';
+            msgEl.innerText = 'Vui lòng nhập mã giảm giá.';
+            msgEl.style.display = 'block';
+            return;
+        }
+
+        try {
+            const resp = await fetch('/Checkout/ValidateVoucher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code, orderAmount: subTotal })
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                document.getElementById('hiddenVoucherCode').value = data.code;
+                msgEl.className = 'small mt-2 text-success fw-bold';
+                msgEl.innerText = data.message;
+                msgEl.style.display = 'block';
+
+                document.getElementById('discountRow').style.setProperty('display', 'flex', 'important');
+                document.getElementById('summaryDiscount').innerText = `-${Number(data.discountAmount).toLocaleString('vi-VN')} ₫`;
+
+                const shipping = subTotal >= 500000 ? 0 : 30000;
+                const finalTotal = Math.max(0, subTotal + shipping - data.discountAmount);
+                document.getElementById('summaryTotal').innerText = `${Number(finalTotal).toLocaleString('vi-VN')} ₫`;
+                
+                const qrAmtEl = document.getElementById('qrAmountDisplay');
+                if (qrAmtEl) qrAmtEl.innerText = `${Number(finalTotal).toLocaleString('vi-VN')} ₫`;
+
+                const qrImg = document.getElementById('qrImagePreview');
+                if (qrImg) {
+                    qrImg.src = `https://api.vietqr.io/image/970422-0987654321-compact.jpg?amount=${finalTotal}&addInfo=VS2026&accountName=VARICOSE%20SOCKS`;
+                }
+
+                if (typeof triggerConfetti === 'function') triggerConfetti();
+            } else {
+                msgEl.className = 'small mt-2 text-danger';
+                msgEl.innerText = data.message || 'Mã không hợp lệ.';
+                msgEl.style.display = 'block';
+            }
+        } catch (e) {
+            msgEl.className = 'small mt-2 text-danger';
+            msgEl.innerText = 'Lỗi kết nối khi kiểm tra mã.';
+            msgEl.style.display = 'block';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const initCode = document.getElementById('voucherInput')?.value?.trim();
+        if (initCode) {
+            applyVoucher();
+        }
+    });
 </script>
 }

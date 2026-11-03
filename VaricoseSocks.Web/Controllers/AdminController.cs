@@ -132,4 +132,16 @@ public class AdminController : Controller
         await _apiService.UpdateOrderStatusAsync(orderId, status);
         return RedirectToAction(nameof(Orders));
     }
+
+    public async Task<IActionResult> Customers()
+    {
+        var customers = await _apiService.GetCustomersAsync();
+        return View(customers);
+    }
+
+    public async Task<IActionResult> Inventory()
+    {
+        var inventory = await _apiService.GetInventoryStatusAsync();
+        return View(inventory);
+    }
 }

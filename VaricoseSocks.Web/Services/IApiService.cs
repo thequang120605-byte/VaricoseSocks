@@ -24,6 +24,13 @@ public interface IApiService
     Task<List<OrderDetailViewModel>> GetAllOrdersAsync(int? status = null);
     Task<bool> UpdateOrderStatusAsync(int orderId, int status);
 
+    // Promotions
+    Task<CouponValidationResultViewModel?> ValidateVoucherAsync(string code, decimal orderAmount);
+
+    // Admin Management (Customer & Inventory)
+    Task<List<AdminCustomerViewModel>> GetCustomersAsync();
+    Task<List<InventoryStatusViewModel>> GetInventoryStatusAsync();
+
     // Chatbot AI
     Task<ChatbotConsultResultViewModel> ConsultChatbotAsync(string message, double? ankleCm, double? calfCm, double? thighCm, bool isPregnant, bool hasVaricose, bool hasSwelling);
     Task<SizeResultViewModel> CalculateSizeAsync(double ankleCm, double? calfCm, double? thighCm);

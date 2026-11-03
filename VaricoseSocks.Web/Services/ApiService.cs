@@ -291,6 +291,7 @@ public class ApiService : IApiService
                 district = model.District,
                 note = model.Note,
                 paymentMethod = model.PaymentMethod,
+                voucherCode = model.VoucherCode,
                 items = model.Cart.Items.Select(i => new
                 {
                     productId = i.ProductId,
@@ -364,6 +365,63 @@ public class ApiService : IApiService
         {
             return false;
         }
+    }
+
+    public async Task<CouponValidationResultViewModel?> ValidateVoucherAsync(string code, decimal orderAmount)
+    {
+        try
+        {
+            var payload = new { code, orderAmount };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("promotions/validate", content);
+            var stream = await response.Content.ReadAsStreamAsync();
+            var result = await JsonSerializer.DeserializeAsync<CouponValidationResultViewModel>(stream, _jsonOptions);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return new CouponValidationResultViewModel
+            {
+                Valid = false,
+                Message = "Không th? xác th?c mã gi?m giá: " + ex.Message
+            };
+        }
+    }
+
+    public async Task<List<AdminCustomerViewModel>> GetCustomersAsync()
+    {
+        try
+        {
+            SetAuthHeader();
+            var response = await _httpClient.GetAsync("customers");
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<List<AdminCustomerViewModel>>(stream, _jsonOptions);
+                if (data != null) return data;
+            }
+        }
+        catch { }
+
+        return new List<AdminCustomerViewModel>();
+    }
+
+    public async Task<List<InventoryStatusViewModel>> GetInventoryStatusAsync()
+    {
+        try
+        {
+            SetAuthHeader();
+            var response = await _httpClient.GetAsync("inventory/status");
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                var data = await JsonSerializer.DeserializeAsync<List<InventoryStatusViewModel>>(stream, _jsonOptions);
+                if (data != null) return data;
+            }
+        }
+        catch { }
+
+        return new List<InventoryStatusViewModel>();
     }
 
     public async Task<ChatbotConsultResultViewModel> ConsultChatbotAsync(string message, double? ankleCm, double? calfCm, double? thighCm, bool isPregnant, bool hasVaricose, bool hasSwelling)

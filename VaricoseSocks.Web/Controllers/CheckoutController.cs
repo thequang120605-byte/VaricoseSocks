@@ -24,7 +24,7 @@ public class CheckoutController : Controller
         return sessionId;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? voucher = null)
     {
         var sessionId = GetOrCreateSessionId();
         var cart = await _apiService.GetCartAsync(null, sessionId);
@@ -47,8 +47,18 @@ public class CheckoutController : Controller
             CustomerPhone = phone,
             ShippingAddress = address,
             City = "Hồ Chí Minh",
-            District = "Quận 3"
+            District = "Quận 3",
+            VoucherCode = voucher
         };
+
+        if (!string.IsNullOrWhiteSpace(voucher))
+        {
+            var vResult = await _apiService.ValidateVoucherAsync(voucher, cart.SubTotal);
+            if (vResult != null && vResult.Valid)
+            {
+                model.DiscountAmount = vResult.DiscountAmount;
+            }
+        }
 
         return View(model);
     }
@@ -84,6 +94,35 @@ public class CheckoutController : Controller
         return View("Index", model);
     }
 
+    [HttpPost]
+    public async Task<IActionResult> ValidateVoucher([FromBody] VoucherRequestModel req)
+    {
+        if (string.IsNullOrWhiteSpace(req.Code))
+        {
+            return Json(new { success = false, message = "Vui lòng nhập mã giảm giá." });
+        }
+
+        var result = await _apiService.ValidateVoucherAsync(req.Code, req.OrderAmount);
+        if (result != null && result.Valid)
+        {
+            return Json(new
+            {
+                success = true,
+                code = result.Code,
+                name = result.Name,
+                discountAmount = result.DiscountAmount,
+                finalAmount = result.FinalAmount,
+                message = result.Message
+            });
+        }
+
+        return Json(new
+        {
+            success = false,
+            message = result?.Message ?? "Mã giảm giá không hợp lệ hoặc không đủ điều kiện."
+        });
+    }
+
     public async Task<IActionResult> Success(string orderCode)
     {
         var order = await _apiService.GetOrderByCodeAsync(orderCode);
@@ -94,4 +133,10 @@ public class CheckoutController : Controller
 
         return View(order);
     }
+}
+
+public class VoucherRequestModel
+{
+    public string Code { get; set; } = string.Empty;
+    public decimal OrderAmount { get; set; }
 }

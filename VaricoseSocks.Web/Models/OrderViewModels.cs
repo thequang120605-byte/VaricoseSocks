@@ -34,6 +34,11 @@ public class CheckoutViewModel
     [Display(Name = "Phương thức thanh toán")]
     public int PaymentMethod { get; set; } = 1; // 1: COD, 2: Chuyển khoản VietQR
 
+    [Display(Name = "Mã ưu đãi / Voucher")]
+    public string? VoucherCode { get; set; }
+
+    public decimal DiscountAmount { get; set; }
+
     public CartViewModel Cart { get; set; } = new();
 }
 
@@ -54,6 +59,7 @@ public class OrderDetailViewModel
     public int OrderStatus { get; set; } = 1;
     public decimal SubTotal { get; set; }
     public decimal ShippingFee { get; set; }
+    public decimal DiscountAmount { get; set; }
     public decimal TotalAmount { get; set; }
     public DateTime CreatedAt { get; set; }
     public List<OrderItemViewModel> Items { get; set; } = new();

@@ -11,13 +11,13 @@ Write-Host "==========================================================" -Foregro
 
 # 1. Khởi chạy Backend API (Cổng 5046)
 Write-Host "[1/2] Đang khởi động Backend REST API tại http://localhost:5046 ..." -ForegroundColor Yellow
-$apiProcess = Start-Process -FilePath "dotnet" -ArgumentList "run --project VaricoseSocks.API" -PassThru -NoNewWindow
+$apiProcess = Start-Process -FilePath "dotnet" -ArgumentList "run --project VaricoseSocks.API --launch-profile http" -PassThru -NoNewWindow
 
 Start-Sleep -Seconds 3
 
 # 2. Khởi chạy Frontend Web UI (Cổng 5118)
 Write-Host "[2/2] Đang khởi động Frontend Web UI tại http://localhost:5118 ..." -ForegroundColor Yellow
-$webProcess = Start-Process -FilePath "dotnet" -ArgumentList "run --project VaricoseSocks.Web" -PassThru -NoNewWindow
+$webProcess = Start-Process -FilePath "dotnet" -ArgumentList "run --project VaricoseSocks.Web --launch-profile http" -PassThru -NoNewWindow
 
 Start-Sleep -Seconds 3
 
@@ -31,7 +31,13 @@ Write-Host "  ĐỊA CHỈ TRUY CẬP HỆ THỐNG:" -ForegroundColor White
 Write-Host "  1. Giao diện Mua sắm (Web UI):   http://localhost:5118" -ForegroundColor Green
 Write-Host "  2. Backend REST API Portal:       http://localhost:5046" -ForegroundColor Green
 Write-Host "  3. Quản trị viên (Admin UI):      http://localhost:5118/Admin" -ForegroundColor Green
-Write-Host "  4. Tra cứu đơn hàng (Tracking):   http://localhost:5118/Order/Track" -ForegroundColor Green
+Write-Host "  4. Quản lý khách hàng:            http://localhost:5118/Admin/Customers" -ForegroundColor Green
+Write-Host "  5. Quản lý tồn kho:               http://localhost:5118/Admin/Inventory" -ForegroundColor Green
+Write-Host "  6. Tra cứu đơn hàng (Tracking):   http://localhost:5118/Order/Track" -ForegroundColor Green
+Write-Host ""
+Write-Host "  TÀI KHOẢN ĐĂNG NHẬP DỰ ÁN:" -ForegroundColor White
+Write-Host "  - Quản trị viên (Admin): admin@varicosesocks.vn / Admin@123" -ForegroundColor Yellow
+Write-Host "  - Khách hàng mẫu:        trung.chu@varicosesocks.vn / 123456" -ForegroundColor Yellow
 Write-Host "----------------------------------------------------------" -ForegroundColor Gray
 Write-Host "Nhấn phím bất kỳ hoặc tắt cửa sổ để dừng máy chủ..." -ForegroundColor Yellow
 

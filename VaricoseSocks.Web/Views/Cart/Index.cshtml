@@ -79,7 +79,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "https://placehold.co/100x100?text=Vớ" : item.ProductImageUrl)" 
+                                                <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "/images/products/vo-goi-jobst-ccl2.svg" : item.ProductImageUrl)" 
                                                      class="rounded-3 me-3 border p-1 bg-light" style="width: 60px; height: 60px; object-fit: contain;" alt="@item.ProductName" />
                                                 <div>
                                                     <a asp-controller="Product" asp-action="Detail" asp-route-id="@item.ProductId" class="fw-bold text-dark text-decoration-none hover-primary">
@@ -153,16 +153,29 @@
                         <span class="text-success fw-bold">Đổi size 7 ngày</span>
                     </div>
 
-                    <!-- Voucher Box -->
-                    <div class="input-group input-group-sm mb-3">
-                        <input type="text" class="form-control rounded-start-pill" placeholder="Mã giảm giá (VARICOSE10)" value="VARICOSE10" />
-                        <button class="btn btn-primary rounded-end-pill px-3 fw-bold" type="button" onclick="triggerConfetti(); showModernToast('Áp dụng ưu đãi thành công!', 'Giảm 10% cho đơn hàng vớ y khoa.', 'success');">Áp dụng</button>
+                    <!-- Available Vouchers Notice -->
+                    <div class="p-3 bg-light rounded-4 border mb-3">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-ticket-perforated-fill text-primary"></i>
+                            <span class="fw-bold small text-dark">Mã ưu đãi hiện có:</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1 mt-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 small">
+                                <i class="bi bi-tag-fill me-1"></i>VARICOSE10 (Giảm 10%)
+                            </span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+                                <i class="bi bi-truck me-1"></i>FREESHIP (Đơn từ 500k)
+                            </span>
+                        </div>
+                        <div class="text-muted small mt-2" style="font-size: 0.74rem;">
+                            <i class="bi bi-info-circle me-1"></i>Mã giảm giá sẽ được áp dụng và tính chiết khấu tại bước <strong>Thanh Toán</strong>.
+                        </div>
                     </div>
 
                     <hr />
 
                     <div class="d-flex justify-content-between align-items-baseline mb-4">
-                        <span class="fs-5 fw-bold text-dark">Tổng thanh toán:</span>
+                        <span class="fs-5 fw-bold text-dark">Tạm tính thanh toán:</span>
                         <span class="fs-4 fw-bold text-danger">@Model.TotalAmount.ToString("N0") ₫</span>
                     </div>
 
