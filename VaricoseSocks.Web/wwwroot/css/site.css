@@ -35,7 +35,7 @@ body {
     font-family: var(--font-body);
     color: #1e293b;
     background-color: var(--med-bg);
-    overflow-x: hidden;
+    overflow-x: clip;
     letter-spacing: -0.01em;
 }
 
@@ -45,8 +45,32 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3, .display-4, .display
 }
 
 html, body {
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
+}
+
+/* =========================================================================
+   STICKY / FIXED HEADER ("Đóng băng" thanh điều hướng cố định trên đầu trang)
+   ========================================================================= */
+.main-sticky-header {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1030;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    background: #0a192f;
+}
+
+body {
+    padding-top: 102px !important;
+}
+
+@media (max-width: 767.98px) {
+    body {
+        padding-top: 66px !important;
+    }
 }
 
 /* =========================================================================
@@ -510,4 +534,117 @@ body.accessible-senior-mode .btn {
 }
 .font-size-toggle-btn:hover {
     transform: scale(1.08);
+}
+
+
+/* =========================================================================
+   13. MOBILE RESPONSIVE BOTTOM NAVIGATION BAR & MOBILE CHATBOT SHEET
+   ========================================================================= */
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 1040;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 500;
+    flex: 1;
+    height: 100%;
+    transition: color 0.15s ease;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.mobile-nav-item i {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:hover,
+.mobile-nav-item:focus {
+    color: #1e40af;
+}
+
+.mobile-nav-highlight {
+    position: relative;
+    top: -12px;
+}
+
+.mobile-nav-ai-bubble {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #2563eb, #0284c7);
+    color: #ffffff !important;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+    border: 3px solid #ffffff;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mobile-nav-ai-bubble:hover,
+.mobile-nav-ai-bubble:active {
+    transform: scale(1.1);
+}
+
+/* Offset body for fixed mobile bottom nav on screens < 992px */
+@media (max-width: 991.98px) {
+    body {
+        padding-bottom: 68px;
+    }
+    .sticky-mobile-buy-bar {
+        bottom: 60px !important;
+    }
+}
+
+/* Chatbot responsive window on mobile (native app bottom sheet style) */
+@media (max-width: 576px) {
+    .chatbot-window-responsive {
+        width: 100% !important;
+        height: calc(100vh - 65px) !important;
+        max-height: 90vh !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        border-radius: 20px 20px 0 0 !important;
+        margin: 0 !important;
+    }
+    
+    #chatbotToggleBtn {
+        bottom: 72px !important;
+        right: 16px !important;
+        width: 48px !important;
+        height: 48px !important;
+    }
+}
+
+/* Utility hide scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }

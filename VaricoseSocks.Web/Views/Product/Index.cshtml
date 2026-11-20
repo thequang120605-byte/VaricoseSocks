@@ -12,9 +12,37 @@
         </ol>
     </nav>
 
+    <!-- Mobile Horizontal Category & Filter Pills (Screens < 992px) -->
+    <div class="d-lg-none mb-3">
+        <div class="d-flex align-items-center gap-2 overflow-x-auto hide-scrollbar pb-1 text-nowrap">
+            <a asp-controller="Product" asp-action="Index" class="btn btn-sm rounded-pill @(!Model.SelectedCategoryId.HasValue && !Model.CompressionFilter.HasValue ? "btn-primary" : "btn-outline-secondary")">
+                Tất cả
+            </a>
+            @foreach (var c in Model.Categories)
+            {
+                <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@c.Id" asp-route-searchTerm="@Model.SearchTerm" asp-route-compression="@Model.CompressionFilter"
+                   class="btn btn-sm rounded-pill @(Model.SelectedCategoryId == c.Id ? "btn-primary" : "btn-outline-secondary")">
+                    @c.Name
+                </a>
+            }
+            <a asp-controller="Product" asp-action="Index" asp-route-compression="1"
+               class="btn btn-sm rounded-pill @(Model.CompressionFilter == 1 ? "btn-primary" : "btn-outline-secondary")">
+                CCL1 (15-21)
+            </a>
+            <a asp-controller="Product" asp-action="Index" asp-route-compression="2"
+               class="btn btn-sm rounded-pill @(Model.CompressionFilter == 2 ? "btn-primary" : "btn-outline-secondary")">
+                CCL2 (20-30)
+            </a>
+            <a asp-controller="Product" asp-action="Index" asp-route-compression="3"
+               class="btn btn-sm rounded-pill @(Model.CompressionFilter == 3 ? "btn-primary" : "btn-outline-secondary")">
+                CCL3 (34-46)
+            </a>
+        </div>
+    </div>
+
     <div class="row">
         <!-- Sidebar Bộ lọc -->
-        <div class="col-lg-3 mb-4">
+        <div class="col-lg-3 mb-4 d-none d-lg-block">
             <div class="card shadow-sm border-0 mb-3">
                 <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
                     <span><i class="bi bi-funnel me-1"></i> Danh mục sản phẩm</span>
@@ -98,7 +126,7 @@
             </div>
 
             <!-- Product Grid -->
-            <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="row row-cols-2 row-cols-md-3 g-2 g-md-4">
                 @if (!Model.Products.Any())
                 {
                     <div class="col-12 py-5 text-center text-muted">

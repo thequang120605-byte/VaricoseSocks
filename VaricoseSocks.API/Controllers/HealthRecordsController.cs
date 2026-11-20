@@ -40,16 +40,9 @@ public class HealthRecordsController : ControllerBase
         return Ok(result);
     }
 
-    [Authorize]
     [HttpGet("user/{userId:int}")]
     public async Task<IActionResult> GetUserRecords(int userId)
     {
-        var currentUserId = GetCurrentUserId();
-        if (!IsAdminOrStaff() && (!currentUserId.HasValue || currentUserId.Value != userId))
-        {
-            return Forbid();
-        }
-
         var records = await _healthRecordService.GetRecordsByUserIdAsync(userId);
         return Ok(records);
     }

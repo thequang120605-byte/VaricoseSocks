@@ -125,6 +125,7 @@ public class ApiService : IApiService
     {
         try
         {
+            SetAuthHeader();
             var payload = new
             {
                 name = model.Name,
@@ -152,7 +153,7 @@ public class ApiService : IApiService
         catch
         {
             _cachedProducts = null;
-            return true;
+            return false;
         }
     }
 
@@ -160,6 +161,7 @@ public class ApiService : IApiService
     {
         try
         {
+            SetAuthHeader();
             var payload = new
             {
                 name = model.Name,
@@ -187,7 +189,7 @@ public class ApiService : IApiService
         catch
         {
             _cachedProducts = null;
-            return true;
+            return false;
         }
     }
 
@@ -195,6 +197,7 @@ public class ApiService : IApiService
     {
         try
         {
+            SetAuthHeader();
             var response = await _httpClient.DeleteAsync($"products/{id}");
             _cachedProducts = null;
             return response.IsSuccessStatusCode;
@@ -202,7 +205,7 @@ public class ApiService : IApiService
         catch
         {
             _cachedProducts = null;
-            return true;
+            return false;
         }
     }
 
@@ -383,7 +386,7 @@ public class ApiService : IApiService
             return new CouponValidationResultViewModel
             {
                 Valid = false,
-                Message = "Kh�ng th? x�c th?c m� gi?m gi�: " + ex.Message
+                Message = "Khng th? xc th?c m gi?m gi: " + ex.Message
             };
         }
     }
@@ -453,7 +456,15 @@ public class ApiService : IApiService
         var result = new ChatbotConsultResultViewModel();
         var allProducts = await GetProductsAsync();
 
-        if (isPregnant || message.ToLower().Contains("bầu"))
+        var lowMsg = message.ToLower();
+        if (lowMsg.Contains("mã") || lowMsg.Contains("voucher") || lowMsg.Contains("giảm giá") || lowMsg.Contains("khuyến mãi"))
+        {
+            result.ReplyMessage = "Chào bạn! Varicose Socks đang tặng mã giảm giá **VARICOSE10** (giảm ngay 10% toàn bộ đơn hàng + Miễn phí vận chuyển toàn quốc). Hãy bấm 'Sao chép' và thêm sản phẩm ngay bên dưới vào giỏ hàng!";
+            result.RecommendedCompressionText = "Mọi cấp độ";
+            result.RecommendedStyleText = "Tất cả sản phẩm";
+            result.RecommendedProducts = allProducts.Take(3).ToList();
+        }
+        else if (isPregnant || lowMsg.Contains("bầu") || lowMsg.Contains("thai"))
         {
             result.ReplyMessage = "Chào bạn! Trong thai kỳ, áp lực vùng chậu tăng làm máu dồn xuống chân. Chúng tôi khuyên bạn dùng Quần vớ bà bầu CCL1 (15-20 mmHg) để nhẹ chân và ngừa chuột rút.";
             result.RecommendedCompressionText = "CCL1 (15-20 mmHg)";
@@ -551,6 +562,25 @@ public class ApiService : IApiService
         }
     }
 
+    public async Task<bool> CheckEmailExistsAsync(string email)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"auth/check-email?email={Uri.EscapeDataString(email)}");
+            if (response.IsSuccessStatusCode)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                using var doc = await JsonDocument.ParseAsync(stream);
+                if (doc.RootElement.TryGetProperty("exists", out var prop))
+                {
+                    return prop.GetBoolean();
+                }
+            }
+        }
+        catch { }
+        return false;
+    }
+
     public async Task<UserAccountViewModel?> GetProfileAsync(int userId)
     {
         try
@@ -566,6 +596,29 @@ public class ApiService : IApiService
         catch { }
 
         return null;
+    }
+
+    public async Task<bool> UpdateProfileAsync(int userId, UpdateProfileViewModel model)
+    {
+        try
+        {
+            SetAuthHeader();
+            var payload = new
+            {
+                fullName = model.FullName,
+                phone = model.Phone,
+                address = model.Address,
+                city = model.City,
+                district = model.District
+            };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"auth/user/{userId}", content);
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public async Task<List<OrderDetailViewModel>> GetUserOrdersAsync(int userId)

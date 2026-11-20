@@ -34,10 +34,35 @@ public class CheckoutController : Controller
             return RedirectToAction("Index", "Cart");
         }
 
-        string name = User.Identity?.IsAuthenticated == true ? (User.Identity.Name ?? "Chu Văn Quốc Trung") : "Chu Văn Quốc Trung";
-        string email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "trung.chu@varicosesocks.vn";
-        string phone = User.FindFirst("Phone")?.Value ?? "0987654321";
-        string address = User.FindFirst("Address")?.Value ?? "456 Lê Văn Sỹ, Phường 14";
+        string name = string.Empty;
+        string email = string.Empty;
+        string phone = string.Empty;
+        string address = string.Empty;
+        string city = "Hồ Chí Minh";
+        string district = string.Empty;
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out var uid))
+            {
+                var profile = await _apiService.GetProfileAsync(uid);
+                if (profile != null)
+                {
+                    name = profile.FullName;
+                    email = profile.Email;
+                    phone = profile.Phone ?? string.Empty;
+                    address = profile.Address ?? string.Empty;
+                    if (!string.IsNullOrEmpty(profile.City)) city = profile.City;
+                    if (!string.IsNullOrEmpty(profile.District)) district = profile.District;
+                }
+            }
+
+            if (string.IsNullOrEmpty(name)) name = User.Identity.Name ?? string.Empty;
+            if (string.IsNullOrEmpty(email)) email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(phone)) phone = User.FindFirst("Phone")?.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(address)) address = User.FindFirst("Address")?.Value ?? string.Empty;
+        }
 
         var model = new CheckoutViewModel
         {
@@ -46,8 +71,8 @@ public class CheckoutController : Controller
             CustomerEmail = email,
             CustomerPhone = phone,
             ShippingAddress = address,
-            City = "Hồ Chí Minh",
-            District = "Quận 3",
+            City = city,
+            District = district,
             VoucherCode = voucher
         };
 
@@ -76,6 +101,17 @@ public class CheckoutController : Controller
             return RedirectToAction("Index", "Cart");
         }
 
+        // Ràng buộc bắt buộc khi Đặt hàng: Phải cung cấp Số điện thoại và Địa chỉ nhận hàng
+        if (string.IsNullOrWhiteSpace(model.CustomerPhone) || model.CustomerPhone.Trim().Length < 8)
+        {
+            ModelState.AddModelError("CustomerPhone", "Ràng buộc đặt hàng: Quý khách vui lòng cung cấp Số điện thoại liên hệ để nhân viên y tế gọi xác nhận.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.ShippingAddress) || model.ShippingAddress.Trim().Length < 5)
+        {
+            ModelState.AddModelError("ShippingAddress", "Ràng buộc đặt hàng: Quý khách vui lòng cung cấp Địa chỉ nhận hàng chi tiết (Số nhà, tên đường, phường xã).");
+        }
+
         if (!ModelState.IsValid)
         {
             return View("Index", model);
@@ -83,6 +119,27 @@ public class CheckoutController : Controller
 
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         int? userId = int.TryParse(userIdClaim, out var uid) ? uid : null;
+
+        // Nếu người dùng đã đăng nhập nhưng chưa có SĐT/Địa chỉ, tự động đồng bộ cập nhật vào Profile Database
+        if (userId.HasValue)
+        {
+            try
+            {
+                var profile = await _apiService.GetProfileAsync(userId.Value);
+                if (profile != null && (string.IsNullOrWhiteSpace(profile.Phone) || string.IsNullOrWhiteSpace(profile.Address)))
+                {
+                    await _apiService.UpdateProfileAsync(userId.Value, new UpdateProfileViewModel
+                    {
+                        FullName = model.CustomerName,
+                        Phone = model.CustomerPhone,
+                        Address = model.ShippingAddress,
+                        City = model.City,
+                        District = model.District
+                    });
+                }
+            }
+            catch { }
+        }
 
         var order = await _apiService.CreateOrderAsync(model, sessionId, userId);
         if (order != null)

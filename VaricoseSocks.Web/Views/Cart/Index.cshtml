@@ -195,6 +195,12 @@
 @section Scripts {
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        const totalQty = @Model.TotalQuantity;
+        const b = document.getElementById('cartCountBadge');
+        if (b) b.innerText = totalQty;
+        const bm = document.getElementById('cartCountBadgeMobile');
+        if (bm) bm.innerText = totalQty;
+
         if (@progressPercent >= 100) {
             triggerConfetti();
         }

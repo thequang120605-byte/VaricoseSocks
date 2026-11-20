@@ -27,7 +27,17 @@ public class CartController : Controller
     {
         var sessionId = GetOrCreateSessionId();
         var cart = await _apiService.GetCartAsync(null, sessionId);
+        HttpContext.Session.SetInt32("CartCount", cart.TotalQuantity);
         return View(cart);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetCount()
+    {
+        var sessionId = GetOrCreateSessionId();
+        var cart = await _apiService.GetCartAsync(null, sessionId);
+        HttpContext.Session.SetInt32("CartCount", cart.TotalQuantity);
+        return Json(new { count = cart.TotalQuantity });
     }
 
     [HttpPost]
@@ -38,10 +48,11 @@ public class CartController : Controller
         var selectedColor = string.IsNullOrWhiteSpace(color) ? "Màu Da (Beige)" : color;
 
         await _apiService.AddToCartAsync(productId, null, selectedSize, selectedColor, quantity, null, sessionId);
+        var cart = await _apiService.GetCartAsync(null, sessionId);
+        HttpContext.Session.SetInt32("CartCount", cart.TotalQuantity);
 
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
         {
-            var cart = await _apiService.GetCartAsync(null, sessionId);
             return Json(new { success = true, totalQuantity = cart.TotalQuantity, subTotal = cart.SubTotal });
         }
 
@@ -52,11 +63,12 @@ public class CartController : Controller
     public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
     {
         await _apiService.UpdateCartItemQuantityAsync(cartItemId, quantity);
+        var sessionId = GetOrCreateSessionId();
+        var cart = await _apiService.GetCartAsync(null, sessionId);
+        HttpContext.Session.SetInt32("CartCount", cart.TotalQuantity);
 
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
         {
-            var sessionId = GetOrCreateSessionId();
-            var cart = await _apiService.GetCartAsync(null, sessionId);
             return Json(new { success = true, totalQuantity = cart.TotalQuantity, subTotal = cart.SubTotal, totalAmount = cart.TotalAmount });
         }
 
@@ -67,11 +79,12 @@ public class CartController : Controller
     public async Task<IActionResult> RemoveItem(int cartItemId)
     {
         await _apiService.RemoveCartItemAsync(cartItemId);
+        var sessionId = GetOrCreateSessionId();
+        var cart = await _apiService.GetCartAsync(null, sessionId);
+        HttpContext.Session.SetInt32("CartCount", cart.TotalQuantity);
 
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
         {
-            var sessionId = GetOrCreateSessionId();
-            var cart = await _apiService.GetCartAsync(null, sessionId);
             return Json(new { success = true, totalQuantity = cart.TotalQuantity, subTotal = cart.SubTotal, totalAmount = cart.TotalAmount });
         }
 

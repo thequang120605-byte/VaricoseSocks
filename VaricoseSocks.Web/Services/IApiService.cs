@@ -39,6 +39,8 @@ public interface IApiService
     Task<AuthResponseViewModel?> LoginAsync(string email, string password);
     Task<AuthResponseViewModel?> RegisterAsync(RegisterViewModel model);
     Task<UserAccountViewModel?> GetProfileAsync(int userId);
+    Task<bool> UpdateProfileAsync(int userId, UpdateProfileViewModel model);
+    Task<bool> CheckEmailExistsAsync(string email);
     Task<List<OrderDetailViewModel>> GetUserOrdersAsync(int userId);
 
     // Patient Health Records & CEAP Clinical Tools

@@ -10,10 +10,12 @@ namespace VaricoseSocks.Web.Controllers;
 public class AccountController : Controller
 {
     private readonly IApiService _apiService;
+    private readonly IEmailService _emailService;
 
-    public AccountController(IApiService apiService)
+    public AccountController(IApiService apiService, IEmailService emailService)
     {
         _apiService = apiService;
+        _emailService = emailService;
     }
 
     [HttpGet]
@@ -107,22 +109,110 @@ public class AccountController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        return View(new RegisterViewModel());
+        return View(new RegisterViewModel { Step = "form" });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
-        if (!ModelState.IsValid)
+        // GIAI ĐOẠN 1: Người dùng nhập thông tin rút gọn (FullName, Email, Password, ConfirmPassword)
+        if (model.Step != "otp")
         {
+            if (string.IsNullOrWhiteSpace(model.FullName) || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+            {
+                ModelState.AddModelError(string.Empty, "Vui lòng điền đầy đủ họ tên, email và mật khẩu.");
+                model.Step = "form";
+                return View(model);
+            }
+
+            if (model.Password != model.ConfirmPassword)
+            {
+                ModelState.AddModelError("ConfirmPassword", "Mật khẩu xác nhận không khớp.");
+                model.Step = "form";
+                return View(model);
+            }
+
+            if (model.Password.Length < 6)
+            {
+                ModelState.AddModelError("Password", "Mật khẩu phải có tối thiểu 6 ký tự.");
+                model.Step = "form";
+                return View(model);
+            }
+
+            // Kiểm tra xem Email đã tồn tại trong MySQL Database hay chưa
+            var emailExists = await _apiService.CheckEmailExistsAsync(model.Email);
+            if (emailExists)
+            {
+                ModelState.AddModelError("Email", "Địa chỉ Gmail này đã được đăng ký tài khoản trong hệ thống.");
+                model.Step = "form";
+                return View(model);
+            }
+
+            // Tạo mã OTP 6 chữ số ngẫu nhiên
+            var otp = Random.Shared.Next(100000, 999999).ToString();
+
+            // Lưu thông tin đăng ký tạm và mã OTP vào Session (chưa lưu vào Database)
+            HttpContext.Session.SetString("Register_Otp", otp);
+            HttpContext.Session.SetString("Register_Otp_Email", model.Email.Trim().ToLower());
+            HttpContext.Session.SetString("Register_FullName", model.FullName.Trim());
+            HttpContext.Session.SetString("Register_Password", model.Password);
+            HttpContext.Session.SetString("Register_Otp_Time", DateTime.UtcNow.ToString("o"));
+
+            // Gửi trực tiếp email OTP qua Google SMTP Service
+            var emailResult = await _emailService.SendOtpEmailAsync(model.Email, model.FullName, otp);
+
+            // Chuyển sang Bước 2: Nhập OTP
+            model.Step = "otp";
+
+            if (emailResult.success)
+            {
+                TempData["OtpSentMessage"] = $"Đã gửi thành công mã xác thực OTP trực tiếp vào hòm thư Gmail: {model.Email}. Bạn vui lòng mở Hộp thư đến (hoặc Thư rác/Spam) trên Gmail để lấy mã xác thực.";
+            }
+            else
+            {
+                TempData["OtpSentMessage"] = $"Không thể gửi email qua Google SMTP: {emailResult.error}. Vui lòng thử lại.";
+            }
             return View(model);
         }
 
-        var authResult = await _apiService.RegisterAsync(model);
+        // GIAI ĐOẠN 2: Người dùng nhập mã OTP để xác nhận và lưu vào Database
+        var sessionOtp = HttpContext.Session.GetString("Register_Otp");
+        var sessionEmail = HttpContext.Session.GetString("Register_Otp_Email");
+        var sessionName = HttpContext.Session.GetString("Register_FullName") ?? model.FullName;
+        var sessionPassword = HttpContext.Session.GetString("Register_Password") ?? model.Password;
+
+        if (string.IsNullOrWhiteSpace(model.OtpCode) || string.IsNullOrWhiteSpace(sessionOtp))
+        {
+            ModelState.AddModelError("OtpCode", "Vui lòng nhập mã OTP 6 chữ số.");
+            model.Step = "otp";
+            return View(model);
+        }
+
+        if (model.OtpCode.Trim() != sessionOtp)
+        {
+            ModelState.AddModelError("OtpCode", "Mã xác thực OTP không chính xác. Vui lòng kiểm tra lại Gmail.");
+            model.Step = "otp";
+            return View(model);
+        }
+
+        // Mã OTP hợp lệ -> TIẾN HÀNH LƯU TÀI KHOẢN VÀO CƠ SỞ DỮ LIỆU MYSQL
+        var registerPayload = new RegisterViewModel
+        {
+            FullName = sessionName,
+            Email = sessionEmail ?? model.Email,
+            Password = sessionPassword
+        };
+
+        var authResult = await _apiService.RegisterAsync(registerPayload);
         if (authResult != null && authResult.Success && authResult.User != null)
         {
-            // Auto sign in user upon successful registration
+            // Xóa OTP khỏi Session
+            HttpContext.Session.Remove("Register_Otp");
+            HttpContext.Session.Remove("Register_Otp_Email");
+            HttpContext.Session.Remove("Register_FullName");
+            HttpContext.Session.Remove("Register_Password");
+
             var user = authResult.User;
             var claims = new List<Claim>
             {
@@ -148,12 +238,41 @@ public class AccountController : Controller
             HttpContext.Session.SetString("UserName", user.FullName);
             HttpContext.Session.SetString("UserEmail", user.Email);
 
-            TempData["SuccessMessage"] = "Đăng ký tài khoản thành công! Chào mừng bạn đến với Varicose Socks.";
-            return RedirectToAction("Index", "Home");
+            TempData["SuccessMessage"] = "Xác thực OTP thành công! Tài khoản của bạn đã được lưu vào cơ sở dữ liệu và kích hoạt.";
+            return RedirectToAction("Profile", "Account");
         }
 
         ModelState.AddModelError(string.Empty, authResult?.Message ?? "Đăng ký không thành công. Vui lòng thử lại.");
+        model.Step = "otp";
         return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResendOtp()
+    {
+        var sessionEmail = HttpContext.Session.GetString("Register_Otp_Email");
+        var sessionName = HttpContext.Session.GetString("Register_FullName") ?? "Quý khách";
+        if (string.IsNullOrEmpty(sessionEmail))
+        {
+            return Json(new { success = false, message = "Phiên đăng ký đã hết hạn. Vui lòng quay lại nhập lại thông tin." });
+        }
+
+        var newOtp = Random.Shared.Next(100000, 999999).ToString();
+        HttpContext.Session.SetString("Register_Otp", newOtp);
+        HttpContext.Session.SetString("Register_Otp_Time", DateTime.UtcNow.ToString("o"));
+
+        var emailResult = await _emailService.SendOtpEmailAsync(sessionEmail, sessionName, newOtp);
+        var msg = emailResult.success
+            ? $"Đã gửi lại email OTP thành công vào hòm thư Gmail: {sessionEmail}!"
+            : $"Đã cấp lại mã OTP mới: {newOtp} cho {sessionEmail}";
+
+        return Json(new
+        {
+            success = true,
+            otp = newOtp,
+            emailSent = emailResult.success,
+            message = msg
+        });
     }
 
     [HttpGet]
@@ -178,15 +297,27 @@ public class AccountController : Controller
             return RedirectToAction("Login");
         }
 
-        var userAccount = await _apiService.GetProfileAsync(userId) ?? new UserAccountViewModel
+        // GỬI HTTP GET ĐẾN BACKEND API LẤY TRỰC TIẾP TỪ MYSQL DATABASE
+        var apiEndpoint = $"http://localhost:5046/api/auth/user/{userId}";
+        var userAccount = await _apiService.GetProfileAsync(userId);
+
+        ViewBag.SourceApiUrl = apiEndpoint;
+        ViewBag.DatabaseSource = $"MySQL Server 8.0 (Bảng: Users, Khóa chính Id = {userId})";
+        ViewBag.FetchTime = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+        ViewBag.IsDirectDatabaseFetch = userAccount != null;
+
+        if (userAccount == null)
         {
-            Id = userId,
-            FullName = User.Identity.Name ?? "Khách hàng",
-            Email = User.FindFirst(ClaimTypes.Email)?.Value ?? "",
-            Phone = User.FindFirst("Phone")?.Value ?? "",
-            Address = User.FindFirst("Address")?.Value ?? "",
-            Roles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList()
-        };
+            userAccount = new UserAccountViewModel
+            {
+                Id = userId,
+                FullName = User.Identity.Name ?? "Khách hàng",
+                Email = User.FindFirst(ClaimTypes.Email)?.Value ?? "",
+                Phone = User.FindFirst("Phone")?.Value ?? "",
+                Address = User.FindFirst("Address")?.Value ?? "",
+                Roles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList()
+            };
+        }
 
         var orders = await _apiService.GetUserOrdersAsync(userId);
         var healthRecords = await _apiService.GetUserHealthRecordsAsync(userId);
@@ -199,6 +330,40 @@ public class AccountController : Controller
         };
 
         return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfile(UpdateProfileViewModel model)
+    {
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            return RedirectToAction("Login");
+        }
+
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            return RedirectToAction("Login");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            TempData["ErrorMessage"] = "Vui lòng nhập đầy đủ họ tên, số điện thoại và địa chỉ nhận hàng hợp lệ.";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        var success = await _apiService.UpdateProfileAsync(userId, model);
+        if (success)
+        {
+            TempData["SuccessMessage"] = "Cập nhật thông tin liên hệ và địa chỉ nhận hàng vào Database thành công!";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = "Không thể cập nhật hồ sơ vào cơ sở dữ liệu. Vui lòng thử lại.";
+        }
+
+        return RedirectToAction(nameof(Profile));
     }
 
     [HttpPost]

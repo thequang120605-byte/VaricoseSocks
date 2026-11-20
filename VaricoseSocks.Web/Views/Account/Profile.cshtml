@@ -28,21 +28,24 @@
         </div>
     }
 
+    <!-- Container hiển thị thông báo cập nhật thời gian thực -->
+    <div id="profileLiveAlertContainer"></div>
+
     <div class="row g-4">
         <!-- Left: User Profile Summary Card -->
         <div class="col-lg-4">
             <div class="glass-card bg-white p-4 border shadow-subtle text-center mb-4">
-                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm fs-2 fw-bold" style="width: 80px; height: 80px;">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm fs-2 fw-bold" style="width: 80px; height: 80px;" id="profileAvatarInitial">
                     @(string.IsNullOrEmpty(Model.User.FullName) ? "U" : Model.User.FullName.Substring(0, 1).ToUpper())
                 </div>
-                <h5 class="fw-bold text-dark mb-1">@Model.User.FullName</h5>
+                <h5 class="fw-bold text-dark mb-1" id="profileFullNameDisplay">@Model.User.FullName</h5>
                 <p class="text-muted small mb-2">@Model.User.Email</p>
                 
                 <div class="d-flex justify-content-center gap-1 mb-3">
                     @foreach (var role in Model.User.Roles)
                     {
-                        <span class="badge @(role == "Admin" ? "bg-warning text-dark" : "bg-primary-subtle text-primary") rounded-pill px-3 py-1">
-                            @(role == "Admin" ? "Quản Trị Viên" : "Khách Hàng Thân Thiết")
+                        <span class="badge @(role == "Admin" ? "bg-warning text-dark" : (role == "Staff" ? "bg-success text-white" : "bg-primary-subtle text-primary")) rounded-pill px-3 py-1">
+                            @(role == "Admin" ? "Quản Trị Viên" : (role == "Staff" ? "Nhân Viên Tư Vấn" : "Khách Hàng Thân Thiết"))
                         </span>
                     }
                 </div>
@@ -50,10 +53,40 @@
                 <hr />
 
                 <div class="text-start small text-muted">
-                    <div class="mb-2"><i class="bi bi-telephone text-primary me-2"></i>Số điện thoại: <strong class="text-dark">@(string.IsNullOrEmpty(Model.User.Phone) ? "Chưa cập nhật" : Model.User.Phone)</strong></div>
-                    <div class="mb-2"><i class="bi bi-geo-alt text-primary me-2"></i>Địa chỉ: <strong class="text-dark">@(string.IsNullOrEmpty(Model.User.Address) ? "Chưa cập nhật" : Model.User.Address)</strong></div>
+                    <div class="mb-2">
+                        <i class="bi bi-telephone text-primary me-2"></i>Số điện thoại: 
+                        <span id="profilePhoneContainer">
+                            @if (string.IsNullOrEmpty(Model.User.Phone))
+                            {
+                                <span class="badge bg-danger-subtle text-danger">Chưa cập nhật (Bắt buộc khi đặt hàng)</span>
+                            }
+                            else
+                            {
+                                <strong class="text-dark">@Model.User.Phone</strong>
+                            }
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        <i class="bi bi-geo-alt text-primary me-2"></i>Địa chỉ nhận hàng: 
+                        <span id="profileAddressContainer">
+                            @if (string.IsNullOrEmpty(Model.User.Address))
+                            {
+                                <span class="badge bg-warning-subtle text-dark">Chưa cập nhật (Bắt buộc khi đặt hàng)</span>
+                            }
+                            else
+                            {
+                                <strong class="text-dark">@Model.User.Address @(string.IsNullOrEmpty(Model.User.City) ? "" : $", {Model.User.City}")</strong>
+                            }
+                        </span>
+                    </div>
                     <div class="mb-2"><i class="bi bi-shield-check text-success me-2"></i>Bảo hiểm y tế vớ: <strong class="text-success">Đang hiệu lực</strong></div>
                     <div><i class="bi bi-file-medical text-info me-2"></i>Số bản ghi theo dõi: <strong class="text-info">@Model.HealthRecords.Count bản ghi</strong></div>
+                </div>
+
+                <div class="mt-3">
+                    <button type="button" class="btn btn-outline-primary w-100 rounded-pill btn-sm py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="bi bi-pencil-square me-1"></i> Cập nhật SĐT & Địa chỉ
+                    </button>
                 </div>
 
                 @if (Model.User.Roles.Contains("Admin"))
@@ -331,8 +364,266 @@
     </div>
 </div>
 
+<!-- Modal Cập Nhật Thông Tin Cá Nhân & Địa Chỉ Giao Hàng -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom p-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary text-white rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold mb-0" id="editProfileModalLabel">Cập Nhật Thông Tin & Địa Chỉ Nhận Hàng</h6>
+                        <small class="text-muted" style="font-size: 0.75rem;">Thông tin liên hệ y tế và giao hàng vớ điều trị</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEditProfileModal" onsubmit="event.preventDefault(); submitUpdateProfileAjax(event); return false;">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Họ và tên của bạn:</label>
+                        <input type="text" id="modalInputFullName" name="FullName" value="@Model.User.FullName" class="form-control rounded-3" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Số điện thoại liên hệ (Dùng để giao hàng y tế):</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-telephone text-muted"></i></span>
+                            <input type="tel" id="modalInputPhone" name="Phone" value="@Model.User.Phone" class="form-control rounded-end-3" placeholder="Ví dụ: 0908125530" required />
+                        </div>
+                        <div class="form-text small text-info"><i class="bi bi-info-circle me-1"></i>Ràng buộc bắt buộc khi tiến hành Đặt hàng.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Địa chỉ nhận hàng (Số nhà, tên đường, phường xã):</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-geo-alt text-muted"></i></span>
+                            <input type="text" id="modalInputAddress" name="Address" value="@Model.User.Address" class="form-control rounded-end-3" placeholder="Ví dụ: 456 Lê Văn Sỹ, Phường 14" required />
+                        </div>
+                        <div class="form-text small text-info"><i class="bi bi-info-circle me-1"></i>Ràng buộc bắt buộc khi tiến hành Đặt hàng.</div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Quận / Huyện:</label>
+                            <input type="text" id="modalInputDistrict" name="District" value="@(Model.User.District ?? "Quận 3")" class="form-control rounded-3" placeholder="Ví dụ: Quận 3" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Tỉnh / Thành phố:</label>
+                            <input type="text" id="modalInputCity" name="City" value="@(string.IsNullOrEmpty(Model.User.City) ? "Hồ Chí Minh" : Model.User.City)" class="form-control rounded-3" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light rounded-bottom-4">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" id="btnSubmitProfileModal" class="btn btn-primary rounded-pill px-4 fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> Lưu Thay Đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script>
+// =========================================================================
+// CLIENT-SIDE REST API CALLS (Hiển thị trực tiếp trong DevTools Network Fetch/XHR)
+// =========================================================================
+
+async function fetchProfileApiLive() {
+    const userId = @Model.User.Id;
+    const userApiUrl = 'http://localhost:5046/api/auth/user/' + userId;
+    const healthApiUrl = 'http://localhost:5046/api/HealthRecords/user/' + userId;
+
+    console.log('%c[Hồ Sơ Bệnh Án REST API] 🚀 Đang gửi HTTP GET đến: ' + userApiUrl, 'color: #0284c7; font-weight: bold;');
+
+    try {
+        // 1. Gọi REST API lấy thông tin người dùng
+        const response = await fetch(userApiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('%c[Hồ Sơ Bệnh Án REST API] ✅ HTTP GET User 200 OK:', 'color: #16a34a; font-weight: bold;', data);
+
+            // Cập nhật DOM trực tiếp từ dữ liệu trả về từ MySQL qua API
+            if (data.fullName) {
+                const nameEl = document.getElementById('profileFullNameDisplay');
+                if (nameEl) nameEl.innerText = data.fullName;
+                const initialEl = document.getElementById('profileAvatarInitial');
+                if (initialEl) initialEl.innerText = data.fullName.charAt(0).toUpperCase();
+                const inputName = document.getElementById('modalInputFullName');
+                if (inputName) inputName.value = data.fullName;
+            }
+            if (data.phone) {
+                const phoneEl = document.getElementById('profilePhoneContainer');
+                if (phoneEl) phoneEl.innerHTML = '<strong class="text-dark">' + data.phone + '</strong>';
+                const inputPhone = document.getElementById('modalInputPhone');
+                if (inputPhone) inputPhone.value = data.phone;
+            }
+            if (data.address) {
+                const addrEl = document.getElementById('profileAddressContainer');
+                if (addrEl) addrEl.innerHTML = '<strong class="text-dark">' + data.address + (data.city ? ', ' + data.city : '') + '</strong>';
+                const inputAddr = document.getElementById('modalInputAddress');
+                if (inputAddr) inputAddr.value = data.address;
+            }
+            if (data.city) {
+                const inputCity = document.getElementById('modalInputCity');
+                if (inputCity) inputCity.value = data.city;
+            }
+            if (data.district) {
+                const inputDist = document.getElementById('modalInputDistrict');
+                if (inputDist) inputDist.value = data.district;
+            }
+        }
+
+        // 2. Gọi đồng thời REST API lấy danh sách hồ sơ bệnh án & số đo CEAP
+        fetch(healthApiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.ok ? res.json() : [])
+        .then(records => {
+            console.log('%c[Hồ Sơ Bệnh Án REST API] ✅ HTTP GET HealthRecords 200 OK (' + records.length + ' bản ghi):', 'color: #16a34a; font-weight: bold;', records);
+        })
+        .catch(err => console.log('HealthRecords fetch info:', err));
+
+    } catch (e) {
+        console.error('[Hồ Sơ Bệnh Án REST API] ❌ Lỗi kết nối API GET:', e);
+    }
+}
+
+async function submitUpdateProfileAjax(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const btn = document.getElementById('btnSubmitProfileModal');
+    if (btn) btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang lưu...';
+
+    const userId = @Model.User.Id;
+    const fullNameVal = document.getElementById('modalInputFullName').value.trim();
+    const phoneVal = document.getElementById('modalInputPhone').value.trim();
+    const addressVal = document.getElementById('modalInputAddress').value.trim();
+    const cityVal = document.getElementById('modalInputCity').value.trim();
+    const districtVal = document.getElementById('modalInputDistrict').value.trim();
+
+    const payload = {
+        fullName: fullNameVal,
+        phone: phoneVal,
+        address: addressVal,
+        city: cityVal,
+        district: districtVal
+    };
+
+    const apiUrl = 'http://localhost:5046/api/auth/user/' + userId;
+    console.log('%c[DevTools Network Fetch/XHR] 🚀 Gửi HTTP PUT đến REST API: ' + apiUrl, 'color: #f59e0b; font-weight: bold;', payload);
+
+    try {
+        const res = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            const resultData = await res.json();
+            console.log('%c[DevTools Network Fetch/XHR] ✅ HTTP PUT 200 OK! Cập nhật thành công vào Database:', 'color: #16a34a; font-weight: bold;', resultData);
+            
+            // Đóng Modal (không reload trang, để request PUT nằm lại trong DevTools Network)
+            const modalEl = document.getElementById('editProfileModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            if (modalInstance) modalInstance.hide();
+
+            // Cập nhật DOM trực tiếp trên trang
+            const nameEl = document.getElementById('profileFullNameDisplay');
+            if (nameEl && fullNameVal) nameEl.innerText = fullNameVal;
+
+            const initialEl = document.getElementById('profileAvatarInitial');
+            if (initialEl && fullNameVal) initialEl.innerText = fullNameVal.charAt(0).toUpperCase();
+
+            const phoneEl = document.getElementById('profilePhoneContainer');
+            if (phoneEl) {
+                phoneEl.innerHTML = phoneVal ? '<strong class="text-dark">' + phoneVal + '</strong>' : '<span class="badge bg-danger-subtle text-danger">Chưa cập nhật (Bắt buộc khi đặt hàng)</span>';
+            }
+
+            const addrEl = document.getElementById('profileAddressContainer');
+            if (addrEl) {
+                const fullAddress = addressVal + (cityVal ? ', ' + cityVal : '');
+                addrEl.innerHTML = addressVal ? '<strong class="text-dark">' + fullAddress + '</strong>' : '<span class="badge bg-warning-subtle text-dark">Chưa cập nhật (Bắt buộc khi đặt hàng)</span>';
+            }
+
+            // Hiển thị thông báo cập nhật thành công nhẹ nhàng, không gây reload hay pop-up chặn màn hình
+            const alertContainer = document.getElementById('profileLiveAlertContainer');
+            if (alertContainer) {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Cập nhật hồ sơ thành công!</strong> Dữ liệu mới đã được lưu trực tiếp vào cơ sở dữ liệu qua REST API (HTTP PUT 200 OK).
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>`;
+            }
+        } else {
+            alert('Lỗi cập nhật HTTP ' + res.status);
+        }
+    } catch (err) {
+        console.error('[DevTools Network Fetch/XHR] ❌ Lỗi kết nối PUT:', err);
+        alert('Lỗi kết nối REST API: ' + err);
+    } finally {
+        if (btn) btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Lưu Thay Đổi';
+    }
+}
+
+// 1. Tự động kích hoạt HTTP GET ngay khi nạp trang Hồ Sơ Bệnh Án
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fetchProfileApiLive);
+} else {
+    fetchProfileApiLive();
+}
+
+// 2. Bắt sự kiện khi người dùng click vào mục "Hồ sơ bệnh án" (Navbar dropdown, tab, mobile nav)
+function bindHsoBenhAnClicks() {
+    const triggers = document.querySelectorAll('#navLinkProfileDropdown, .profile-nav-link, #health-tab, a[href*="/Account/Profile"]');
+    triggers.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            if (window.location.pathname.toLowerCase().includes('/account/profile')) {
+                e.preventDefault();
+                console.log('%c[Hồ Sơ Bệnh Án] Người dùng bấm vào mục Hồ Sơ Bệnh Án -> Gọi ngay RESTful API HTTP GET!', 'color: #0284c7; font-weight: bold;');
+                fetchProfileApiLive();
+            }
+        });
+    });
+
+    const editModalEl = document.getElementById('editProfileModal');
+    if (editModalEl) {
+        editModalEl.addEventListener('show.bs.modal', function () {
+            fetchProfileApiLive();
+        });
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindHsoBenhAnClicks);
+} else {
+    bindHsoBenhAnClicks();
+}
+
 function calcSizeAuto() {
     const ankle = parseFloat(document.getElementById('hrAnkle').value) || 0;
     const calf = parseFloat(document.getElementById('hrCalf').value) || 0;

@@ -21,26 +21,60 @@ public class RegisterViewModel
 {
     [Required(ErrorMessage = "Vui lòng nhập họ và tên của bạn.")]
     [StringLength(100, MinimumLength = 2, ErrorMessage = "Họ tên từ 2 đến 100 ký tự.")]
+    [Display(Name = "Họ và tên")]
     public string FullName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Vui lòng nhập địa chỉ Email.")]
     [EmailAddress(ErrorMessage = "Email không đúng định dạng.")]
+    [Display(Name = "Địa chỉ Email")]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Vui lòng nhập số điện thoại liên hệ.")]
-    [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
-    public string Phone { get; set; } = string.Empty;
-
+    public string? Phone { get; set; }
     public string? Address { get; set; }
 
     [Required(ErrorMessage = "Vui lòng tạo mật khẩu.")]
     [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự.")]
     [DataType(DataType.Password)]
+    [Display(Name = "Mật khẩu")]
     public string Password { get; set; } = string.Empty;
 
     [DataType(DataType.Password)]
     [Compare("Password", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
+    [Display(Name = "Xác nhận mật khẩu")]
     public string ConfirmPassword { get; set; } = string.Empty;
+
+    [Display(Name = "Mã xác thực OTP")]
+    public string? OtpCode { get; set; }
+
+    public string? Step { get; set; } = "form"; // "form" hoặc "otp"
+}
+
+public class SendOtpRequestModel
+{
+    public string Email { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
+}
+
+public class UpdateProfileViewModel
+{
+    [Required(ErrorMessage = "Vui lòng nhập họ và tên")]
+    [Display(Name = "Họ và tên")]
+    public string FullName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Vui lòng nhập số điện thoại liên hệ")]
+    [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+    [Display(Name = "Số điện thoại")]
+    public string? Phone { get; set; }
+
+    [Required(ErrorMessage = "Vui lòng nhập địa chỉ nhận hàng")]
+    [Display(Name = "Địa chỉ nhận hàng (Số nhà, tên đường)")]
+    public string? Address { get; set; }
+
+    [Display(Name = "Tỉnh / Thành phố")]
+    public string? City { get; set; } = "Hồ Chí Minh";
+
+    [Display(Name = "Quận / Huyện")]
+    public string? District { get; set; }
 }
 
 public class AuthResponseViewModel
@@ -58,6 +92,8 @@ public class UserAccountViewModel
     public string Email { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string? Address { get; set; }
+    public string? City { get; set; }
+    public string? District { get; set; }
     public List<string> Roles { get; set; } = new();
 }
 

@@ -13,7 +13,11 @@ using VaricoseSocks.Infrastructure.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 builder.Services.AddOpenApi();
 
 // Cấu hình CORS để Web UI và Mobile Client kết nối mượt mà
@@ -27,18 +31,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Cấu hình kết nối Database (Hỗ trợ MySQL Laragon và SQL Server)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Cấu hình kết nối Cơ sở dữ liệu (100% MySQL Server 8.0)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Server=localhost;Port=3306;Database=VaricoseSocksDB;User=root;Password=;CharSet=utf8mb4;";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    if (connectionString != null && connectionString.Contains("Port=3306"))
-    {
-        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-    }
-    else
-    {
-        options.UseSqlServer(connectionString ?? "Server=localhost;Database=VaricoseSocksDB;Trusted_Connection=True;TrustServerCertificate=True;");
-    }
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
 // Cấu hình Password Hasher (PBKDF2 HMAC-SHA256)

@@ -18,26 +18,27 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="d-flex flex-column min-vh-100">
-    <!-- Top Announcement Bar (Contained & Centered) -->
-    <div class="text-white py-1 small d-none d-md-block" style="background: linear-gradient(90deg, #071324 0%, #0a192f 50%, #071324 100%); border-bottom: 1px solid rgba(255,255,255,0.08);">
-        <div class="container-xl d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-3">
-                <span><i class="bi bi-truck me-1 text-warning"></i> Miễn phí giao hàng từ 500.000₫</span>
-                <span class="opacity-25">|</span>
-                <span><i class="bi bi-patch-check-fill me-1 text-info"></i> Chuẩn quốc tế RAL-GZ 387</span>
-                <span class="opacity-25">|</span>
-                <span><i class="bi bi-telephone-fill me-1 text-success"></i> Hotline bác sĩ tư vấn: <strong>1900 6868</strong></span>
-            </div>
-            <div>
-                <button type="button" class="btn btn-outline-light btn-sm rounded-pill py-0 px-2 border-secondary font-size-toggle-btn" onclick="toggleSeniorAccessibilityMode()" title="Chế độ Chữ Lớn Dễ Đọc cho Người Cao Tuổi">
-                    <i class="bi bi-fonts me-1 text-warning"></i><span id="seniorModeText">Chế độ Chữ Lớn</span>
-                </button>
+    <!-- Thanh Header Cố Định / Đóng Băng Trên Cùng (Frozen Sticky Header) -->
+    <header class="main-sticky-header">
+        <!-- Top Announcement Bar (Contained & Centered) -->
+        <div class="text-white py-1 small d-none d-md-block" style="background: linear-gradient(90deg, #071324 0%, #0a192f 50%, #071324 100%); border-bottom: 1px solid rgba(255,255,255,0.08);">
+            <div class="container-xl d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-3">
+                    <span><i class="bi bi-truck me-1 text-warning"></i> Miễn phí giao hàng từ 500.000₫</span>
+                    <span class="opacity-25">|</span>
+                    <span><i class="bi bi-patch-check-fill me-1 text-info"></i> Chuẩn quốc tế RAL-GZ 387</span>
+                    <span class="opacity-25">|</span>
+                    <span><i class="bi bi-telephone-fill me-1 text-success"></i> Hotline bác sĩ tư vấn: <strong>1900 6868</strong></span>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-light btn-sm rounded-pill py-0 px-2 border-secondary font-size-toggle-btn" onclick="toggleSeniorAccessibilityMode()" title="Chế độ Chữ Lớn Dễ Đọc cho Người Cao Tuổi">
+                        <i class="bi bi-fonts me-1 text-warning"></i><span id="seniorModeText">Chế độ Chữ Lớn</span>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Smart Floating Glass Navigation Bar (Contained & Bounded) -->
-    <header class="sticky-top">
+        <!-- Smart Floating Glass Navigation Bar (Contained & Bounded) -->
         <nav class="navbar navbar-expand-lg navbar-dark glass-nav py-2">
             <div class="container-xl px-3">
                 <a class="navbar-brand fw-bold d-flex align-items-center text-nowrap me-3" asp-controller="Home" asp-action="Index">
@@ -120,7 +121,7 @@
                             <i class="bi bi-cart3 fs-6"></i>
                             <span>Giỏ hàng</span>
                             <span id="cartCountBadge" class="badge rounded-pill bg-danger border border-white ms-1" style="font-size: 0.72rem;">
-                                0
+                                @(Context.Session.GetInt32("CartCount") ?? 0)
                             </span>
                         </a>
 
@@ -136,7 +137,7 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2 mt-2" style="background: rgba(255,255,255,0.96); backdrop-filter: blur(16px);">
                                     <li><h6 class="dropdown-header small">Tài khoản: @User.Identity.Name</h6></li>
-                                    <li><a class="dropdown-item rounded-3 py-2" asp-controller="Account" asp-action="Profile"><i class="bi bi-person-circle me-2 text-primary"></i>Hồ sơ bệnh án</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2 profile-nav-link" asp-controller="Account" asp-action="Profile" id="navLinkProfileDropdown"><i class="bi bi-person-circle me-2 text-primary"></i>Hồ sơ bệnh án</a></li>
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Account" asp-action="Profile"><i class="bi bi-receipt me-2 text-info"></i>Lịch sử đơn hàng</a></li>
                                     @if (User.IsInRole("Admin"))
                                     {
@@ -161,8 +162,6 @@
                     </div>
                 </div>
             </div>
-        </nav>
-    </header>
         </nav>
     </header>
 
@@ -237,6 +236,37 @@
         </div>
     </footer>
 
+    <!-- Sleek Mobile Bottom Navigation Bar (Screens < 992px) -->
+    <nav class="mobile-bottom-nav d-lg-none shadow-lg">
+        <a asp-controller="Home" asp-action="Index" class="mobile-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+            <i class="bi bi-house-door-fill"></i>
+            <span>Trang chủ</span>
+        </a>
+        <a asp-controller="Product" asp-action="Index" class="mobile-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "active" : "")">
+            <i class="bi bi-grid-fill"></i>
+            <span>Sản phẩm</span>
+        </a>
+        <button type="button" class="mobile-nav-item mobile-nav-highlight" onclick="openChatbot()" title="Trợ lý Bác sĩ AI">
+            <div class="mobile-nav-ai-bubble">
+                <i class="bi bi-robot"></i>
+            </div>
+            <span>Bác sĩ AI</span>
+        </button>
+        <a asp-controller="Cart" asp-action="Index" class="mobile-nav-item position-relative @(ViewContext.RouteData.Values["controller"]?.ToString() == "Cart" ? "active" : "")">
+            <div class="position-relative d-inline-block">
+                <i class="bi bi-cart3"></i>
+                <span id="cartCountBadgeMobile" class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="font-size: 0.62rem; padding: 2px 5px;">
+                    @(Context.Session.GetInt32("CartCount") ?? 0)
+                </span>
+            </div>
+            <span>Giỏ hàng</span>
+        </a>
+        <a asp-controller="Account" asp-action="@(User.Identity?.IsAuthenticated == true ? "Profile" : "Login")" class="mobile-nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Account" ? "active" : "")">
+            <i class="bi bi-person-fill"></i>
+            <span>@(User.Identity?.IsAuthenticated == true ? "Tài khoản" : "Đăng nhập")</span>
+        </a>
+    </nav>
+
     <!-- Spotlight Search Modal (Ctrl + K) -->
     <div class="modal fade" id="spotlightSearchModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -302,7 +332,7 @@
     </div>
 
     <!-- Chatbot Window Card -->
-    <div id="chatbotWindow" class="card position-fixed bottom-0 end-0 m-3 shadow-lg border-0 d-none" style="width: 380px; max-width: 92vw; height: 540px; z-index: 1060;">
+    <div id="chatbotWindow" class="card chatbot-window-responsive position-fixed bottom-0 end-0 m-3 shadow-lg border-0 d-none" style="width: 380px; max-width: 92vw; height: 540px; z-index: 1060;">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;">
             <div class="d-flex align-items-center">
                 <i class="bi bi-robot fs-4 me-2 text-warning"></i>
@@ -330,11 +360,14 @@
         </div>
 
         <!-- Quick Action Pills -->
-        <div class="px-2 py-1 bg-white border-top d-flex gap-1 overflow-x-auto text-nowrap" style="scrollbar-width: none;">
-            <button class="btn btn-outline-primary btn-sm py-1 px-2 rounded-pill" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi hay bị mỏi phù chân vào buổi chiều')">Mỏi phù chân</button>
-            <button class="btn btn-outline-primary btn-sm py-1 px-2 rounded-pill" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi bị nổi gân xanh ngoằn ngoèo ở bắp chân')">Nổi gân xanh</button>
-            <button class="btn btn-outline-primary btn-sm py-1 px-2 rounded-pill" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi đang mang thai muốn tìm vớ cho bà bầu')">Mẹ bầu</button>
-            <button class="btn btn-outline-success btn-sm py-1 px-2 rounded-pill" style="font-size: 0.75rem;" onclick="promptSizeTool()">Tính Size</button>
+        <div class="px-2 py-2 bg-white border-top d-flex gap-1 overflow-x-auto text-nowrap hide-scrollbar">
+            <button type="button" class="btn btn-outline-success btn-sm py-1 px-2 rounded-pill fw-semibold" style="font-size: 0.75rem;" onclick="promptSizeTool()"><i class="bi bi-rulers me-1"></i>Tính Size</button>
+            <button type="button" class="btn btn-outline-warning btn-sm py-1 px-2 rounded-pill fw-semibold text-dark" style="font-size: 0.75rem; background-color: #fef3c7;" onclick="sendQuickMsg('Cho tôi xin mã giảm giá')"><i class="bi bi-gift-fill me-1 text-danger"></i>Mã giảm 10%</button>
+            <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2 rounded-pill" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi hay bị mỏi phù chân vào buổi chiều')">Mỏi phù chân</button>
+            <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2 rounded-pill" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi bị nổi gân xanh ngoằn ngoèo ở bắp chân')">Nổi gân xanh</button>
+            <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2 rounded-pill" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi đang mang thai muốn tìm vớ cho bà bầu')">Vớ bầu</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2 rounded-pill" style="font-size: 0.75rem;" onclick="sendQuickMsg('Tôi muốn tra cứu đơn hàng')"><i class="bi bi-truck me-1"></i>Tra cứu đơn</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2 rounded-pill" style="font-size: 0.75rem;" onclick="sendQuickMsg('Chính sách đổi trả và bảo hành như thế nào?')"><i class="bi bi-shield-check me-1"></i>Đổi trả 30 ngày</button>
         </div>
 
         <!-- Chat Input Form -->

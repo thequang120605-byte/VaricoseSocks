@@ -55,6 +55,13 @@ public class UserRepository : IUserRepository
         }
     }
 
+    public async Task<bool> UpdateUserAsync(User user)
+    {
+        user.UpdatedAt = DateTime.UtcNow;
+        _context.Users.Update(user);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
     public async Task<bool> CheckEmailExistsAsync(string email)
     {
         return await _context.Users.AnyAsync(u => u.Email.ToLower() == email.Trim().ToLower());

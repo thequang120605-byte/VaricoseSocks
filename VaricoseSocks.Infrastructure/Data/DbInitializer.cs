@@ -12,72 +12,182 @@ public static class DbInitializer
         var passwordHasher = new PasswordHasher<User>();
 
         // 1. Seed Roles
-        if (!await context.Roles.AnyAsync())
+        var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
+        if (adminRole == null)
         {
-            var adminRole = new Role { Name = "Admin", Description = "Quản trị viên toàn quyền hệ thống" };
-            var staffRole = new Role { Name = "Staff", Description = "Nhân viên bán hàng và hỗ trợ khách hàng" };
-            var customerRole = new Role { Name = "Customer", Description = "Khách hàng mua sắm" };
-
-            await context.Roles.AddRangeAsync(adminRole, staffRole, customerRole);
+            adminRole = new Role { Name = "Admin", Description = "Quản trị viên toàn quyền hệ thống" };
+            await context.Roles.AddAsync(adminRole);
             await context.SaveChangesAsync();
         }
 
-        // 2. Seed Users
-        if (!await context.Users.AnyAsync())
+        var staffRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Staff");
+        if (staffRole == null)
         {
-            var adminUser = new User
+            staffRole = new Role { Name = "Staff", Description = "Nhân viên bán hàng và hỗ trợ khách hàng" };
+            await context.Roles.AddAsync(staffRole);
+            await context.SaveChangesAsync();
+        }
+
+        var customerRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Customer");
+        if (customerRole == null)
+        {
+            customerRole = new Role { Name = "Customer", Description = "Khách hàng mua sắm" };
+            await context.Roles.AddAsync(customerRole);
+            await context.SaveChangesAsync();
+        }
+
+        // 2. Seed Users & Setup 3 Roles with default password 0908125530
+        const string defaultPassword = "0908125530";
+
+        // (1) Role Admin
+        var adminUser = await context.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Email == "admin@gmail.com");
+        if (adminUser == null)
+        {
+            adminUser = new User
             {
-                FullName = "Quản Trị Viên",
-                Email = "admin@varicosesocks.vn",
-                Phone = "0901234567",
+                FullName = "Quản Trị Viên (Admin)",
+                Email = "admin@gmail.com",
+                Phone = "0908125530",
                 Address = "123 Hai Bà Trưng, Phường Bến Nghé, Quận 1, TP.HCM",
                 City = "Hồ Chí Minh",
                 District = "Quận 1",
-                IsActive = true
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
             };
-            adminUser.PasswordHash = passwordHasher.HashPassword(adminUser, "Admin@123");
+            await context.Users.AddAsync(adminUser);
+            await context.SaveChangesAsync();
+        }
+        adminUser.PasswordHash = passwordHasher.HashPassword(adminUser, defaultPassword);
+        if (!adminUser.UserRoles.Any(ur => ur.RoleId == adminRole.Id))
+        {
+            adminUser.UserRoles.Add(new UserRole { UserId = adminUser.Id, RoleId = adminRole.Id });
+        }
 
-            var customerUser = new User
+        // Đảm bảo alias admin@varicosesocks.vn cũng tồn tại và có Role Admin
+        var adminVaricose = await context.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Email == "admin@varicosesocks.vn");
+        if (adminVaricose == null)
+        {
+            adminVaricose = new User
             {
-                FullName = "Chu Văn Quốc Trung",
-                Email = "trung.chu@varicosesocks.vn",
-                Phone = "0987654321",
+                FullName = "Quản Trị Viên Toàn Quyền",
+                Email = "admin@varicosesocks.vn",
+                Phone = "0908125530",
+                Address = "123 Hai Bà Trưng, Phường Bến Nghé, Quận 1, TP.HCM",
+                City = "Hồ Chí Minh",
+                District = "Quận 1",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            await context.Users.AddAsync(adminVaricose);
+            await context.SaveChangesAsync();
+        }
+        adminVaricose.PasswordHash = passwordHasher.HashPassword(adminVaricose, defaultPassword);
+        if (!adminVaricose.UserRoles.Any(ur => ur.RoleId == adminRole.Id))
+        {
+            adminVaricose.UserRoles.Add(new UserRole { UserId = adminVaricose.Id, RoleId = adminRole.Id });
+        }
+
+        // (2) Role Staff
+        var staffUser = await context.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Email == "staff@gmail.com");
+        if (staffUser == null)
+        {
+            staffUser = new User
+            {
+                FullName = "Nhân Viên Tư Vấn Y Khoa (Staff)",
+                Email = "staff@gmail.com",
+                Phone = "0908125530",
+                Address = "789 Cách Mạng Tháng 8, Phường 5, Quận Tân Bình, TP.HCM",
+                City = "Hồ Chí Minh",
+                District = "Tân Bình",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            await context.Users.AddAsync(staffUser);
+            await context.SaveChangesAsync();
+        }
+        staffUser.PasswordHash = passwordHasher.HashPassword(staffUser, defaultPassword);
+        if (!staffUser.UserRoles.Any(ur => ur.RoleId == staffRole.Id))
+        {
+            staffUser.UserRoles.Add(new UserRole { UserId = staffUser.Id, RoleId = staffRole.Id });
+        }
+
+        var staffVaricose = await context.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Email == "staff@varicosesocks.vn");
+        if (staffVaricose == null)
+        {
+            staffVaricose = new User
+            {
+                FullName = "Dược Sĩ Tư Vấn Tĩnh Mạch (Staff)",
+                Email = "staff@varicosesocks.vn",
+                Phone = "0908125530",
+                Address = "789 Cách Mạng Tháng 8, Phường 5, Quận Tân Bình, TP.HCM",
+                City = "Hồ Chí Minh",
+                District = "Tân Bình",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            await context.Users.AddAsync(staffVaricose);
+            await context.SaveChangesAsync();
+        }
+        staffVaricose.PasswordHash = passwordHasher.HashPassword(staffVaricose, defaultPassword);
+        if (!staffVaricose.UserRoles.Any(ur => ur.RoleId == staffRole.Id))
+        {
+            staffVaricose.UserRoles.Add(new UserRole { UserId = staffVaricose.Id, RoleId = staffRole.Id });
+        }
+
+        // (3) Role Customer
+        var customerUser = await context.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Email == "chuquoctrung0607@gmail.com");
+        if (customerUser == null)
+        {
+            customerUser = new User
+            {
+                FullName = "Chu Văn Quốc Trung (Customer)",
+                Email = "chuquoctrung0607@gmail.com",
+                Phone = "0908125530",
                 Address = "456 Lê Văn Sỹ, Phường 14, Quận 3, TP.HCM",
                 City = "Hồ Chí Minh",
                 District = "Quận 3",
-                IsActive = true
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
             };
-            customerUser.PasswordHash = passwordHasher.HashPassword(customerUser, "123456");
-
-            await context.Users.AddRangeAsync(adminUser, customerUser);
-            await context.SaveChangesAsync();
-
-            var adminRole = await context.Roles.FirstAsync(r => r.Name == "Admin");
-            var customerRole = await context.Roles.FirstAsync(r => r.Name == "Customer");
-
-            await context.UserRoles.AddRangeAsync(
-                new UserRole { UserId = adminUser.Id, RoleId = adminRole.Id },
-                new UserRole { UserId = customerUser.Id, RoleId = customerRole.Id }
-            );
+            await context.Users.AddAsync(customerUser);
             await context.SaveChangesAsync();
         }
-        else
+        customerUser.PasswordHash = passwordHasher.HashPassword(customerUser, defaultPassword);
+        if (!customerUser.UserRoles.Any(ur => ur.RoleId == customerRole.Id))
         {
-            // Upgrade legacy plain-text or dummy hashes to standard PBKDF2 hash
-            var existingUsers = await context.Users.ToListAsync();
-            foreach (var u in existingUsers)
-            {
-                if (u.PasswordHash.Contains("...") || u.PasswordHash == "123456" || u.PasswordHash == "Admin@123" || !u.PasswordHash.StartsWith("AQAAAA"))
-                {
-                    var defaultPwd = u.Email.Contains("admin", StringComparison.OrdinalIgnoreCase) ? "Admin@123" : "123456";
-                    u.PasswordHash = passwordHasher.HashPassword(u, defaultPwd);
-                }
-            }
-            if (context.ChangeTracker.HasChanges())
-            {
-                await context.SaveChangesAsync();
-            }
+            customerUser.UserRoles.Add(new UserRole { UserId = customerUser.Id, RoleId = customerRole.Id });
         }
+
+        var customerVaricose = await context.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Email == "trung.chu@varicosesocks.vn");
+        if (customerVaricose == null)
+        {
+            customerVaricose = new User
+            {
+                FullName = "Chu Văn Quốc Trung",
+                Email = "trung.chu@varicosesocks.vn",
+                Phone = "0908125530",
+                Address = "456 Lê Văn Sỹ, Phường 14, Quận 3, TP.HCM",
+                City = "Hồ Chí Minh",
+                District = "Quận 3",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            await context.Users.AddAsync(customerVaricose);
+            await context.SaveChangesAsync();
+        }
+        customerVaricose.PasswordHash = passwordHasher.HashPassword(customerVaricose, defaultPassword);
+        if (!customerVaricose.UserRoles.Any(ur => ur.RoleId == customerRole.Id))
+        {
+            customerVaricose.UserRoles.Add(new UserRole { UserId = customerVaricose.Id, RoleId = customerRole.Id });
+        }
+
+        // Cập nhật tất cả tài khoản trong bảng Users sang mật khẩu 0908125530
+        var allUsers = await context.Users.ToListAsync();
+        foreach (var u in allUsers)
+        {
+            u.PasswordHash = passwordHasher.HashPassword(u, defaultPassword);
+        }
+        await context.SaveChangesAsync();
 
         // 3. Seed Categories
         if (!await context.Categories.AnyAsync())

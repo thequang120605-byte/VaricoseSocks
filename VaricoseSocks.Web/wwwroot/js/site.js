@@ -317,6 +317,25 @@ function initCounters() {
 // =========================================================================
 // 11. ENHANCED CART LIVE ACTIONS
 // =========================================================================
+async function syncCartBadge() {
+    try {
+        const resp = await fetch('/Cart/GetCount', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (resp.ok) {
+            const data = await resp.json();
+            const badge = document.getElementById('cartCountBadge');
+            if (badge) badge.innerText = data.count;
+            const badgeMobile = document.getElementById('cartCountBadgeMobile');
+            if (badgeMobile) badgeMobile.innerText = data.count;
+        }
+    } catch {}
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncCartBadge);
+} else {
+    syncCartBadge();
+}
+
 async function addToCartLive(productId, size, color, qty, triggerElement) {
     try {
         if (triggerElement) {
@@ -339,6 +358,8 @@ async function addToCartLive(productId, size, color, qty, triggerElement) {
             const data = await resp.json();
             const badge = document.getElementById('cartCountBadge');
             if (badge) badge.innerText = data.totalQuantity;
+            const badgeMobile = document.getElementById('cartCountBadgeMobile');
+            if (badgeMobile) badgeMobile.innerText = data.totalQuantity;
 
             showModernToast('Đã thêm vào giỏ hàng!', `Vớ y khoa (Size ${size || 'M'}) đã sẵn sàng trong giỏ của bạn.`, 'success');
         } else {
@@ -528,34 +549,146 @@ function renderBotResponse(data) {
     const container = document.getElementById('chatbotMessages');
     if (!container) return;
 
+    const rawText = data.replyMessage || data.answer || 'Bác sĩ AI Varicose luôn sẵn sàng hỗ trợ tư vấn và chọn vớ y khoa phù hợp cho bạn!';
+    
+    // Format text: escape HTML then convert markdown bold **text** to <strong>
+    let formattedText = rawText
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br/>');
+
+    // Clinical recommendation badges
+    let badgesHtml = '';
+    if (data.recommendedCompressionText || data.recommendedSize || data.recommendedStyleText) {
+        badgesHtml += '<div class="d-flex flex-wrap gap-1 my-2">';
+        if (data.recommendedCompressionText) {
+            badgesHtml += `<span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill py-1 px-2"><i class="bi bi-speedometer2 me-1"></i>${data.recommendedCompressionText}</span>`;
+        }
+        if (data.recommendedSize) {
+            badgesHtml += `<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill py-1 px-2"><i class="bi bi-rulers me-1"></i>Size gợi ý: ${data.recommendedSize}</span>`;
+        }
+        if (data.recommendedStyleText) {
+            badgesHtml += `<span class="badge bg-info-subtle text-dark border border-info-subtle rounded-pill py-1 px-2"><i class="bi bi-tag me-1"></i>${data.recommendedStyleText}</span>`;
+        }
+        badgesHtml += '</div>';
+    }
+
+    // Voucher card if VARICOSE10 is mentioned
+    let voucherHtml = '';
+    if (rawText.includes('VARICOSE10')) {
+        voucherHtml = `
+            <div class="p-2 my-2 rounded-3 bg-warning-subtle border border-warning d-flex align-items-center justify-content-between gap-2">
+                <div class="small">
+                    <span class="badge bg-warning text-dark fw-bold me-1">VOUCHER 10%</span>
+                    <strong class="text-dark">VARICOSE10</strong>
+                    <div class="text-muted" style="font-size: 0.72rem;">Giảm 10% + Miễn phí vận chuyển toàn quốc</div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-success fw-bold px-2 py-1" style="font-size: 0.75rem;" onclick="copyVoucherCode('VARICOSE10', this)">
+                    <i class="bi bi-clipboard me-1"></i> Sao chép
+                </button>
+            </div>`;
+    }
+
+    // Product cards with inline size selector and direct 1-click Add to Cart
     let prodsHtml = '';
     if (data.recommendedProducts && data.recommendedProducts.length > 0) {
-        prodsHtml = '<div class="mt-2 pt-2 border-top"><div class="fw-bold text-dark mb-1">Sản phẩm khuyến nghị cho bạn:</div>';
-        data.recommendedProducts.forEach(p => {
+        prodsHtml = '<div class="mt-2 pt-2 border-top"><div class="fw-bold text-dark small mb-2"><i class="bi bi-cart-check me-1 text-primary"></i>Sản phẩm bác sĩ khuyên dùng (mua trực tiếp):</div><div class="d-flex flex-column gap-2">';
+        const recSize = data.recommendedSize || 'M';
+        data.recommendedProducts.forEach((p, idx) => {
+            const selectId = `chat_size_${p.id}_${Date.now()}_${idx}`;
             prodsHtml += `
-                <div class="d-flex align-items-center gap-2 mb-2 p-1 bg-light rounded-3">
-                    <img src="${p.imageUrl}" style="width: 38px; height: 38px; object-fit: contain;" class="rounded border bg-white" />
-                    <div class="flex-grow-1 text-truncate">
-                        <div class="fw-bold small text-truncate">${p.name}</div>
-                        <div class="text-danger small fw-bold">${p.price.toLocaleString('vi-VN')} ₫</div>
+                <div class="p-2 bg-light rounded-3 border d-flex flex-column gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="${p.imageUrl || '/images/products/stocking-default.png'}" style="width: 44px; height: 44px; object-fit: contain;" class="rounded border bg-white flex-shrink-0" onerror="this.src='/images/products/stocking-default.png'" />
+                        <div class="flex-grow-1 min-w-0">
+                            <a href="/Product/Detail/${p.id}" class="fw-bold small text-dark text-decoration-none text-truncate d-block">${p.name}</a>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-danger small fw-bold">${(p.price || 0).toLocaleString('vi-VN')} ₫</span>
+                                <span class="badge bg-success-subtle text-success py-0 px-1" style="font-size: 0.7rem;">Chính hãng RAL</span>
+                            </div>
+                        </div>
                     </div>
-                    <a href="/Product/Detail/${p.id}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;">Xem</a>
+                    <div class="d-flex align-items-center gap-2 pt-1 border-top border-light-subtle">
+                        <label class="small text-muted mb-0" style="font-size: 0.75rem;">Size:</label>
+                        <select id="${selectId}" class="form-select form-select-sm py-0 px-2" style="width: 75px; font-size: 0.75rem; height: 28px;">
+                            <option value="S" ${recSize === 'S' ? 'selected' : ''}>S</option>
+                            <option value="M" ${recSize === 'M' ? 'selected' : ''}>M</option>
+                            <option value="L" ${recSize === 'L' ? 'selected' : ''}>L</option>
+                            <option value="XL" ${recSize === 'XL' ? 'selected' : ''}>XL</option>
+                            <option value="XXL" ${recSize === 'XXL' ? 'selected' : ''}>XXL</option>
+                        </select>
+                        <button type="button" class="btn btn-sm btn-primary py-0 px-2 flex-grow-1 d-flex align-items-center justify-content-center gap-1" style="font-size: 0.75rem; height: 28px;" onclick="addFromChatToCart(${p.id}, '${selectId}', this)">
+                            <i class="bi bi-cart-plus"></i> Thêm giỏ
+                        </button>
+                        <a href="/Product/Detail/${p.id}" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem; height: 28px;" title="Xem chi tiết">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                    </div>
                 </div>`;
         });
-        prodsHtml += '</div>';
+        prodsHtml += '</div></div>';
     }
 
     const row = document.createElement('div');
     row.className = 'd-flex mb-3';
     row.innerHTML = `
         <div class="bg-white p-3 rounded-4 shadow-sm border small text-dark" style="max-width: 90%; border-bottom-left-radius: 4px;">
-            <div class="fw-bold text-primary mb-1"><i class="bi bi-shield-plus me-1"></i> Bác sĩ AI Varicose</div>
-            <div>${data.answer}</div>
+            <div class="fw-bold text-primary mb-1 d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-shield-plus me-1 text-danger"></i> Bác sĩ AI Varicose</span>
+                <span class="badge bg-light text-muted border py-0 px-1" style="font-size: 0.65rem;">Y khoa Đức</span>
+            </div>
+            <div>${formattedText}</div>
+            ${badgesHtml}
+            ${voucherHtml}
             ${prodsHtml}
         </div>`;
 
     container.appendChild(row);
     container.scrollTop = container.scrollHeight;
+}
+
+// 1-Click Add To Cart directly from Chatbot consultation
+async function addFromChatToCart(productId, selectId, btnEl) {
+    const select = document.getElementById(selectId);
+    const size = select ? select.value : 'M';
+    const originalText = btnEl.innerHTML;
+    btnEl.disabled = true;
+    btnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang thêm...';
+
+    try {
+        await addToCartLive(productId, size, 'Màu Da (Beige)', 1, btnEl);
+        btnEl.innerHTML = '<i class="bi bi-check-lg me-1"></i> Đã thêm!';
+        btnEl.classList.remove('btn-primary', 'btn-outline-primary');
+        btnEl.classList.add('btn-success');
+        setTimeout(() => {
+            btnEl.disabled = false;
+            btnEl.innerHTML = originalText;
+            btnEl.classList.remove('btn-success');
+            btnEl.classList.add('btn-primary');
+        }, 2200);
+    } catch {
+        btnEl.disabled = false;
+        btnEl.innerHTML = originalText;
+    }
+}
+
+// Copy voucher code with feedback
+function copyVoucherCode(code, btnEl) {
+    navigator.clipboard.writeText(code).then(() => {
+        const orig = btnEl.innerHTML;
+        btnEl.innerHTML = '<i class="bi bi-check-lg me-1"></i> Đã lưu!';
+        btnEl.classList.remove('btn-outline-success');
+        btnEl.classList.add('btn-success', 'text-white');
+        setTimeout(() => {
+            btnEl.innerHTML = orig;
+            btnEl.classList.remove('btn-success', 'text-white');
+            btnEl.classList.add('btn-outline-success');
+        }, 2000);
+    }).catch(() => {
+        alert('Mã giảm giá: ' + code);
+    });
 }
 
 // Modal size calculator

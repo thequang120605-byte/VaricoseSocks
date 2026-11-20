@@ -1,4 +1,4 @@
-# =========================================================================
+﻿# =========================================================================
 # SCRIPT KHỞI CHẠY TỰ ĐỘNG CẢ BACKEND API VÀ FRONTEND WEB UI
 # DỰ ÁN: VARICOSE SOCKS MEDICAL (.NET 9 CORE)
 # =========================================================================
@@ -35,9 +35,10 @@ Write-Host "  4. Quản lý khách hàng:            http://localhost:5118/Admin
 Write-Host "  5. Quản lý tồn kho:               http://localhost:5118/Admin/Inventory" -ForegroundColor Green
 Write-Host "  6. Tra cứu đơn hàng (Tracking):   http://localhost:5118/Order/Track" -ForegroundColor Green
 Write-Host ""
-Write-Host "  TÀI KHOẢN ĐĂNG NHẬP DỰ ÁN:" -ForegroundColor White
-Write-Host "  - Quản trị viên (Admin): admin@varicosesocks.vn / Admin@123" -ForegroundColor Yellow
-Write-Host "  - Khách hàng mẫu:        trung.chu@varicosesocks.vn / 123456" -ForegroundColor Yellow
+Write-Host "  TÀI KHOẢN ĐĂNG NHẬP 3 ROLE (MẬT KHẨU MẶC ĐỊNH: 0908125530):" -ForegroundColor White
+Write-Host "  - 1. Quản trị viên (Admin): admin@gmail.com (hoặc admin@varicosesocks.vn)" -ForegroundColor Yellow
+Write-Host "  - 2. Nhân viên tư vấn (Staff): staff@gmail.com (hoặc staff@varicosesocks.vn)" -ForegroundColor Yellow
+Write-Host "  - 3. Khách hàng (Customer): chuquoctrung0607@gmail.com (hoặc trung.chu@varicosesocks.vn)" -ForegroundColor Yellow
 Write-Host "----------------------------------------------------------" -ForegroundColor Gray
 Write-Host "Nhấn phím bất kỳ hoặc tắt cửa sổ để dừng máy chủ..." -ForegroundColor Yellow
 

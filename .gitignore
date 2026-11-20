@@ -482,3 +482,40 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# =============================================================
+# Custom Exclusions: Non-project files (Reports, Docs, Scratch)
+# =============================================================
+# Word and PDF documents & reports
+/*.docx
+/*.pdf
+/BaoCaoThucTap/
+
+# Excel test matrices and workbooks
+/*.xlsx
+/*.xls
+
+# Python scratch & automation scripts
+/*.py
+/scratch/
+__pycache__/
+*.pyc
+
+# Root screenshots, diagrams and temporary test assets
+/*.png
+/*.jpg
+/*.jpeg
+/screenshots/
+/diagrams/
+/word/
+
+# Temporary test scripts, logs and dumps
+/check_pages.ps1
+/export_final_pdf.ps1
+/get_page_count.ps1
+/inspect_report_pages.ps1
+/measure_bookmarks*.ps1
+/test_*.ps1
+/measured_bookmark_pages*.json
+/toc_dump.txt
+

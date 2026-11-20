@@ -110,12 +110,22 @@ public class AuthController : ControllerBase
         });
     }
 
-    [Authorize]
+    [HttpGet("check-email")]
+    public async Task<IActionResult> CheckEmail([FromQuery] string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return BadRequest(new { message = "Email không được để trống." });
+        }
+        var exists = await _userRepo.CheckEmailExistsAsync(email);
+        return Ok(new { exists });
+    }
+
     [HttpGet("user/{id:int}")]
     public async Task<IActionResult> GetProfile(int id)
     {
         var user = await _userRepo.GetByIdAsync(id);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound(new { message = "Không tìm thấy người dùng." });
 
         var roles = await _userRepo.GetUserRolesAsync(user.Id);
 
@@ -126,7 +136,48 @@ public class AuthController : ControllerBase
             Email = user.Email,
             Phone = user.Phone,
             Address = user.Address,
+            City = user.City,
+            District = user.District,
             Roles = roles.ToList()
+        });
+    }
+
+    [HttpPut("user/{id:int}")]
+    public async Task<IActionResult> UpdateProfile(int id, [FromBody] UpdateProfileDto dto)
+    {
+        var user = await _userRepo.GetByIdAsync(id);
+        if (user == null) return NotFound(new { success = false, message = "Không tìm thấy người dùng." });
+
+        if (!string.IsNullOrWhiteSpace(dto.FullName))
+            user.FullName = dto.FullName.Trim();
+
+        user.Phone = dto.Phone?.Trim();
+        user.Address = dto.Address?.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.City)) user.City = dto.City.Trim();
+        if (!string.IsNullOrWhiteSpace(dto.District)) user.District = dto.District.Trim();
+
+        var updated = await _userRepo.UpdateUserAsync(user);
+        if (!updated)
+        {
+            return StatusCode(500, new { success = false, message = "Không thể cập nhật hồ sơ vào cơ sở dữ liệu." });
+        }
+
+        var roles = await _userRepo.GetUserRolesAsync(user.Id);
+        return Ok(new
+        {
+            success = true,
+            message = "Cập nhật thông tin hồ sơ thành công.",
+            user = new UserDto
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                City = user.City,
+                District = user.District,
+                Roles = roles.ToList()
+            }
         });
     }
 }

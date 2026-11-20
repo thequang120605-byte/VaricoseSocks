@@ -25,6 +25,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddHttpClient<IApiService, ApiService>();
+builder.Services.AddScoped<IEmailService, GmailEmailService>();
 
 var app = builder.Build();
 
