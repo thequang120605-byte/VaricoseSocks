@@ -91,11 +91,11 @@
                                 <i class="bi bi-clipboard2-pulse me-1"></i>Khám CEAP
                             </a>
                         </li>
-                        @if (User.IsInRole("Admin"))
+                        @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-warning fw-semibold px-2" asp-controller="Admin" asp-action="Index">
-                                    <i class="bi bi-speedometer2 me-1"></i>Admin
+                                    <i class="bi bi-speedometer2 me-1"></i>@(User.IsInRole("Admin") ? "Admin" : "Nhân Viên Y Tế")
                                 </a>
                             </li>
                         }
@@ -139,9 +139,9 @@
                                     <li><h6 class="dropdown-header small">Tài khoản: @User.Identity.Name</h6></li>
                                     <li><a class="dropdown-item rounded-3 py-2 profile-nav-link" asp-controller="Account" asp-action="Profile" id="navLinkProfileDropdown"><i class="bi bi-person-circle me-2 text-primary"></i>Hồ sơ bệnh án</a></li>
                                     <li><a class="dropdown-item rounded-3 py-2" asp-controller="Account" asp-action="Profile"><i class="bi bi-receipt me-2 text-info"></i>Lịch sử đơn hàng</a></li>
-                                    @if (User.IsInRole("Admin"))
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
                                     {
-                                        <li><a class="dropdown-item rounded-3 py-2 text-warning" asp-controller="Admin" asp-action="Index"><i class="bi bi-speedometer2 me-2"></i>Quản trị Admin</a></li>
+                                        <li><a class="dropdown-item rounded-3 py-2 text-warning" asp-controller="Admin" asp-action="Index"><i class="bi bi-speedometer2 me-2"></i>@(User.IsInRole("Admin") ? "Quản trị Admin" : "Cổng Nhân Viên Y Tế")</a></li>
                                     }
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item rounded-3 py-2 text-danger" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
