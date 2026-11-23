@@ -49,20 +49,24 @@ public class PaymentService : IPaymentService
 
     public object GenerateVietQr(VietQrRequestDto dto)
     {
-        var bankId = "970422"; // MB Bank
-        var accountNo = "0901234567";
-        var accountName = Uri.EscapeDataString("VARICOSE SOCKS MEDICAL");
-        var memo = Uri.EscapeDataString(dto.OrderCode);
-        var qrUrl = $"https://api.vietqr.io/image/{bankId}-{accountNo}-compact2.jpg?amount={dto.Amount}&addInfo={memo}&accountName={accountName}";
+        var bankId = "970436"; // Vietcombank (Ngân hàng TMCP Ngoại thương Việt Nam)
+        var accountNo = "9379798265";
+        var accountName = "CHU VAN QUOC TRUNG";
+        var memo = dto.OrderCode;
+        var qrUrl = $"https://api.vietqr.io/image/{bankId}-{accountNo}-compact2.jpg?amount={Convert.ToInt64(dto.Amount)}&addInfo={Uri.EscapeDataString(memo)}&accountName={Uri.EscapeDataString(accountName)}";
+        var expiresAt = DateTime.UtcNow.AddMinutes(15);
 
         return new
         {
-            bankName = "Ngân hàng Quân Đội (MB Bank)",
+            bankName = "Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)",
+            bankBin = bankId,
             accountNumber = accountNo,
-            accountName = "VARICOSE SOCKS MEDICAL",
+            accountName = accountName,
             amount = dto.Amount,
-            memo = dto.OrderCode,
-            qrImageUrl = qrUrl
+            memo = memo,
+            qrImageUrl = qrUrl,
+            expiresAt = expiresAt,
+            validityMinutes = 15
         };
     }
 

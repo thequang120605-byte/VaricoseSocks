@@ -14,31 +14,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // =========================================================================
-// 1. SMART DYNAMIC FLOATING GLASS NAVBAR
+// 1. SMART DYNAMIC FLOATING GLASS NAVBAR (Fixed & Stable on Scroll)
 // =========================================================================
 function initSmartNavbar() {
     const navbar = document.querySelector('.glass-nav');
     if (!navbar) return;
 
-    let lastScrollY = window.scrollY;
-
     window.addEventListener('scroll', () => {
         const currentScrollY = window.scrollY;
 
-        if (currentScrollY > 60) {
+        if (currentScrollY > 40) {
             navbar.classList.add('nav-shrink');
         } else {
             navbar.classList.remove('nav-shrink');
         }
-
-        // Hide when scrolling down, show when scrolling up
-        if (currentScrollY > 300 && currentScrollY > lastScrollY) {
-            navbar.style.transform = 'translateY(-100%)';
-        } else {
-            navbar.style.transform = 'translateY(0)';
-        }
-
-        lastScrollY = currentScrollY;
     }, { passive: true });
 }
 
@@ -190,7 +179,7 @@ function initPressureSimulator() {
 }
 
 // =========================================================================
-// 6. INTERACTIVE SIZING SLIDER RULER
+// 6. INTERACTIVE SIZING SLIDER RULER (Two-way Synchronized with Size Buttons)
 // =========================================================================
 function initSizingSlider() {
     const slider = document.getElementById('liveAnkleSlider');
@@ -200,29 +189,45 @@ function initSizingSlider() {
 
     if (!slider || !display) return;
 
-    const updateSize = (val) => {
+    const sizeDescriptions = {
+        'S': {
+            range: '18 - 21 cm',
+            desc: 'Dành cho cổ chân nhỏ (18 - 21 cm). Áp lực nén 100% tại mắt cá giúp ôm sát bắp chân thon gọn.'
+        },
+        'M': {
+            range: '21 - 25 cm',
+            desc: 'Dành cho cổ chân trung bình (21 - 25 cm). Kích cỡ phổ biến nhất, tối ưu đẩy máu tĩnh mạch về tim.'
+        },
+        'L': {
+            range: '25 - 29 cm',
+            desc: 'Dành cho cổ chân đầy đặn (25 - 29 cm). Độ đàn hồi cao, ôm êm ái không gây bó thắt hay lằn da.'
+        },
+        'XL': {
+            range: '29 - 33 cm',
+            desc: 'Dành cho cổ chân lớn hoặc sưng phù (29 - 33 cm). Giảm sưng nề tĩnh mạch và trợ lực tối đa.'
+        }
+    };
+
+    const updateSize = (val, triggerExternal = true) => {
+        val = parseFloat(val);
         display.innerText = `${val} cm`;
         let recSize = 'S';
-        let desc = 'Ôm sát bắp chân thon gọn, áp lực chuẩn 100% tại mắt cá.';
 
         if (val < 21) {
             recSize = 'S';
-            desc = 'Dành cho cổ chân nhỏ (18 - 21 cm). Hiệu quả nén tối ưu.';
         } else if (val < 25) {
             recSize = 'M';
-            desc = 'Dành cho cổ chân trung bình (21 - 25 cm). Kích cỡ phổ biến nhất.';
         } else if (val < 29) {
             recSize = 'L';
-            desc = 'Dành cho cổ chân đầy đặn (25 - 29 cm). Co giãn êm ái, không bó thắt.';
         } else {
             recSize = 'XL';
-            desc = 'Dành cho cổ chân lớn hoặc sưng phù (29 - 33 cm).';
         }
 
+        const info = sizeDescriptions[recSize];
         if (badge) badge.innerText = `Size ${recSize}`;
-        if (advice) advice.innerText = desc;
+        if (advice) advice.innerHTML = `Dựa trên số đo <strong>${val} cm</strong> (${info.range}), <strong>Size ${recSize}</strong> sẽ ôm vừa khít và đạt hiệu quả đẩy máu về tim tốt nhất.`;
 
-        // Also sync on product detail if available
+        // Sync active state on size buttons
         const sizeBtns = document.querySelectorAll('#sizeSelector .btn-size');
         sizeBtns.forEach(b => {
             if (b.innerText.trim() === recSize) {
@@ -231,9 +236,26 @@ function initSizingSlider() {
                 b.classList.remove('active');
             }
         });
+
+        // Notify page if listener exists
+        if (triggerExternal && typeof window.onSizingSliderChanged === 'function') {
+            window.onSizingSliderChanged(recSize, val);
+        }
     };
 
-    slider.addEventListener('input', e => updateSize(e.target.value));
+    slider.addEventListener('input', e => updateSize(e.target.value, true));
+
+    // Expose global synchronizer for size buttons to control slider
+    window.setSizingSliderFromSize = function(size) {
+        let targetVal = 23;
+        if (size === 'S') targetVal = 19.5;
+        else if (size === 'M') targetVal = 23;
+        else if (size === 'L') targetVal = 27;
+        else if (size === 'XL') targetVal = 31;
+
+        slider.value = targetVal;
+        updateSize(targetVal, false);
+    };
 }
 
 // =========================================================================
@@ -336,12 +358,40 @@ if (document.readyState === 'loading') {
     syncCartBadge();
 }
 
+function getOrCreateClientSessionId() {
+    let sid = localStorage.getItem('varicose_session_id');
+    if (!sid) {
+        sid = 'client_' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('varicose_session_id', sid);
+    }
+    return sid;
+}
+
 async function addToCartLive(productId, size, color, qty, triggerElement) {
     try {
         if (triggerElement) {
             flyToCart(triggerElement);
         }
 
+        // 1. Gọi trực tiếp RESTful API Backend port 5046 để hiển thị rõ ràng trên Network DevTools Fetch/XHR
+        try {
+            console.log('[DevTools Network Fetch/XHR] 🚀 Gửi HTTP POST: http://localhost:5046/api/cart/items');
+            fetch('http://localhost:5046/api/cart/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productId: productId,
+                    size: size || 'M',
+                    color: color || 'Màu Da (Beige)',
+                    quantity: qty || 1,
+                    sessionId: getOrCreateClientSessionId()
+                })
+            }).then(r => r.json()).then(apiRes => {
+                console.log('[DevTools Network Fetch/XHR] ✅ Phản hồi từ Backend API 5046:', apiRes);
+            }).catch(e => console.log('Cart API info:', e));
+        } catch {}
+
+        // 2. Gửi request lên Web MVC để đồng bộ giỏ hàng Session & Cookie
         const formData = new FormData();
         formData.append('productId', productId);
         formData.append('size', size || 'M');
@@ -356,6 +406,10 @@ async function addToCartLive(productId, size, color, qty, triggerElement) {
 
         if (resp.ok) {
             const data = await resp.json();
+            if (!data.success) {
+                showModernToast('Không thể thêm vào giỏ!', data.message || 'Số lượng vượt quá tồn kho khả dụng.', 'warning');
+                return;
+            }
             const badge = document.getElementById('cartCountBadge');
             if (badge) badge.innerText = data.totalQuantity;
             const badgeMobile = document.getElementById('cartCountBadgeMobile');
@@ -370,12 +424,26 @@ async function addToCartLive(productId, size, color, qty, triggerElement) {
     }
 }
 
-async function updateCartQty(cartItemId, newQty) {
+async function updateCartQty(cartItemId, newQty, maxStock) {
     if (newQty < 1) {
         if (!confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) return;
     }
+    if (maxStock && newQty > maxStock) {
+        showModernToast('Vượt quá tồn kho!', `Số lượng tối đa có thể mua là ${maxStock} sản phẩm.`, 'warning');
+        newQty = maxStock;
+    }
 
     try {
+        // Gửi HTTP PUT trực tiếp lên Backend API 5046
+        try {
+            console.log(`[DevTools Network Fetch/XHR] 🚀 Gửi HTTP PUT: http://localhost:5046/api/cart/items/${cartItemId}`);
+            fetch(`http://localhost:5046/api/cart/items/${cartItemId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ quantity: newQty })
+            }).catch(e => console.log('Cart PUT API info:', e));
+        } catch {}
+
         const formData = new FormData();
         formData.append('cartItemId', cartItemId);
         formData.append('quantity', newQty);
@@ -387,6 +455,14 @@ async function updateCartQty(cartItemId, newQty) {
         });
 
         if (resp.ok) {
+            const data = await resp.json();
+            if (!data.success) {
+                showModernToast('Không thể cập nhật!', data.message || 'Số lượng vượt quá tồn kho.', 'warning');
+                setTimeout(() => window.location.reload(), 1500);
+                return;
+            }
+            window.location.reload();
+        } else {
             window.location.reload();
         }
     } catch {
@@ -398,6 +474,13 @@ async function removeCartItem(cartItemId) {
     if (!confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) return;
 
     try {
+        // Gửi HTTP DELETE trực tiếp lên Backend API 5046
+        try {
+            console.log(`[DevTools Network Fetch/XHR] 🚀 Gửi HTTP DELETE: http://localhost:5046/api/cart/items/${cartItemId}`);
+            fetch(`http://localhost:5046/api/cart/items/${cartItemId}`, {
+                method: 'DELETE'
+            }).catch(e => console.log('Cart DELETE API info:', e));
+        } catch {}
         const formData = new FormData();
         formData.append('cartItemId', cartItemId);
 

@@ -46,7 +46,31 @@ public class RegisterViewModel
     [Display(Name = "Mã xác thực OTP")]
     public string? OtpCode { get; set; }
 
+    public string? ReturnUrl { get; set; }
     public string? Step { get; set; } = "form"; // "form" hoặc "otp"
+}
+
+public class ForgotPasswordViewModel
+{
+    [Required(ErrorMessage = "Vui lòng nhập địa chỉ Email đã đăng ký.")]
+    [EmailAddress(ErrorMessage = "Email không đúng định dạng.")]
+    [Display(Name = "Địa chỉ Email")]
+    public string Email { get; set; } = string.Empty;
+
+    [Display(Name = "Mã xác thực OTP")]
+    public string? OtpCode { get; set; }
+
+    [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu mới phải có tối thiểu 6 ký tự.")]
+    [DataType(DataType.Password)]
+    [Display(Name = "Mật khẩu mới")]
+    public string? NewPassword { get; set; }
+
+    [DataType(DataType.Password)]
+    [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
+    [Display(Name = "Xác nhận mật khẩu mới")]
+    public string? ConfirmNewPassword { get; set; }
+
+    public string Step { get; set; } = "email"; // "email" hoặc "otp"
 }
 
 public class SendOtpRequestModel

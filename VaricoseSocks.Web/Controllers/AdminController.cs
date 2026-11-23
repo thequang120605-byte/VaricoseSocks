@@ -113,6 +113,7 @@ public class AdminController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteProduct(int id)
     {
         await _apiService.DeleteProductAsync(id);

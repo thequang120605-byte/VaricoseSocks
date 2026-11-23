@@ -519,3 +519,7 @@ __pycache__/
 /measured_bookmark_pages*.json
 /toc_dump.txt
 
+# PlantUML diagrams & diagram images
+*.puml
+/images/
+

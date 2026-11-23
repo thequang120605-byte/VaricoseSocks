@@ -43,3 +43,9 @@ public class UpdateProfileDto
     public string? City { get; set; }
     public string? District { get; set; }
 }
+
+public class ResetPasswordDto
+{
+    public string Email { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
+}

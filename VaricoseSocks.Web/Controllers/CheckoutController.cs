@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VaricoseSocks.Web.Models;
 using VaricoseSocks.Web.Services;
@@ -24,6 +25,7 @@ public class CheckoutController : Controller
         return sessionId;
     }
 
+    [Authorize]
     public async Task<IActionResult> Index(string? voucher = null)
     {
         var sessionId = GetOrCreateSessionId();
@@ -31,6 +33,14 @@ public class CheckoutController : Controller
 
         if (!cart.Items.Any())
         {
+            return RedirectToAction("Index", "Cart");
+        }
+
+        // Ràng buộc tồn kho: Nếu có sản phẩm vượt quá tồn kho khả dụng, yêu cầu người dùng điều chỉnh
+        var overflowItem = cart.Items.FirstOrDefault(i => i.Quantity > i.StockQuantity);
+        if (overflowItem != null)
+        {
+            TempData["ErrorMessage"] = $"Sản phẩm '{overflowItem.ProductName}' (Size {overflowItem.Size}) chỉ còn {overflowItem.StockQuantity} sản phẩm trong kho (bạn đang đặt {overflowItem.Quantity}). Vui lòng điều chỉnh lại số lượng giỏ hàng.";
             return RedirectToAction("Index", "Cart");
         }
 
@@ -88,6 +98,7 @@ public class CheckoutController : Controller
         return View(model);
     }
 
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Process(CheckoutViewModel model)
@@ -141,13 +152,22 @@ public class CheckoutController : Controller
             catch { }
         }
 
-        var order = await _apiService.CreateOrderAsync(model, sessionId, userId);
+        var (order, errorMessage) = await _apiService.CreateOrderAsync(model, sessionId, userId);
         if (order != null)
         {
+            // Làm trống giỏ hàng và đặt lại badge giỏ hàng về 0 sau khi xác nhận đặt hàng thành công
+            await _apiService.ClearCartAsync(userId, sessionId);
+            HttpContext.Session.SetInt32("CartCount", 0);
+
+            if (model.PaymentMethod == 2) // 2: Chuyển khoản ngân hàng VietQR -> Chuyển sang Cổng Quét Mã Thanh Toán 15 phút
+            {
+                return RedirectToAction(nameof(Payment), new { orderCode = order.OrderCode });
+            }
+
             return RedirectToAction(nameof(Success), new { orderCode = order.OrderCode });
         }
 
-        ModelState.AddModelError("", "Đã có lỗi khi tạo đơn hàng. Vui lòng thử lại.");
+        ModelState.AddModelError("", errorMessage ?? "Đã có lỗi khi tạo đơn hàng. Vui lòng thử lại.");
         return View("Index", model);
     }
 
@@ -180,12 +200,90 @@ public class CheckoutController : Controller
         });
     }
 
-    public async Task<IActionResult> Success(string orderCode)
+    [AllowAnonymous]
+    public async Task<IActionResult> Payment(string orderCode)
     {
         var order = await _apiService.GetOrderByCodeAsync(orderCode);
         if (order == null)
         {
             return RedirectToAction("Index", "Home");
+        }
+
+        if (order.PaymentStatusText.Contains("Đã thanh toán", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToAction(nameof(Success), new { orderCode = order.OrderCode });
+        }
+
+        return View(order);
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> CheckPaymentStatus(string orderCode)
+    {
+        var order = await _apiService.GetOrderByCodeAsync(orderCode);
+        if (order == null)
+        {
+            return Json(new { success = false, isPaid = false, message = "Không tìm thấy đơn hàng." });
+        }
+
+        bool isPaid = order.PaymentStatusText.Contains("Đã thanh toán", StringComparison.OrdinalIgnoreCase);
+        return Json(new
+        {
+            success = true,
+            orderCode = order.OrderCode,
+            isPaid = isPaid,
+            paymentStatus = order.PaymentStatusText,
+            orderStatus = order.OrderStatusText
+        });
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> SimulateBankTransfer([FromBody] SimulateTransferRequest req)
+    {
+        if (string.IsNullOrWhiteSpace(req?.OrderCode))
+        {
+            return Json(new { success = false, message = "Mã đơn hàng không hợp lệ." });
+        }
+
+        var order = await _apiService.GetOrderByCodeAsync(req.OrderCode);
+        if (order == null)
+        {
+            return Json(new { success = false, message = "Không tìm thấy đơn hàng." });
+        }
+
+        var success = await _apiService.ConfirmVietQrPaymentAsync(order.OrderCode, order.TotalAmount);
+        return Json(new { success, message = success ? "Khớp lệnh Vietcombank thành công!" : "Lỗi khi xử lý giao dịch." });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [AllowAnonymous]
+    public async Task<IActionResult> ConfirmPayment(string orderCode)
+    {
+        var order = await _apiService.GetOrderByCodeAsync(orderCode);
+        if (order == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        await _apiService.ConfirmVietQrPaymentAsync(orderCode, order.TotalAmount);
+        return RedirectToAction(nameof(Success), new { orderCode = order.OrderCode, paid = true });
+    }
+
+    [AllowAnonymous]
+    public async Task<IActionResult> Success(string orderCode, bool? paid = null)
+    {
+        var order = await _apiService.GetOrderByCodeAsync(orderCode);
+        if (order == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        if (paid == true)
+        {
+            ViewBag.JustPaid = true;
         }
 
         return View(order);
@@ -196,4 +294,9 @@ public class VoucherRequestModel
 {
     public string Code { get; set; } = string.Empty;
     public decimal OrderAmount { get; set; }
+}
+
+public class SimulateTransferRequest
+{
+    public string OrderCode { get; set; } = string.Empty;
 }

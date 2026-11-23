@@ -1,0 +1,373 @@
+@model VaricoseSocks.Web.Models.OrderDetailViewModel
+@{
+    ViewData["Title"] = "Cổng thanh toán VietQR - Mã " + Model.OrderCode;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4 text-center">
+                <ol class="breadcrumb justify-content-center small">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index" class="text-decoration-none">Giỏ hàng</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Checkout" asp-action="Index" class="text-decoration-none">Đặt hàng</a></li>
+                    <li class="breadcrumb-item active fw-bold" aria-current="page">Thanh toán VietQR</li>
+                </ol>
+            </nav>
+
+            <div class="glass-card bg-white p-4 p-md-5 border shadow-subtle position-relative overflow-hidden">
+                <!-- Top Status Header -->
+                <div class="text-center mb-4">
+                    <div class="bg-success text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-2 shadow-sm" style="width: 68px; height: 68px;">
+                        <i class="bi bi-qr-code-scan fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">CỔNG THANH TOÁN VIETQR</h3>
+                    <p class="text-muted small mb-2">Quét mã thanh toán qua ứng dụng ngân hàng Vietcombank Napas247</p>
+                    <div class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fs-6 fw-bold">
+                        Mã đơn hàng: <span class="font-monospace">@Model.OrderCode</span>
+                    </div>
+                </div>
+
+                <!-- Alert Hiệu lực giao dịch 15 phút -->
+                <div class="alert alert-warning border-0 rounded-4 p-3 mb-4 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-clock-history text-danger fs-3 flex-shrink-0"></i>
+                        <div>
+                            <div class="fw-bold text-dark">Giao dịch thanh toán có hiệu lực trong 15 phút</div>
+                            <div class="small text-muted">Vui lòng quét mã QR trước khi thời gian đếm ngược kết thúc.</div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="badge bg-danger fs-5 px-3 py-2 rounded-pill shadow-sm font-monospace" id="paymentTimer">15:00</div>
+                    </div>
+                </div>
+
+                <div class="progress mb-4" style="height: 6px;">
+                    <div id="paymentProgress" class="progress-bar bg-success" role="progressbar" style="width: 100%;"></div>
+                </div>
+
+                <!-- Main QR Card -->
+                <div class="p-4 bg-light rounded-4 border mb-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success px-3 py-2 rounded-pill fs-6"><i class="bi bi-bank me-1"></i> Vietcombank</span>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill small">Napas247 Siêu Tốc</span>
+                        </div>
+                        <div class="small text-success fw-bold">
+                            <i class="bi bi-shield-check me-1"></i>Tự động điền đúng số tiền & mã đơn
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center g-4">
+                        <div class="col-md-5 text-center">
+                            <div class="qr-card-wrapper d-inline-block position-relative shadow-sm p-3 rounded-4 bg-white border">
+                                <div class="radar-laser"></div>
+                                <img id="paymentQrImg" src="https://api.vietqr.io/image/970436-9379798265-compact2.jpg?amount=@Convert.ToInt64(Model.TotalAmount)&addInfo=@Model.OrderCode&accountName=CHU%20VAN%20QUOC%20TRUNG" 
+                                     style="width: 210px; height: 210px; object-fit: contain;" alt="Mã VietQR Vietcombank" />
+                                
+                                <!-- Lớp phủ hết hạn 15 phút -->
+                                <div id="paymentExpiredOverlay" class="position-absolute top-0 start-0 w-100 h-100 d-none flex-column align-items-center justify-content-center bg-dark bg-opacity-75 rounded-4 text-white p-2 text-center" style="backdrop-filter: blur(4px);">
+                                    <i class="bi bi-clock-history text-warning fs-2 mb-1"></i>
+                                    <span class="small fw-bold mb-2">Mã QR đã hết hạn (15 phút)</span>
+                                    <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 py-1 fw-bold shadow-sm" onclick="renewPaymentCountdown()">
+                                        <i class="bi bi-arrow-clockwise me-1"></i> Làm mới mã
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="small text-muted mt-2">
+                                <i class="bi bi-camera me-1"></i>Mở App ngân hàng & chọn <strong>Quét mã QR</strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <div class="bg-white p-3 rounded-4 border small">
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Ngân hàng thụ hưởng:</span>
+                                    <strong class="text-dark">TMCP Ngoại thương VN (Vietcombank)</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Số tài khoản:</span>
+                                    <div>
+                                        <strong class="text-primary font-monospace fs-6">9379798265</strong>
+                                        <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 rounded-pill ms-2" style="font-size: 0.75rem;" onclick="copyPaymentText('9379798265', 'Số tài khoản Vietcombank')">
+                                            <i class="bi bi-clipboard"></i> Sao chép
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Chủ tài khoản:</span>
+                                    <strong class="text-dark text-uppercase">CHU VAN QUOC TRUNG</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                    <span class="text-muted">Số tiền cần chuyển:</span>
+                                    <div>
+                                        <strong class="text-danger fs-5">@Model.TotalAmount.ToString("N0") ₫</strong>
+                                        <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2 rounded-pill ms-2" style="font-size: 0.75rem;" onclick="copyPaymentText('@Convert.ToInt64(Model.TotalAmount)', 'Số tiền')">
+                                            <i class="bi bi-clipboard"></i> Sao chép
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2">
+                                    <span class="text-muted">Nội dung chuyển khoản:</span>
+                                    <div>
+                                        <strong class="text-dark font-monospace">@Model.OrderCode</strong>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 rounded-pill ms-2" style="font-size: 0.75rem;" onclick="copyPaymentText('@Model.OrderCode', 'Nội dung chuyển khoản')">
+                                            <i class="bi bi-clipboard"></i> Sao chép
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 p-2 bg-primary-subtle text-primary rounded-3 small">
+                                <i class="bi bi-info-circle-fill me-1"></i>Hệ thống tự động nhận diện mã đơn <strong>@Model.OrderCode</strong> khi nhận được tiền từ Vietcombank.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hướng dẫn 3 bước quét mã -->
+                <div class="row g-2 text-center small mb-4">
+                    <div class="col-4">
+                        <div class="p-2 bg-light rounded-3 border">
+                            <span class="badge bg-primary rounded-circle mb-1">1</span>
+                            <div class="fw-bold">Mở App Ngân hàng</div>
+                            <span class="text-muted" style="font-size: 0.75rem;">VCB, MB, Techcom, BIDV...</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 bg-light rounded-3 border">
+                            <span class="badge bg-primary rounded-circle mb-1">2</span>
+                            <div class="fw-bold">Quét Mã VietQR</div>
+                            <span class="text-muted" style="font-size: 0.75rem;">Tự điền số tiền & nội dung</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 bg-light rounded-3 border">
+                            <span class="badge bg-primary rounded-circle mb-1">3</span>
+                            <div class="fw-bold">Xác Nhận Đã Chuyển</div>
+                            <span class="text-muted" style="font-size: 0.75rem;">Bấm nút bên dưới để hoàn tất</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hộp trạng thái lắng nghe thời gian thực (Real-time Payment Listener) -->
+                <div id="listeningBox" class="p-4 bg-light rounded-4 border text-center mb-3 shadow-subtle position-relative overflow-hidden">
+                    <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+                        <div class="spinner-grow text-success" role="status" style="width: 1.5rem; height: 1.5rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0" id="pollingStatusTitle">
+                            Đang chờ hệ thống Vietcombank ghi nhận chuyển khoản...
+                        </h5>
+                    </div>
+                    <p class="text-muted small mb-0" id="pollingStatusDesc">
+                        <i class="bi bi-arrow-repeat spinner-border spinner-border-sm me-1 text-primary" style="width: 14px; height: 14px;"></i>
+                        Hệ thống tự động kiểm tra mỗi 2 giây. Vui lòng mở App Ngân hàng và quét mã QR chuyển khoản. Sau khi tiền vào tài khoản <strong>9379798265</strong>, hệ thống sẽ tự động hoàn tất đơn hàng ngay lập tức.
+                    </p>
+                </div>
+
+                <!-- Khung Báo Khớp Lệnh Thành Công (Xuất hiện ngay khi phát hiện trạng thái Đã thanh toán) -->
+                <div id="paymentSuccessNotice" class="alert alert-success rounded-4 p-4 text-center border-0 shadow-lg d-none mb-3">
+                    <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-2 shadow-sm" style="width: 64px; height: 64px;">
+                        <i class="bi bi-check-lg fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold text-success mb-1">VIETCOMBANK ĐÃ XÁC NHẬN CHUYỂN KHOẢN THÀNH CÔNG!</h4>
+                    <p class="text-dark small mb-2">Hệ thống đã nhận đủ <strong>@Model.TotalAmount.ToString("N0") ₫</strong> cho đơn hàng <strong>@Model.OrderCode</strong>.</p>
+                    <div class="text-muted small">
+                        <span class="spinner-border spinner-border-sm text-success me-1"></span> Đang chuyển hướng bạn đến trang xác nhận đơn hàng...
+                    </div>
+                </div>
+
+                <!-- Công cụ giả lập chuyển khoản Vietcombank dành cho kiểm thử / demo -->
+                <div class="text-center pt-1 mb-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm" onclick="simulateBankTransfer()" id="btnSimulateTransfer">
+                        <i class="bi bi-cpu me-1 text-primary"></i> [Kiểm thử / Demo] Giả lập Vietcombank nhận tiền thành công
+                    </button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top small">
+                    <a asp-controller="Checkout" asp-action="Success" asp-route-orderCode="@Model.OrderCode" class="text-decoration-none text-muted">
+                        <i class="bi bi-arrow-left me-1"></i> Tôi sẽ thanh toán sau (Xem đơn hàng)
+                    </a>
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">
+                        <i class="bi bi-house me-1"></i> Trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let paymentTimerInterval = null;
+    let paymentRemainingSec = 15 * 60;
+
+    function startPaymentCountdown() {
+        clearInterval(paymentTimerInterval);
+        paymentRemainingSec = 15 * 60;
+        updatePaymentTimer();
+
+        const overlay = document.getElementById('paymentExpiredOverlay');
+        if (overlay) {
+            overlay.classList.add('d-none');
+            overlay.classList.remove('d-flex');
+        }
+
+        paymentTimerInterval = setInterval(() => {
+            paymentRemainingSec--;
+            updatePaymentTimer();
+
+            if (paymentRemainingSec <= 0) {
+                clearInterval(paymentTimerInterval);
+                if (overlay) {
+                    overlay.classList.remove('d-none');
+                    overlay.classList.add('d-flex');
+                }
+            }
+        }, 1000);
+    }
+
+    function updatePaymentTimer() {
+        const timerEl = document.getElementById('paymentTimer');
+        const progressEl = document.getElementById('paymentProgress');
+        const m = Math.floor(Math.max(0, paymentRemainingSec) / 60);
+        const s = Math.max(0, paymentRemainingSec) % 60;
+        if (timerEl) {
+            timerEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+        if (progressEl) {
+            const pct = (paymentRemainingSec / (15 * 60)) * 100;
+            progressEl.style.width = `${Math.max(0, pct)}%`;
+            if (pct < 20) {
+                progressEl.className = 'progress-bar bg-danger';
+            } else if (pct < 50) {
+                progressEl.className = 'progress-bar bg-warning';
+            } else {
+                progressEl.className = 'progress-bar bg-success';
+            }
+        }
+    }
+
+    function renewPaymentCountdown() {
+        startPaymentCountdown();
+        if (typeof showModernToast === 'function') {
+            showModernToast('Gia hạn thành công', 'Mã VietQR đã được làm mới thêm 15 phút!', 'info');
+        }
+    }
+
+    function copyPaymentText(text, label) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                if (typeof showModernToast === 'function') {
+                    showModernToast('Đã sao chép', `Đã chép ${label}: ${text}`, 'success');
+                } else {
+                    alert(`Đã chép: ${text}`);
+                }
+            }).catch(() => {
+                prompt('Sao chép thông tin:', text);
+            });
+        } else {
+            prompt('Sao chép thông tin:', text);
+        }
+    }
+
+    let pollInterval = null;
+    let isPaymentDone = false;
+
+    function handlePaymentSuccess() {
+        if (isPaymentDone) return;
+        isPaymentDone = true;
+        clearInterval(pollInterval);
+        clearInterval(paymentTimerInterval);
+
+        const listenBox = document.getElementById('listeningBox');
+        const successBox = document.getElementById('paymentSuccessNotice');
+        const btnSimulate = document.getElementById('btnSimulateTransfer');
+
+        if (listenBox) listenBox.classList.add('d-none');
+        if (btnSimulate) btnSimulate.classList.add('d-none');
+        if (successBox) successBox.classList.remove('d-none');
+
+        if (typeof triggerConfetti === 'function') {
+            triggerConfetti();
+        }
+
+        setTimeout(() => {
+            window.location.href = '/Checkout/Success?orderCode=@Model.OrderCode&paid=True';
+        }, 1500);
+    }
+
+    function checkPaymentStatus() {
+        if (isPaymentDone) return;
+
+        // 1. Gọi trực tiếp RESTful API Backend 5046 để hiển thị rõ ràng trên DevTools Network Fetch/XHR
+        try {
+            console.log('[DevTools Network Fetch/XHR] 🚀 Kiểm tra trạng thái đơn hàng: http://localhost:5046/api/orders/code/@Model.OrderCode');
+            fetch('http://localhost:5046/api/orders/code/@Model.OrderCode')
+                .then(res => res.json())
+                .then(orderData => {
+                    console.log('[DevTools Network Fetch/XHR] Trạng thái thanh toán từ API 5046:', orderData.paymentStatusText, 'Code:', orderData.paymentStatus);
+                    // ENUM C# PaymentStatus: Pending = 1 (Chờ thanh toán), Paid = 2 (Đã thanh toán).
+                    // CHỈ kích hoạt thành công khi paymentStatus === 2 hoặc text rõ ràng là 'Đã thanh toán'.
+                    if (orderData && (orderData.paymentStatus === 2 || (orderData.paymentStatusText && orderData.paymentStatusText.trim() === 'Đã thanh toán'))) {
+                        handlePaymentSuccess();
+                    }
+                })
+                .catch(e => console.log('API order check:', e));
+        } catch {}
+
+        // 2. Đồng thời kiểm tra qua Web MVC endpoint
+        fetch('/Checkout/CheckPaymentStatus?orderCode=@Model.OrderCode')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.isPaid === true) {
+                    handlePaymentSuccess();
+                }
+            })
+            .catch(err => {
+                console.log('Polling payment status...', err);
+            });
+    }
+
+    function simulateBankTransfer() {
+        const btn = document.getElementById('btnSimulateTransfer');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang bắn tín hiệu giao dịch từ Vietcombank...';
+        }
+
+        fetch('/Checkout/SimulateBankTransfer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderCode: '@Model.OrderCode' })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                checkPaymentStatus();
+            } else {
+                alert(data.message);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-cpu me-1 text-primary"></i> [Kiểm thử / Demo] Giả lập Vietcombank nhận tiền thành công';
+                }
+            }
+        })
+        .catch(err => {
+            alert('Lỗi giả lập: ' + err);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-cpu me-1 text-primary"></i> [Kiểm thử / Demo] Giả lập Vietcombank nhận tiền thành công';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        startPaymentCountdown();
+        pollInterval = setInterval(checkPaymentStatus, 2000);
+        checkPaymentStatus();
+    });
+</script>
+}

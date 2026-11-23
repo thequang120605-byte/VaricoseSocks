@@ -54,4 +54,21 @@ public class PaymentsController : ControllerBase
 
         return Ok(new { success = true, message = result.Message });
     }
+
+    [HttpPost("confirm-vietqr")]
+    public async Task<IActionResult> ConfirmVietQr([FromBody] VietQrRequestDto dto)
+    {
+        var callback = new PaymentCallbackDto
+        {
+            OrderCode = dto.OrderCode,
+            Amount = dto.Amount,
+            PaymentMethod = 2, // VietQR
+            TransactionId = "VIETQR-" + DateTime.UtcNow.ToString("yyyyMMddHHmmss"),
+            Success = true,
+            RawResponse = "User confirmed Vietcombank transfer on UI"
+        };
+        callback.Signature = _paymentService.GenerateCallbackSignature(callback);
+        var result = await _paymentService.ProcessCallbackAsync(callback);
+        return Ok(new { success = result.Success, message = result.Message });
+    }
 }

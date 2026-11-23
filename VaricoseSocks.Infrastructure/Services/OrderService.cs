@@ -89,6 +89,19 @@ public class OrderService : IOrderService
                     return (false, $"Size {variant.Size} - Màu {variant.Color} của sản phẩm '{product.Name}' chỉ còn {variant.StockQuantity} sản phẩm trong kho.", null);
                 }
             }
+            else if (product.Variants.Any())
+            {
+                var variant = product.Variants.FirstOrDefault(v => v.Size == item.Size && (string.IsNullOrEmpty(item.Color) || v.Color == item.Color))
+                           ?? product.Variants.FirstOrDefault(v => v.Size == item.Size);
+                if (variant != null)
+                {
+                    item.ProductVariantId = variant.Id;
+                    if (variant.StockQuantity < item.Quantity)
+                    {
+                        return (false, $"Size {variant.Size} - Màu {variant.Color} của sản phẩm '{product.Name}' chỉ còn {variant.StockQuantity} sản phẩm trong kho.", null);
+                    }
+                }
+            }
         }
 
         // Compute subtotal

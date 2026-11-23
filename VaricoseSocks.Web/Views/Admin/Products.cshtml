@@ -88,11 +88,14 @@
                                     <a asp-controller="Admin" asp-action="EditProduct" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm rounded-pill px-2" title="Sửa">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <form asp-controller="Admin" asp-action="DeleteProduct" asp-route-id="@p.Id" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');" class="d-inline">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-2" title="Xóa">
-                                            <i class="bi bi-trash3"></i>
-                                        </button>
-                                    </form>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <form asp-controller="Admin" asp-action="DeleteProduct" asp-route-id="@p.Id" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-2" title="Xóa vĩnh viễn (Chỉ Admin)">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    }
                                 </div>
                             </td>
                         </tr>

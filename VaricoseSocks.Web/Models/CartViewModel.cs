@@ -23,6 +23,7 @@ public class CartItemViewModel
     public string Size { get; set; } = "M";
     public string Color { get; set; } = "Màu Da";
     public int Quantity { get; set; } = 1;
+    public int StockQuantity { get; set; } = 0;
     public decimal UnitPrice { get; set; }
     public decimal TotalPrice => UnitPrice * Quantity;
 }

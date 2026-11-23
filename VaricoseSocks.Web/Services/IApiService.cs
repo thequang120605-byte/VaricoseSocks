@@ -14,15 +14,17 @@ public interface IApiService
 
     // Cart
     Task<CartViewModel> GetCartAsync(int? userId, string? sessionId);
-    Task<bool> AddToCartAsync(int productId, int? variantId, string size, string color, int quantity, int? userId, string? sessionId);
-    Task<bool> UpdateCartItemQuantityAsync(int cartItemId, int quantity);
+    Task<(bool Success, string? Message)> AddToCartAsync(int productId, int? variantId, string size, string color, int quantity, int? userId, string? sessionId);
+    Task<(bool Success, string? Message)> UpdateCartItemQuantityAsync(int cartItemId, int quantity);
     Task<bool> RemoveCartItemAsync(int cartItemId);
+    Task<bool> ClearCartAsync(int? userId, string? sessionId);
 
     // Orders & Checkout
-    Task<OrderDetailViewModel?> CreateOrderAsync(CheckoutViewModel model, string? sessionId, int? userId);
+    Task<(OrderDetailViewModel? Order, string? ErrorMessage)> CreateOrderAsync(CheckoutViewModel model, string? sessionId, int? userId);
     Task<OrderDetailViewModel?> GetOrderByCodeAsync(string orderCode);
     Task<List<OrderDetailViewModel>> GetAllOrdersAsync(int? status = null);
     Task<bool> UpdateOrderStatusAsync(int orderId, int status);
+    Task<bool> ConfirmVietQrPaymentAsync(string orderCode, decimal amount);
 
     // Promotions
     Task<CouponValidationResultViewModel?> ValidateVoucherAsync(string code, decimal orderAmount);
@@ -38,6 +40,7 @@ public interface IApiService
     // Authentication & Users
     Task<AuthResponseViewModel?> LoginAsync(string email, string password);
     Task<AuthResponseViewModel?> RegisterAsync(RegisterViewModel model);
+    Task<bool> ResetPasswordAsync(string email, string newPassword);
     Task<UserAccountViewModel?> GetProfileAsync(int userId);
     Task<bool> UpdateProfileAsync(int userId, UpdateProfileViewModel model);
     Task<bool> CheckEmailExistsAsync(string email);

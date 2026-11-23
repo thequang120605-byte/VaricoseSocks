@@ -1,6 +1,7 @@
 @model VaricoseSocks.Web.Models.RegisterViewModel
 @{
     ViewData["Title"] = "Đăng ký tài khoản y khoa - Varicose Socks";
+    var isOtpStep = Model?.Step == "otp";
 }
 
 <div class="container py-5">
@@ -15,15 +16,104 @@
             </nav>
 
             <div class="glass-card bg-white p-4 p-md-5 border shadow-subtle position-relative overflow-hidden">
-                @if (Model.Step == "otp")
-                {
-                    <!-- BƯỚC 2: XÁC THỰC MÃ OTP TỪ GMAIL -->
+                
+                <!-- BƯỚC 1: NHẬP THÔNG TIN TÀI KHOẢN (GỬI OTP QUA AJAX ĐỂ TRÁNH TRÌNH DUYỆT BẬT LƯU MẬT KHẨU SỚM) -->
+                <div id="step1Container" style="@(isOtpStep ? "display:none;" : "")">
+                    <div class="text-center mb-4">
+                        <div class="bg-primary text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-2 shadow-sm" style="width: 64px; height: 64px;">
+                            <i class="bi bi-person-plus-fill fs-2"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark mb-1">Tạo Tài Khoản Y Khoa</h3>
+                        <p class="text-muted small">Bước 1/2: Điền thông tin cơ bản và nhận mã OTP xác thực Gmail</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model?.ReturnUrl) && Model.ReturnUrl.Contains("Checkout", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <div class="alert alert-warning rounded-4 p-3 small mb-4 border-0 shadow-sm d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-lock-fill text-warning fs-4 flex-shrink-0"></i>
+                            <div>
+                                <strong>Yêu cầu đăng ký:</strong> Tạo tài khoản để lưu lại đơn hàng, bảo lưu giỏ hàng và nhận phác đồ bảo hành vớ y khoa chính hãng.
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Khung thông báo lỗi của Bước 1 -->
+                    <div id="step1Alert" class="alert alert-danger rounded-3 p-3 small mb-3 border-0" style="display: none;">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <span id="step1AlertMsg"></span>
+                    </div>
+
+                    <div id="step1Form">
+                        <input type="hidden" id="regReturnUrl" value="@(Model?.ReturnUrl ?? "")" />
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="regFullName" class="form-label fw-semibold small">Họ và tên của bạn:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                                    <input id="regFullName" type="text" class="form-control border-start-0" placeholder="Ví dụ: Chu Văn Quốc Trung" required autocomplete="name" onkeydown="if(event.key==='Enter') handleStep1Submit();" />
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="regEmail" class="form-label fw-semibold small">Địa chỉ Gmail nhận mã OTP:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                                    <input id="regEmail" type="email" class="form-control border-start-0" placeholder="tenban@gmail.com" required autocomplete="email" onkeydown="if(event.key==='Enter') handleStep1Submit();" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="regPassword" class="form-label fw-semibold small">Mật khẩu:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                                    <input id="regPassword" type="text" style="-webkit-text-security: disc; text-security: disc;" class="form-control border-start-0 border-end-0" placeholder="Tối thiểu 6 ký tự..." required autocomplete="off" data-lpignore="true" data-form-type="other" onkeydown="if(event.key==='Enter') handleStep1Submit();" />
+                                    <button class="btn btn-outline-light text-muted border border-start-0 bg-light" type="button" onclick="togglePasswordVis('regPassword', this)" title="Ẩn/hiện mật khẩu">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="regConfirmPassword" class="form-label fw-semibold small">Xác nhận mật khẩu:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-shield-check text-muted"></i></span>
+                                    <input id="regConfirmPassword" type="text" style="-webkit-text-security: disc; text-security: disc;" class="form-control border-start-0 border-end-0" placeholder="Nhập lại mật khẩu..." required autocomplete="off" data-lpignore="true" data-form-type="other" onkeydown="if(event.key==='Enter') handleStep1Submit();" />
+                                    <button class="btn btn-outline-light text-muted border border-start-0 bg-light" type="button" onclick="togglePasswordVis('regConfirmPassword', this)" title="Ẩn/hiện mật khẩu">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check my-3">
+                            <input class="form-check-input" type="checkbox" id="termsCheck" checked required />
+                            <label class="form-check-label small text-muted" for="termsCheck">
+                                Tôi đồng ý với chính sách bảo mật thông tin y tế và quy chuẩn điều trị của Varicose Socks.
+                            </label>
+                        </div>
+
+                        <button type="button" id="btnSubmitStep1" onclick="handleStep1Submit()" class="btn btn-success btn-lg w-100 fw-bold rounded-pill shadow-sm py-3 mb-3">
+                            <i class="bi bi-send-check-fill me-2"></i> Tiếp Tục & Nhận Mã OTP Gmail
+                        </button>
+
+                        <div class="text-center pt-3 border-top small text-muted">
+                            Bạn đã có tài khoản? 
+                            <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Model?.ReturnUrl" class="text-primary fw-bold text-decoration-none">
+                                Đăng nhập ngay
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 2: XÁC THỰC MÃ OTP (CHỈ CÓ MÃ OTP, KHÔNG CHỨA INPUT PASSWORD ĐỂ TRÁNH GOOGLE LƯU TRƯỚC HẠN) -->
+                <div id="step2Container" style="@(isOtpStep ? "" : "display:none;")">
                     <div class="text-center mb-4">
                         <div class="bg-primary text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-2 shadow-sm" style="width: 64px; height: 64px;">
                             <i class="bi bi-shield-lock-fill fs-2"></i>
                         </div>
                         <h3 class="fw-bold text-dark mb-1">Xác Thực Mã OTP</h3>
-                        <p class="text-muted small">Bước 2/2: Nhập mã xác nhận đã được gửi về Gmail để hoàn tất đăng ký</p>
+                        <p class="text-muted small">Bước 2/2: Nhập mã xác thực gồm 6 chữ số đã được gửi về Gmail của bạn</p>
                     </div>
 
                     @if (TempData["OtpSentMessage"] != null)
@@ -33,6 +123,11 @@
                             @TempData["OtpSentMessage"]
                         </div>
                     }
+
+                    <div id="otpInfoAlert" class="alert alert-info rounded-4 p-3 small mb-4 border-0 shadow-sm" style="display: none;">
+                        <i class="bi bi-info-circle-fill me-1 text-primary"></i>
+                        <span id="otpInfoAlertMsg"></span>
+                    </div>
 
                     @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
                     {
@@ -44,19 +139,20 @@
 
                     <div class="p-3 bg-light rounded-4 border mb-4 text-center">
                         <div class="small text-muted mb-1">Mã xác thực đã được gửi đến hòm thư:</div>
-                        <div class="fw-bold text-primary fs-6"><i class="bi bi-envelope-check-fill me-1"></i>@Model.Email</div>
+                        <div class="fw-bold text-primary fs-6">
+                            <i class="bi bi-envelope-check-fill me-1"></i>
+                            <span id="displayOtpEmail">@(Model?.Email ?? "Gmail của bạn")</span>
+                        </div>
                         <div class="small text-muted mt-2">
                             <i class="bi bi-shield-check text-success me-1"></i>Vui lòng mở ứng dụng Gmail hoặc tab Gmail của bạn để lấy mã OTP gồm 6 chữ số.
                         </div>
                     </div>
 
-                    <form asp-controller="Account" asp-action="Register" method="post">
+                    <form asp-controller="Account" asp-action="Register" method="post" id="step2Form">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" asp-for="FullName" />
-                        <input type="hidden" asp-for="Email" />
-                        <input type="hidden" asp-for="Password" />
-                        <input type="hidden" asp-for="ConfirmPassword" />
-                        <input type="hidden" asp-for="Step" value="otp" />
+                        <input type="hidden" name="Step" value="otp" />
+                        <input type="hidden" name="Email" id="step2EmailInput" value="@(Model?.Email ?? "")" />
+                        <input type="hidden" name="ReturnUrl" id="step2ReturnUrl" value="@(Model?.ReturnUrl ?? "")" />
 
                         <div class="mb-4">
                             <label class="form-label fw-bold text-center d-block small text-dark mb-2">
@@ -64,115 +160,27 @@
                             </label>
                             <input asp-for="OtpCode" id="otpInput" class="form-control form-control-lg text-center fw-bold text-primary tracking-widest rounded-4 border-2" 
                                    style="font-size: 1.75rem; letter-spacing: 0.5rem; max-width: 260px; margin: 0 auto;"
-                                   placeholder="------" maxlength="6" autofocus required />
+                                   placeholder="------" maxlength="6" autofocus required autocomplete="one-time-code" />
                             <div class="text-center">
                                 <span asp-validation-for="OtpCode" class="text-danger small mt-1 d-block"></span>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold rounded-pill shadow-sm py-3 mb-3">
-                            <i class="bi bi-check2-circle me-2"></i> Xác Thực OTP & Lưu Vào Database
+                        <button type="submit" id="btnSubmitOtp" class="btn btn-success btn-lg w-100 fw-bold rounded-pill shadow-sm py-3 mb-3">
+                            <i class="bi bi-check2-circle me-2"></i> Xác Thực OTP & Kích Hoạt Tài Khoản
                         </button>
 
-                        <div class="d-flex justify-content-between align-items-center pt-3 border-top small">
-                            <a asp-action="Register" class="text-muted text-decoration-none">
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <button type="button" class="btn btn-link text-decoration-none small text-muted p-0" onclick="switchBackToStep1()">
                                 <i class="bi bi-arrow-left me-1"></i> Nhập lại thông tin
-                            </a>
-                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="resendOtpAjax()">
-                                <i class="bi bi-arrow-repeat me-1"></i> Gửi lại mã OTP
+                            </button>
+                            <button type="button" id="btnResendOtp" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="resendOtpAjax()">
+                                <i class="bi bi-arrow-clockwise me-1"></i> <span id="resendOtpText">Gửi lại mã OTP</span>
                             </button>
                         </div>
                     </form>
-                }
-                else
-                {
-                    <!-- BƯỚC 1: NHẬP THÔNG TIN TÀI KHOẢN RÚT GỌN -->
-                    <div class="text-center mb-4">
-                        <div class="bg-success text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-2 shadow-sm" style="width: 58px; height: 58px;">
-                            <i class="bi bi-person-plus-fill fs-3"></i>
-                        </div>
-                        <h3 class="fw-bold text-dark mb-1">Tạo Tài Khoản Khách Hàng</h3>
-                        <p class="text-muted small">Bước 1/2: Đăng ký nhanh với Gmail và nhận mã xác thực OTP bảo mật</p>
-                    </div>
+                </div>
 
-                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
-                    {
-                        <div class="alert alert-danger rounded-3 p-3 small mb-3 border-0">
-                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-0" })
-                        </div>
-                    }
-
-                    <div class="alert alert-light border small text-muted rounded-4 p-3 mb-4">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-lightbulb-fill text-warning fs-5"></i>
-                            <div>
-                                <strong>Đăng ký tinh gọn:</strong> Bạn không cần nhập số điện thoại và địa chỉ nhận hàng ngay bây giờ. Thông tin đó có thể bổ sung trong <strong>Hồ sơ cá nhân (Profile)</strong> hoặc khi <strong>Đặt hàng</strong>.
-                            </div>
-                        </div>
-                    </div>
-
-                    <form asp-controller="Account" asp-action="Register" method="post">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" asp-for="Step" value="form" />
-
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label asp-for="FullName" class="form-label fw-semibold small">Họ và tên của bạn:</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
-                                    <input asp-for="FullName" class="form-control border-start-0" placeholder="Ví dụ: Chu Văn Quốc Trung" required />
-                                </div>
-                                <span asp-validation-for="FullName" class="text-danger small"></span>
-                            </div>
-
-                            <div class="col-12">
-                                <label asp-for="Email" class="form-label fw-semibold small">Địa chỉ Gmail nhận mã OTP:</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
-                                    <input asp-for="Email" type="email" class="form-control border-start-0" placeholder="tenban@gmail.com" required />
-                                </div>
-                                <span asp-validation-for="Email" class="text-danger small"></span>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label asp-for="Password" class="form-label fw-semibold small">Mật khẩu:</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
-                                    <input asp-for="Password" type="password" class="form-control border-start-0" placeholder="Tối thiểu 6 ký tự..." required />
-                                </div>
-                                <span asp-validation-for="Password" class="text-danger small"></span>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label asp-for="ConfirmPassword" class="form-label fw-semibold small">Xác nhận mật khẩu:</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-shield-check text-muted"></i></span>
-                                    <input asp-for="ConfirmPassword" type="password" class="form-control border-start-0" placeholder="Nhập lại mật khẩu..." required />
-                                </div>
-                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-                            </div>
-                        </div>
-
-                        <div class="form-check my-3">
-                            <input class="form-check-input" type="checkbox" id="termsCheck" checked required />
-                            <label class="form-check-label small text-muted" for="termsCheck">
-                                Tôi đồng ý với chính sách bảo mật thông tin y tế và quy chuẩn điều trị của Varicose Socks.
-                            </label>
-                        </div>
-
-                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold rounded-pill shadow-sm py-3 mb-3">
-                            <i class="bi bi-send-check-fill me-2"></i> Tiếp Tục & Nhận Mã OTP Gmail
-                        </button>
-
-                        <div class="text-center pt-3 border-top small text-muted">
-                            Bạn đã có tài khoản? 
-                            <a asp-controller="Account" asp-action="Login" class="text-primary fw-bold text-decoration-none">
-                                Đăng nhập ngay
-                            </a>
-                        </div>
-                    </form>
-                }
             </div>
         </div>
     </div>
@@ -180,7 +188,161 @@
 
 @section Scripts {
     <script>
+        function togglePasswordVis(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (!input) return;
+            const isMasked = input.style.webkitTextSecurity !== 'none' && input.type !== 'text' || (input.style.webkitTextSecurity === 'disc');
+            if (isMasked) {
+                input.style.webkitTextSecurity = 'none';
+                input.style.textSecurity = 'none';
+                icon.className = 'bi bi-eye-slash text-primary';
+            } else {
+                input.style.webkitTextSecurity = 'disc';
+                input.style.textSecurity = 'disc';
+                icon.className = 'bi bi-eye text-muted';
+            }
+        }
+
+        let resendCountdown = 0;
+        let resendTimer = null;
+
+        function startResendCountdown() {
+            resendCountdown = 60;
+            const btn = document.getElementById('btnResendOtp');
+            const text = document.getElementById('resendOtpText');
+            if (!btn || !text) return;
+            btn.disabled = true;
+
+            clearInterval(resendTimer);
+            resendTimer = setInterval(() => {
+                resendCountdown--;
+                if (resendCountdown <= 0) {
+                    clearInterval(resendTimer);
+                    btn.disabled = false;
+                    text.innerText = 'Gửi lại mã OTP';
+                } else {
+                    text.innerText = `Gửi lại (${resendCountdown}s)`;
+                }
+            }, 1000);
+        }
+
+        async function handleStep1Submit() {
+            const fullName = document.getElementById('regFullName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const returnUrl = document.getElementById('regReturnUrl').value;
+            const termsCheck = document.getElementById('termsCheck').checked;
+
+            const alertBox = document.getElementById('step1Alert');
+            const alertMsg = document.getElementById('step1AlertMsg');
+            const btn = document.getElementById('btnSubmitStep1');
+
+            alertBox.style.display = 'none';
+
+            if (!fullName || !email || !password) {
+                alertMsg.innerText = 'Vui lòng điền đầy đủ họ và tên, email và mật khẩu.';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            if (!email.includes('@@') || !email.includes('.')) {
+                alertMsg.innerText = 'Địa chỉ Gmail không đúng định dạng. Vui lòng kiểm tra lại.';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                alertMsg.innerText = 'Mật khẩu phải có tối thiểu 6 ký tự để đảm bảo an toàn thông tin.';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alertMsg.innerText = 'Mật khẩu xác nhận không khớp với mật khẩu đã nhập.';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            if (!termsCheck) {
+                alertMsg.innerText = 'Vui lòng đồng ý với chính sách bảo mật thông tin y tế để tiếp tục.';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            // Hiệu ứng Loading
+            const originalBtnHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang gửi mã OTP đến Gmail...';
+
+            try {
+                const response = await fetch('/Account/SendRegisterOtp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName: fullName,
+                        email: email,
+                        password: password,
+                        confirmPassword: confirmPassword,
+                        returnUrl: returnUrl,
+                        step: 'form'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Xóa giá trị input mật khẩu khỏi DOM để triệt tiêu việc trình duyệt (Chrome Password Manager) tự động bắt và hỏi lưu mật khẩu khi chưa xác thực xong OTP
+                    document.getElementById('regPassword').value = '';
+                    document.getElementById('regConfirmPassword').value = '';
+
+                    // Cập nhật thông tin sang Bước 2
+                    document.getElementById('displayOtpEmail').innerText = email;
+                    document.getElementById('step2EmailInput').value = email;
+                    document.getElementById('step2ReturnUrl').value = returnUrl;
+
+                    const infoAlert = document.getElementById('otpInfoAlert');
+                    const infoAlertMsg = document.getElementById('otpInfoAlertMsg');
+                    infoAlertMsg.innerText = data.message || `Đã gửi thành công mã OTP xác thực vào hòm thư Gmail ${email}.`;
+                    infoAlert.style.display = 'block';
+
+                    // Chuyển giao diện sang Bước 2 (Không load lại trang)
+                    document.getElementById('step1Container').style.display = 'none';
+                    document.getElementById('step2Container').style.display = 'block';
+
+                    startResendCountdown();
+
+                    setTimeout(() => {
+                        const otpInput = document.getElementById('otpInput');
+                        if (otpInput) otpInput.focus();
+                    }, 200);
+                } else {
+                    alertMsg.innerText = data.message || 'Không thể gửi mã xác thực. Vui lòng thử lại.';
+                    alertBox.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnHtml;
+                }
+            } catch (err) {
+                alertMsg.innerText = 'Lỗi kết nối máy chủ khi gửi mã xác thực: ' + err.message;
+                alertBox.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+            }
+        }
+
+        function switchBackToStep1() {
+            document.getElementById('step2Container').style.display = 'none';
+            document.getElementById('step1Container').style.display = 'block';
+            const btn = document.getElementById('btnSubmitStep1');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-send-check-fill me-2"></i> Tiếp Tục & Nhận Mã OTP Gmail';
+        }
+
         function resendOtpAjax() {
+            const btn = document.getElementById('btnResendOtp');
+            btn.disabled = true;
+
             fetch('/Account/ResendOtp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
@@ -188,12 +350,20 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert('Hệ thống đã gửi lại mã OTP mới vào hòm thư Gmail của bạn. Vui lòng kiểm tra email!');
+                    startResendCountdown();
+                    const infoAlert = document.getElementById('otpInfoAlert');
+                    const infoAlertMsg = document.getElementById('otpInfoAlertMsg');
+                    infoAlertMsg.innerText = 'Hệ thống đã gửi lại mã OTP mới vào Gmail của bạn. Vui lòng kiểm tra hộp thư!';
+                    infoAlert.style.display = 'block';
                 } else {
                     alert(data.message);
+                    btn.disabled = false;
                 }
             })
-            .catch(err => alert('Không thể kết nối gửi lại OTP: ' + err));
+            .catch(err => {
+                alert('Không thể kết nối gửi lại OTP: ' + err);
+                btn.disabled = false;
+            });
         }
     </script>
 }

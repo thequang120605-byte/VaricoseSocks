@@ -434,7 +434,12 @@
 // CLIENT-SIDE REST API CALLS (Hiển thị trực tiếp trong DevTools Network Fetch/XHR)
 // =========================================================================
 
+let isFetchingProfile = false;
+
 async function fetchProfileApiLive() {
+    if (isFetchingProfile) return;
+    isFetchingProfile = true;
+
     const userId = @Model.User.Id;
     const userApiUrl = 'http://localhost:5046/api/auth/user/' + userId;
     const healthApiUrl = 'http://localhost:5046/api/HealthRecords/user/' + userId;
@@ -502,6 +507,8 @@ async function fetchProfileApiLive() {
 
     } catch (e) {
         console.error('[Hồ Sơ Bệnh Án REST API] ❌ Lỗi kết nối API GET:', e);
+    } finally {
+        setTimeout(() => { isFetchingProfile = false; }, 800);
     }
 }
 
@@ -590,38 +597,20 @@ async function submitUpdateProfileAjax(event) {
     }
 }
 
-// 1. Tự động kích hoạt HTTP GET ngay khi nạp trang Hồ Sơ Bệnh Án
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fetchProfileApiLive);
-} else {
+// 1. Tự động kích hoạt HTTP GET đúng 1 lần khi nạp trang Hồ Sơ Bệnh Án
+document.addEventListener('DOMContentLoaded', () => {
     fetchProfileApiLive();
-}
+    bindHsoBenhAnClicks();
+});
 
-// 2. Bắt sự kiện khi người dùng click vào mục "Hồ sơ bệnh án" (Navbar dropdown, tab, mobile nav)
+// 2. Bắt sự kiện khi người dùng click vào mục "Hồ sơ bệnh án" hoặc mở Modal
 function bindHsoBenhAnClicks() {
-    const triggers = document.querySelectorAll('#navLinkProfileDropdown, .profile-nav-link, #health-tab, a[href*="/Account/Profile"]');
-    triggers.forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            if (window.location.pathname.toLowerCase().includes('/account/profile')) {
-                e.preventDefault();
-                console.log('%c[Hồ Sơ Bệnh Án] Người dùng bấm vào mục Hồ Sơ Bệnh Án -> Gọi ngay RESTful API HTTP GET!', 'color: #0284c7; font-weight: bold;');
-                fetchProfileApiLive();
-            }
-        });
-    });
-
     const editModalEl = document.getElementById('editProfileModal');
     if (editModalEl) {
         editModalEl.addEventListener('show.bs.modal', function () {
             fetchProfileApiLive();
         });
     }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindHsoBenhAnClicks);
-} else {
-    bindHsoBenhAnClicks();
 }
 
 function calcSizeAuto() {

@@ -227,7 +227,7 @@ public class ApiService : IApiService
         return new CartViewModel();
     }
 
-    public async Task<bool> AddToCartAsync(int productId, int? variantId, string size, string color, int quantity, int? userId, string? sessionId)
+    public async Task<(bool Success, string? Message)> AddToCartAsync(int productId, int? variantId, string size, string color, int quantity, int? userId, string? sessionId)
     {
         try
         {
@@ -243,26 +243,58 @@ public class ApiService : IApiService
             };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("cart/items", content);
-            return response.IsSuccessStatusCode;
+            if (response.IsSuccessStatusCode)
+            {
+                return (true, null);
+            }
+
+            var errText = await response.Content.ReadAsStringAsync();
+            try
+            {
+                var errObj = JsonSerializer.Deserialize<JsonElement>(errText);
+                if (errObj.TryGetProperty("message", out var msgEl))
+                {
+                    return (false, msgEl.GetString());
+                }
+            }
+            catch { }
+
+            return (false, "Số lượng thêm vào vượt quá tồn kho khả dụng.");
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            return (false, ex.Message);
         }
     }
 
-    public async Task<bool> UpdateCartItemQuantityAsync(int cartItemId, int quantity)
+    public async Task<(bool Success, string? Message)> UpdateCartItemQuantityAsync(int cartItemId, int quantity)
     {
         try
         {
             var payload = new { cartItemId, quantity };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PutAsync($"cart/items/{cartItemId}", content);
-            return response.IsSuccessStatusCode;
+            if (response.IsSuccessStatusCode)
+            {
+                return (true, null);
+            }
+
+            var errText = await response.Content.ReadAsStringAsync();
+            try
+            {
+                var errObj = JsonSerializer.Deserialize<JsonElement>(errText);
+                if (errObj.TryGetProperty("message", out var msgEl))
+                {
+                    return (false, msgEl.GetString());
+                }
+            }
+            catch { }
+
+            return (false, "Số lượng cập nhật vượt quá tồn kho khả dụng.");
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            return (false, ex.Message);
         }
     }
 
@@ -279,7 +311,20 @@ public class ApiService : IApiService
         }
     }
 
-    public async Task<OrderDetailViewModel?> CreateOrderAsync(CheckoutViewModel model, string? sessionId, int? userId)
+    public async Task<bool> ClearCartAsync(int? userId, string? sessionId)
+    {
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"cart/clear?userId={userId}&sessionId={sessionId}");
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<(OrderDetailViewModel? Order, string? ErrorMessage)> CreateOrderAsync(CheckoutViewModel model, string? sessionId, int? userId)
     {
         try
         {
@@ -311,12 +356,28 @@ public class ApiService : IApiService
             {
                 var stream = await response.Content.ReadAsStreamAsync();
                 var created = await JsonSerializer.DeserializeAsync<OrderDetailViewModel>(stream, _jsonOptions);
-                return created;
+                return (created, null);
+            }
+            else
+            {
+                var errText = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    var errObj = JsonSerializer.Deserialize<JsonElement>(errText);
+                    if (errObj.TryGetProperty("message", out var msgEl))
+                    {
+                        return (null, msgEl.GetString());
+                    }
+                }
+                catch { }
+
+                return (null, "Không thể tạo đơn hàng do tồn kho không đủ hoặc dữ liệu không hợp lệ.");
             }
         }
-        catch { }
-
-        return null;
+        catch (Exception ex)
+        {
+            return (null, "Lỗi kết nối máy chủ tạo đơn hàng: " + ex.Message);
+        }
     }
 
     public async Task<OrderDetailViewModel?> GetOrderByCodeAsync(string orderCode)
@@ -362,6 +423,21 @@ public class ApiService : IApiService
             var payload = new { orderStatus = status };
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PatchAsync($"orders/{orderId}/status", content);
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> ConfirmVietQrPaymentAsync(string orderCode, decimal amount)
+    {
+        try
+        {
+            var payload = new { orderCode, amount };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("payments/confirm-vietqr", content);
             return response.IsSuccessStatusCode;
         }
         catch
@@ -559,6 +635,21 @@ public class ApiService : IApiService
                 Success = false,
                 Message = "Lỗi khi gửi yêu cầu đăng ký: " + ex.Message
             };
+        }
+    }
+
+    public async Task<bool> ResetPasswordAsync(string email, string newPassword)
+    {
+        try
+        {
+            var payload = new { email = email.Trim().ToLower(), newPassword };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("auth/reset-password", content);
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
         }
     }
 

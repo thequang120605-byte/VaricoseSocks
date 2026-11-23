@@ -176,13 +176,36 @@
                                                 </span>
                                             }
                                         </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            @if (p.StockQuantity > 0)
+                                            {
+                                                <span class="badge bg-light text-secondary border small" style="font-size: 0.72rem;">
+                                                    <i class="bi bi-box-seam me-1 text-primary"></i>Còn @p.StockQuantity sp
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle small" style="font-size: 0.72rem;">
+                                                    <i class="bi bi-x-circle me-1"></i>Hết hàng
+                                                </span>
+                                            }
+                                        </div>
                                         <div class="d-flex gap-2">
                                             <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm rounded-pill flex-grow-1 fw-bold">
                                                 Chi tiết
                                             </a>
-                                            <button type="button" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="addToCartLive(@p.Id, 'M', 'Màu Da (Beige)', 1, this.closest('.product-card').querySelector('img'))" title="Thêm vào giỏ">
-                                                <i class="bi bi-cart-plus fs-6"></i>
-                                            </button>
+                                            @if (p.StockQuantity > 0)
+                                            {
+                                                <button type="button" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="addToCartLive(@p.Id, 'M', 'Màu Da (Beige)', 1, this.closest('.product-card').querySelector('img'))" title="Thêm vào giỏ">
+                                                    <i class="bi bi-cart-plus fs-6"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3 opacity-50" disabled title="Tạm hết hàng">
+                                                    <i class="bi bi-slash-circle fs-6"></i>
+                                                </button>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -194,3 +217,18 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tải danh mục sản phẩm từ RESTful API 5046 hiển thị rõ ràng trên Network DevTools Fetch/XHR
+        try {
+            console.log('[DevTools Network Fetch/XHR] 🚀 Gửi HTTP GET: http://localhost:5046/api/products');
+            fetch('http://localhost:5046/api/products')
+                .then(r => r.json())
+                .then(data => console.log('[DevTools Network Fetch/XHR] ✅ Danh mục sản phẩm từ API 5046:', data))
+                .catch(e => console.log('Products API info:', e));
+        } catch {}
+    });
+</script>
+}

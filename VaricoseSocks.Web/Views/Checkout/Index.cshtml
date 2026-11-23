@@ -101,41 +101,32 @@
                             <input class="form-check-input me-3" type="radio" asp-for="PaymentMethod" value="1" checked onchange="toggleQrCard(false)" />
                             <div class="flex-grow-1">
                                 <strong class="d-block text-dark"><i class="bi bi-cash-stack text-success me-2"></i>Thanh toán khi nhận hàng (COD)</strong>
-                                <small class="text-muted">Nhận bưu kiện, kiểm tra đúng size và loại vớ y khoa rồi mới thanh toán tiền mặt.</small>
+                                <small class="text-muted">Nhận bưu kiện, kiểm tra đúng size và loại vớ y khoa rồi mới thanh toán tiền mặt cho nhân viên giao hàng.</small>
                             </div>
                         </label>
 
                         <label class="form-check p-3 border rounded-4 bg-light d-flex align-items-center cursor-pointer transition-hover">
                             <input class="form-check-input me-3" type="radio" asp-for="PaymentMethod" value="2" onchange="toggleQrCard(true)" />
                             <div class="flex-grow-1">
-                                <strong class="d-block text-dark"><i class="bi bi-qr-code text-primary me-2"></i>Chuyển khoản VietQR Siêu Tốc (Khuyên dùng)</strong>
-                                <small class="text-muted">Quét mã QR tự động điền số tiền và nội dung, xác nhận tự động 24/7 qua mọi App Ngân hàng.</small>
+                                <strong class="d-block text-dark"><i class="bi bi-qr-code text-primary me-2"></i>Chuyển khoản VietQR Siêu Tốc (Vietcombank)</strong>
+                                <small class="text-muted">Nhấn Đặt hàng để mở Cổng quét mã VietQR Napas247 (hiệu lực 15 phút) qua bất kỳ App Ngân hàng nào.</small>
                             </div>
                         </label>
                     </div>
 
-                    <!-- VietQR Dynamic Card (Shown when VietQR chosen) -->
+                    <!-- VietQR Information notice -->
                     <div id="vietQrSection" class="p-3 bg-light rounded-4 border d-none">
-                        <div class="row align-items-center g-3">
-                            <div class="col-md-5 text-center">
-                                <div class="qr-card-wrapper d-inline-block">
-                                    <div class="radar-laser"></div>
-                                    <img id="qrImagePreview" src="https://api.vietqr.io/image/970422-0987654321-compact.jpg?amount=@Model.Cart.TotalAmount&addInfo=VS2026&accountName=VARICOSE%20SOCKS" 
-                                         alt="VietQR Mã Thanh Toán" style="width: 170px; height: 170px; object-fit: contain;" />
-                                </div>
-                                <div class="mt-2 text-danger small fw-bold">
-                                    <i class="bi bi-clock-history me-1"></i>Hết hạn sau: <span id="qrTimer">14:59</span>
-                                </div>
-                            </div>
-                            <div class="col-md-7">
-                                <h6 class="fw-bold text-primary mb-2">Thông tin tài khoản y tế:</h6>
-                                <div class="small text-muted mb-1">Ngân hàng: <strong>MBBank (Quân Đội)</strong></div>
-                                <div class="small text-muted mb-1">Số tài khoản: <strong class="text-dark">0987.654.321</strong></div>
-                                <div class="small text-muted mb-1">Chủ tài khoản: <strong>VARICOSE SOCKS VIETNAM</strong></div>
-                                <div class="small text-muted mb-2">Số tiền: <strong class="text-danger fs-6" id="qrAmountDisplay">@Model.Cart.TotalAmount.ToString("N0") ₫</strong></div>
-                                <div class="badge bg-success-subtle text-success p-2 small">
-                                    <i class="bi bi-shield-check me-1"></i> Hệ thống tự động xác nhận sau 3 giây quét mã
-                                </div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-success px-3 py-1 rounded-pill"><i class="bi bi-bank me-1"></i> Vietcombank</span>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill small">Napas247 Siêu Tốc</span>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            <i class="bi bi-qr-code-scan text-primary me-1"></i>Khi bạn nhấn <strong>"Tiến Hành Quét Mã Thanh Toán"</strong>, màn hình Cổng thanh toán VietQR sẽ hiển thị kèm đồng hồ đếm ngược <strong>15 phút</strong> để bạn quét mã thanh toán bằng App Ngân hàng.
+                        </div>
+                        <div class="bg-white p-2 rounded-3 border small">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Tài khoản thụ hưởng:</span>
+                                <strong class="text-dark">Vietcombank - 9379798265 (CHU VAN QUOC TRUNG)</strong>
                             </div>
                         </div>
                     </div>
@@ -217,8 +208,9 @@
                         <span class="fs-4 fw-bold text-danger" id="summaryTotal">@((Model.Cart.TotalAmount - Model.DiscountAmount).ToString("N0")) ₫</span>
                     </div>
 
-                    <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold text-dark rounded-pill shadow-glow-warning py-3">
-                        <i class="bi bi-check-circle-fill me-2"></i> Xác Nhận Đặt Hàng Ngay
+                    <button type="submit" id="btnPlaceOrder" class="btn btn-warning btn-lg w-100 fw-bold text-dark rounded-pill shadow-glow-warning py-3">
+                        <i class="bi bi-check-circle-fill me-2" id="btnPlaceOrderIcon"></i>
+                        <span id="btnPlaceOrderText">Xác Nhận Đặt Hàng Ngay (COD)</span>
                     </button>
 
                     <div class="text-center mt-3 small text-muted">
@@ -232,30 +224,31 @@
 
 @section Scripts {
 <script>
-    function toggleQrCard(show) {
+    function toggleQrCard(isVietQr) {
         const qrEl = document.getElementById('vietQrSection');
+        const btn = document.getElementById('btnPlaceOrder');
+        const btnText = document.getElementById('btnPlaceOrderText');
+        const btnIcon = document.getElementById('btnPlaceOrderIcon');
+
         if (qrEl) {
-            if (show) {
+            if (isVietQr) {
                 qrEl.classList.remove('d-none');
-                startQrCountdown();
             } else {
                 qrEl.classList.add('d-none');
             }
         }
-    }
 
-    function startQrCountdown() {
-        let sec = 15 * 60;
-        const timerEl = document.getElementById('qrTimer');
-        if (!timerEl) return;
-
-        const interval = setInterval(() => {
-            sec--;
-            const m = Math.floor(sec / 60);
-            const s = sec % 60;
-            timerEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-            if (sec <= 0) clearInterval(interval);
-        }, 1000);
+        if (btn && btnText && btnIcon) {
+            if (isVietQr) {
+                btn.className = 'btn btn-success btn-lg w-100 fw-bold rounded-pill shadow-sm py-3 text-white';
+                btnIcon.className = 'bi bi-qr-code-scan me-2';
+                btnText.innerText = 'Tiến Hành Quét Mã Thanh Toán VietQR (15 Phút)';
+            } else {
+                btn.className = 'btn btn-warning btn-lg w-100 fw-bold text-dark rounded-pill shadow-glow-warning py-3';
+                btnIcon.className = 'bi bi-check-circle-fill me-2';
+                btnText.innerText = 'Xác Nhận Đặt Hàng Ngay (COD)';
+            }
+        }
     }
 
     function fillVoucher(code) {
@@ -291,7 +284,7 @@
 
         const qrImg = document.getElementById('qrImagePreview');
         if (qrImg) {
-            qrImg.src = `https://api.vietqr.io/image/970422-0987654321-compact.jpg?amount=${finalTotal}&addInfo=VS2026&accountName=VARICOSE%20SOCKS`;
+            qrImg.src = `https://api.vietqr.io/image/970436-9379798265-compact2.jpg?amount=${finalTotal}&addInfo=VS2026&accountName=CHU%20VAN%20QUOC%20TRUNG`;
         }
     }
 
@@ -308,6 +301,18 @@
             msgEl.style.display = 'block';
             return;
         }
+
+        // Gọi trực tiếp RESTful API Promotions Backend (port 5046) để hiển thị trên DevTools Network Fetch/XHR
+        try {
+            console.log('[DevTools Network Fetch/XHR] 🚀 Gửi POST: http://localhost:5046/api/promotions/validate');
+            fetch('http://localhost:5046/api/promotions/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code, orderAmount: subTotal })
+            }).then(r => r.json()).then(d => {
+                console.log('[DevTools Network Fetch/XHR] ✅ Kiểm tra voucher từ API 5046:', d);
+            }).catch(e => console.log('API voucher check:', e));
+        } catch {}
 
         try {
             const resp = await fetch('/Checkout/ValidateVoucher', {
@@ -335,7 +340,7 @@
 
                 const qrImg = document.getElementById('qrImagePreview');
                 if (qrImg) {
-                    qrImg.src = `https://api.vietqr.io/image/970422-0987654321-compact.jpg?amount=${finalTotal}&addInfo=VS2026&accountName=VARICOSE%20SOCKS`;
+                    qrImg.src = `https://api.vietqr.io/image/970436-9379798265-compact2.jpg?amount=${finalTotal}&addInfo=VS2026&accountName=CHU%20VAN%20QUOC%20TRUNG`;
                 }
 
                 if (typeof triggerConfetti === 'function') triggerConfetti();
@@ -352,6 +357,16 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // Tải thông tin giỏ hàng từ RESTful API 5046 để hiển thị trên DevTools Network
+        try {
+            const sid = typeof getOrCreateClientSessionId === 'function' ? getOrCreateClientSessionId() : '';
+            console.log('[DevTools Network Fetch/XHR] 🚀 Gửi HTTP GET: http://localhost:5046/api/cart?sessionId=' + sid);
+            fetch('http://localhost:5046/api/cart?sessionId=' + encodeURIComponent(sid))
+                .then(r => r.json())
+                .then(d => console.log('[DevTools Network Fetch/XHR] ✅ Dữ liệu giỏ hàng Checkout từ API 5046:', d))
+                .catch(e => console.log('Cart Checkout fetch:', e));
+        } catch {}
+
         const initCode = document.getElementById('voucherInput')?.value?.trim();
         if (initCode) {
             applyVoucher();

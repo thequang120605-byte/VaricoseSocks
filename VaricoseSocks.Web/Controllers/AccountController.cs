@@ -102,14 +102,61 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Register()
+    public IActionResult Register(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
         {
             return RedirectToAction("Index", "Home");
         }
 
-        return View(new RegisterViewModel { Step = "form" });
+        return View(new RegisterViewModel { Step = "form", ReturnUrl = returnUrl });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SendRegisterOtp([FromBody] RegisterViewModel model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.FullName) || string.IsNullOrWhiteSpace(model.Email) || string.IsNullOrWhiteSpace(model.Password))
+        {
+            return Json(new { success = false, message = "Vui lòng điền đầy đủ họ tên, địa chỉ Gmail và mật khẩu." });
+        }
+
+        if (model.Password != model.ConfirmPassword)
+        {
+            return Json(new { success = false, message = "Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại." });
+        }
+
+        if (model.Password.Length < 6)
+        {
+            return Json(new { success = false, message = "Mật khẩu phải có tối thiểu 6 ký tự để bảo mật thông tin." });
+        }
+
+        // Kiểm tra xem Email đã tồn tại trong MySQL Database hay chưa
+        var emailExists = await _apiService.CheckEmailExistsAsync(model.Email.Trim().ToLower());
+        if (emailExists)
+        {
+            return Json(new { success = false, message = "Địa chỉ Gmail này đã được đăng ký tài khoản trong hệ thống. Bạn có thể bấm Đăng nhập hoặc Quên mật khẩu." });
+        }
+
+        // Tạo mã OTP 6 chữ số ngẫu nhiên
+        var otp = Random.Shared.Next(100000, 999999).ToString();
+
+        // Lưu thông tin đăng ký tạm và mã OTP vào Session
+        HttpContext.Session.SetString("Register_Otp", otp);
+        HttpContext.Session.SetString("Register_Otp_Email", model.Email.Trim().ToLower());
+        HttpContext.Session.SetString("Register_FullName", model.FullName.Trim());
+        HttpContext.Session.SetString("Register_Password", model.Password);
+        HttpContext.Session.SetString("Register_Otp_Time", DateTime.UtcNow.ToString("o"));
+        HttpContext.Session.SetString("Register_ReturnUrl", model.ReturnUrl ?? "");
+
+        // Gửi trực tiếp email OTP qua Google SMTP Service
+        var emailResult = await _emailService.SendOtpEmailAsync(model.Email.Trim().ToLower(), model.FullName.Trim(), otp);
+
+        if (!emailResult.success)
+        {
+            return Json(new { success = false, message = $"Không thể gửi email qua Google SMTP: {emailResult.error}. Vui lòng thử lại." });
+        }
+
+        return Json(new { success = true, email = model.Email.Trim().ToLower(), message = $"Đã gửi thành công mã xác thực OTP trực tiếp vào hòm thư Gmail: {model.Email}." });
     }
 
     [HttpPost]
@@ -158,6 +205,7 @@ public class AccountController : Controller
             HttpContext.Session.SetString("Register_FullName", model.FullName.Trim());
             HttpContext.Session.SetString("Register_Password", model.Password);
             HttpContext.Session.SetString("Register_Otp_Time", DateTime.UtcNow.ToString("o"));
+            HttpContext.Session.SetString("Register_ReturnUrl", model.ReturnUrl ?? "");
 
             // Gửi trực tiếp email OTP qua Google SMTP Service
             var emailResult = await _emailService.SendOtpEmailAsync(model.Email, model.FullName, otp);
@@ -238,7 +286,12 @@ public class AccountController : Controller
             HttpContext.Session.SetString("UserName", user.FullName);
             HttpContext.Session.SetString("UserEmail", user.Email);
 
-            TempData["SuccessMessage"] = "Xác thực OTP thành công! Tài khoản của bạn đã được lưu vào cơ sở dữ liệu và kích hoạt.";
+            TempData["SuccessMessage"] = "Xác thực OTP thành công! Tài khoản của bạn đã được kích hoạt.";
+            var targetReturnUrl = model.ReturnUrl ?? HttpContext.Session.GetString("Register_ReturnUrl");
+            if (!string.IsNullOrEmpty(targetReturnUrl) && Url.IsLocalUrl(targetReturnUrl))
+            {
+                return Redirect(targetReturnUrl);
+            }
             return RedirectToAction("Profile", "Account");
         }
 
@@ -264,6 +317,142 @@ public class AccountController : Controller
         var emailResult = await _emailService.SendOtpEmailAsync(sessionEmail, sessionName, newOtp);
         var msg = emailResult.success
             ? $"Đã gửi lại email OTP thành công vào hòm thư Gmail: {sessionEmail}!"
+            : $"Đã cấp lại mã OTP mới: {newOtp} cho {sessionEmail}";
+
+        return Json(new
+        {
+            success = true,
+            otp = newOtp,
+            emailSent = emailResult.success,
+            message = msg
+        });
+    }
+
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        return View(new ForgotPasswordViewModel { Step = "email" });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+    {
+        if (model.Step != "otp")
+        {
+            // BƯỚC 1: Nhập email đã đăng ký
+            if (string.IsNullOrWhiteSpace(model.Email))
+            {
+                ModelState.AddModelError("Email", "Vui lòng nhập địa chỉ Email đã đăng ký.");
+                return View(model);
+            }
+
+            var emailClean = model.Email.Trim().ToLower();
+
+            // Kiểm tra xem email có tồn tại trong hệ thống MySQL không
+            var exists = await _apiService.CheckEmailExistsAsync(emailClean);
+            if (!exists)
+            {
+                ModelState.AddModelError("Email", "Địa chỉ email này chưa được đăng ký trong hệ thống. Vui lòng kiểm tra lại.");
+                return View(model);
+            }
+
+            // Tạo mã OTP 6 chữ số
+            var otp = Random.Shared.Next(100000, 999999).ToString();
+            HttpContext.Session.SetString("Forgot_Otp", otp);
+            HttpContext.Session.SetString("Forgot_Email", emailClean);
+            HttpContext.Session.SetString("Forgot_Time", DateTime.UtcNow.ToString("o"));
+
+            // Gửi OTP trực tiếp qua Google SMTP
+            var emailResult = await _emailService.SendForgotPasswordOtpAsync(emailClean, "Quý khách", otp);
+
+            model.Step = "otp";
+            model.Email = emailClean;
+
+            if (emailResult.success)
+            {
+                TempData["OtpSentMessage"] = $"Mã xác thực OTP đã được gửi đến email: {emailClean}. Bạn vui lòng kiểm tra Hộp thư đến (hoặc Thư rác/Spam).";
+            }
+            else
+            {
+                TempData["OtpSentMessage"] = $"Hệ thống đã gửi yêu cầu cấp mã OTP cho email {emailClean}. Vui lòng kiểm tra email của bạn.";
+            }
+
+            return View(model);
+        }
+        else
+        {
+            // BƯỚC 2: Xác thực OTP và đặt mật khẩu mới
+            var sessionOtp = HttpContext.Session.GetString("Forgot_Otp");
+            var sessionEmail = HttpContext.Session.GetString("Forgot_Email");
+
+            if (string.IsNullOrEmpty(sessionEmail) || string.IsNullOrEmpty(sessionOtp))
+            {
+                ModelState.AddModelError(string.Empty, "Phiên khôi phục mật khẩu đã hết hạn. Vui lòng thực hiện lại từ đầu.");
+                model.Step = "email";
+                return View(model);
+            }
+
+            model.Email = sessionEmail;
+
+            if (string.IsNullOrWhiteSpace(model.OtpCode))
+            {
+                ModelState.AddModelError("OtpCode", "Vui lòng nhập mã OTP 6 chữ số.");
+                return View(model);
+            }
+
+            if (model.OtpCode.Trim() != sessionOtp)
+            {
+                ModelState.AddModelError("OtpCode", "Mã xác thực OTP không chính xác. Vui lòng kiểm tra lại Gmail.");
+                return View(model);
+            }
+
+            if (string.IsNullOrWhiteSpace(model.NewPassword) || model.NewPassword.Length < 6)
+            {
+                ModelState.AddModelError("NewPassword", "Mật khẩu mới phải có tối thiểu 6 ký tự.");
+                return View(model);
+            }
+
+            if (model.NewPassword != model.ConfirmNewPassword)
+            {
+                ModelState.AddModelError("ConfirmNewPassword", "Mật khẩu xác nhận không trùng khớp.");
+                return View(model);
+            }
+
+            // Gọi API đổi mật khẩu trong MySQL Database
+            var success = await _apiService.ResetPasswordAsync(sessionEmail, model.NewPassword);
+            if (!success)
+            {
+                ModelState.AddModelError(string.Empty, "Có lỗi xảy ra khi cập nhật mật khẩu vào hệ thống. Vui lòng thử lại sau.");
+                return View(model);
+            }
+
+            // Xóa session
+            HttpContext.Session.Remove("Forgot_Otp");
+            HttpContext.Session.Remove("Forgot_Email");
+            HttpContext.Session.Remove("Forgot_Time");
+
+            TempData["SuccessMessage"] = "Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.";
+            return RedirectToAction("Login");
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResendForgotOtp()
+    {
+        var sessionEmail = HttpContext.Session.GetString("Forgot_Email");
+        if (string.IsNullOrEmpty(sessionEmail))
+        {
+            return Json(new { success = false, message = "Phiên khôi phục đã hết hạn. Vui lòng nhập lại email." });
+        }
+
+        var newOtp = Random.Shared.Next(100000, 999999).ToString();
+        HttpContext.Session.SetString("Forgot_Otp", newOtp);
+        HttpContext.Session.SetString("Forgot_Time", DateTime.UtcNow.ToString("o"));
+
+        var emailResult = await _emailService.SendForgotPasswordOtpAsync(sessionEmail, "Quý khách", newOtp);
+        var msg = emailResult.success
+            ? $"Đã gửi lại mã OTP thành công vào hòm thư Gmail: {sessionEmail}!"
             : $"Đã cấp lại mã OTP mới: {newOtp} cho {sessionEmail}";
 
         return Json(new

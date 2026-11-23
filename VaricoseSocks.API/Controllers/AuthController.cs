@@ -180,4 +180,28 @@ public class AuthController : ControllerBase
             }
         });
     }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.NewPassword))
+        {
+            return BadRequest(new { success = false, message = "Email và mật khẩu mới không được để trống." });
+        }
+
+        var user = await _userRepo.GetByEmailAsync(dto.Email.Trim().ToLower());
+        if (user == null)
+        {
+            return NotFound(new { success = false, message = "Không tìm thấy tài khoản với địa chỉ email này." });
+        }
+
+        user.PasswordHash = _passwordHasher.HashPassword(user, dto.NewPassword);
+        var updated = await _userRepo.UpdateUserAsync(user);
+        if (!updated)
+        {
+            return StatusCode(500, new { success = false, message = "Không thể cập nhật mật khẩu vào cơ sở dữ liệu." });
+        }
+
+        return Ok(new { success = true, message = "Đặt lại mật khẩu thành công." });
+    }
 }

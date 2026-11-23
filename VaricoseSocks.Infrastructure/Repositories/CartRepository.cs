@@ -52,12 +52,27 @@ public class CartRepository : ICartRepository
 
     public async Task<CartItem> AddItemAsync(int cartId, int productId, int? variantId, string size, string color, int quantity, decimal unitPrice)
     {
+        // Tự động đối soát biến thể theo Size & Color nếu variantId chưa được truyền vào
+        if (!variantId.HasValue)
+        {
+            var matchedVariant = await _context.ProductVariants
+                .FirstOrDefaultAsync(v => v.ProductId == productId && v.Size == size && (string.IsNullOrEmpty(color) || v.Color == color));
+            if (matchedVariant != null)
+            {
+                variantId = matchedVariant.Id;
+            }
+        }
+
         var existing = await _context.CartItems
             .FirstOrDefaultAsync(ci => ci.CartId == cartId && ci.ProductId == productId && ci.Size == size && ci.Color == color);
 
         if (existing != null)
         {
             existing.Quantity += quantity;
+            if (!existing.ProductVariantId.HasValue && variantId.HasValue)
+            {
+                existing.ProductVariantId = variantId;
+            }
             await _context.SaveChangesAsync();
             return existing;
         }
@@ -77,6 +92,14 @@ public class CartRepository : ICartRepository
         _context.CartItems.Add(item);
         await _context.SaveChangesAsync();
         return item;
+    }
+
+    public async Task<CartItem?> GetCartItemAsync(int cartItemId)
+    {
+        return await _context.CartItems
+            .Include(ci => ci.Product)
+            .Include(ci => ci.ProductVariant)
+            .FirstOrDefaultAsync(ci => ci.Id == cartItemId);
     }
 
     public async Task<bool> UpdateItemQuantityAsync(int cartItemId, int quantity)

@@ -47,13 +47,22 @@ public class CartController : Controller
         var selectedSize = string.IsNullOrWhiteSpace(size) ? "M" : size;
         var selectedColor = string.IsNullOrWhiteSpace(color) ? "Màu Da (Beige)" : color;
 
-        await _apiService.AddToCartAsync(productId, null, selectedSize, selectedColor, quantity, null, sessionId);
+        var (success, errorMsg) = await _apiService.AddToCartAsync(productId, null, selectedSize, selectedColor, quantity, null, sessionId);
         var cart = await _apiService.GetCartAsync(null, sessionId);
         HttpContext.Session.SetInt32("CartCount", cart.TotalQuantity);
 
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
         {
+            if (!success)
+            {
+                return Json(new { success = false, message = errorMsg ?? "Không đủ tồn kho khả dụng." });
+            }
             return Json(new { success = true, totalQuantity = cart.TotalQuantity, subTotal = cart.SubTotal });
+        }
+
+        if (!success)
+        {
+            TempData["ErrorMessage"] = errorMsg;
         }
 
         return RedirectToAction(nameof(Index));
@@ -62,14 +71,23 @@ public class CartController : Controller
     [HttpPost]
     public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
     {
-        await _apiService.UpdateCartItemQuantityAsync(cartItemId, quantity);
+        var (success, errorMsg) = await _apiService.UpdateCartItemQuantityAsync(cartItemId, quantity);
         var sessionId = GetOrCreateSessionId();
         var cart = await _apiService.GetCartAsync(null, sessionId);
         HttpContext.Session.SetInt32("CartCount", cart.TotalQuantity);
 
         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
         {
+            if (!success)
+            {
+                return Json(new { success = false, message = errorMsg ?? "Số lượng vượt quá tồn kho khả dụng." });
+            }
             return Json(new { success = true, totalQuantity = cart.TotalQuantity, subTotal = cart.SubTotal, totalAmount = cart.TotalAmount });
+        }
+
+        if (!success)
+        {
+            TempData["ErrorMessage"] = errorMsg;
         }
 
         return RedirectToAction(nameof(Index));
